@@ -3266,6 +3266,24 @@ function renderResult() {
       <button class="btn-secondary btn-sm" onclick="showEmailDigestPreview()" style="font-size:0.85rem;">📧 Preview Weekly Digest</button>
     </div>
 
+    <!-- PLAY THE GAME CTA -->
+    <div id="gameCtaSection" style="margin-top:32px; background:linear-gradient(135deg, #16213e, #1a1a2e); border:1px solid var(--border); border-radius:var(--radius); padding:24px; text-align:center;">
+      <div style="font-size:2rem; margin-bottom:8px;">&#x1F47B;&#x2694;&#xFE0F;&#x1F47B;</div>
+      <h3 style="color:var(--green); margin-bottom:4px; font-size:1.2rem;">Death Clock: The Game</h3>
+      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:12px;">Your ghost wants to haunt. Steal years from other players. Defend with wards. Earn ectoplasm. Buy accessories.</p>
+      <div id="gamePointsDisplay" style="display:none; margin-bottom:12px;">
+        <div style="display:flex; gap:16px; justify-content:center; font-size:0.9rem;">
+          <span style="color:#6cb4ee;">&#x1F4A7; <span id="gameEctoDisplay">0</span> Ecto</span>
+          <span style="color:#c77dff;">&#x1F480; <span id="gameShardsDisplay">0</span> Shards</span>
+          <span style="color:var(--gold);">Lv.<span id="gameLevelDisplay">1</span></span>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <a href="https://game.death-clock.app" target="_blank" class="btn-primary btn-sm" style="text-decoration:none; font-size:0.9rem;">&#x1F3AE; Play Now</a>
+        <button class="btn-secondary btn-sm" onclick="showAccessoryPreview()" style="font-size:0.85rem;">&#x1F451; Ghost Accessories</button>
+      </div>
+    </div>
+
     <!-- NOTIFICATION OPT-IN -->
     <div style="margin-top:16px; text-align:center;">
       <button class="btn-sm" onclick="requestNotificationPermission()" style="background:var(--surface); border:1px solid var(--border); color:var(--text2); padding:8px 16px; border-radius:8px; font-size:0.8rem; cursor:pointer;">
@@ -7410,9 +7428,92 @@ async function processPendingJoin() {
       checkJoinCodeInURL();
       // Process pending join if we just logged in
       if (state.socialUser) processPendingJoin();
+
+      // Load game points from dc_profiles
+      loadGamePoints();
     }
   }, 1500);
 })();
+
+// === CROSS-APP GAME POINTS ===
+async function loadGamePoints() {
+  if (!socialClient) return;
+  try {
+    const { data: { user } } = await socialClient.auth.getUser();
+    if (!user) return;
+    const { data } = await socialClient
+      .from('dc_profiles')
+      .select('ectoplasm, soul_shards, game_level, owned_accessories, equipped_accessories')
+      .eq('id', user.id)
+      .single();
+    if (!data) return;
+
+    const ectoEl = document.getElementById('gameEctoDisplay');
+    const shardsEl = document.getElementById('gameShardsDisplay');
+    const levelEl = document.getElementById('gameLevelDisplay');
+    const container = document.getElementById('gamePointsDisplay');
+    if (ectoEl) ectoEl.textContent = data.ectoplasm || 0;
+    if (shardsEl) shardsEl.textContent = data.soul_shards || 0;
+    if (levelEl) levelEl.textContent = data.game_level || 1;
+    if (container) container.style.display = 'block';
+
+    // Store for accessory preview
+    window._gameAccessories = {
+      owned: data.owned_accessories || [],
+      equipped: data.equipped_accessories || {}
+    };
+  } catch(e) {
+    console.log('Game points load failed:', e);
+  }
+}
+
+function showAccessoryPreview() {
+  const acc = window._gameAccessories || { owned: [], equipped: {} };
+  const ACCESSORIES = {
+    hat_halo: { name:'Halo', icon:'\u{1F607}', cost:200 },
+    hat_crown: { name:'Crown', icon:'\u{1F451}', cost:500 },
+    hat_tophat: { name:'Top Hat', icon:'\u{1F3A9}', cost:300 },
+    hat_horns: { name:'Devil Horns', icon:'\u{1F608}', cost:400 },
+    hat_witch: { name:'Witch Hat', icon:'\u{1F9D9}', cost:350 },
+    aura_fire: { name:'Fire Aura', icon:'\u{1F525}', cost:600 },
+    aura_ice: { name:'Ice Aura', icon:'\u{2744}️', cost:600 },
+    aura_electric: { name:'Lightning', icon:'\u{26A1}', cost:800 },
+    aura_shadow: { name:'Shadow', icon:'\u{1F311}', cost:700 },
+    eyes_red: { name:'Red Eyes', icon:'\u{1F534}', cost:150 },
+    eyes_gold: { name:'Gold Eyes', icon:'\u{1F7E1}', cost:250 },
+    eyes_void: { name:'Void Eyes', icon:'\u{26AB}', cost:400 },
+    trail_sparkle: { name:'Sparkle', icon:'\u{2728}', cost:300 },
+    trail_smoke: { name:'Smoke', icon:'\u{1F32B}️', cost:250 },
+    trail_bones: { name:'Bones', icon:'\u{1F9B4}', cost:350 },
+  };
+
+  const owned = acc.owned || [];
+  const equipped = acc.equipped || {};
+
+  let itemsHtml = Object.entries(ACCESSORIES).map(([id, a]) => {
+    const isOwned = owned.includes(id);
+    const isEquipped = Object.values(equipped).includes(id);
+    return `<div style="background:var(--surface);border:1px solid ${isEquipped ? 'var(--gold)' : isOwned ? 'var(--green)' : 'var(--border)'};border-radius:10px;padding:10px;text-align:center;min-width:80px;">
+      <div style="font-size:1.5rem;">${a.icon}</div>
+      <div style="font-size:0.75rem;font-weight:600;">${a.name}</div>
+      <div style="font-size:0.7rem;color:${isEquipped ? 'var(--gold)' : isOwned ? 'var(--green)' : 'var(--text3)'};">${isEquipped ? 'Equipped' : isOwned ? 'Owned' : a.cost + ' ecto'}</div>
+    </div>`;
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;">
+    <h3 style="color:var(--green);text-align:center;margin-bottom:4px;">Ghost Accessories</h3>
+    <p style="color:var(--text2);font-size:0.85rem;text-align:center;margin-bottom:16px;">Earn ectoplasm in the game to unlock accessories for your ghost.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:16px;">${itemsHtml}</div>
+    <div style="text-align:center;">
+      <a href="https://game.death-clock.app" target="_blank" class="btn-primary btn-sm" style="text-decoration:none;">Play the Game to Earn More</a>
+    </div>
+    <button onclick="this.closest('div').parentElement.remove()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;">x</button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
 
 </script>
 </body>
