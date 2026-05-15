@@ -550,7 +550,7 @@ async function renderMansion() {
       const isMe = p.id === user.id;
       const safeName = escHtml(name).replace(/'/g, '&#39;');
       const glow = isMe ? ' filter:drop-shadow(0 0 8px '+color+');' : '';
-      const clickFn = 'showGhostInfo(&quot;'+safeName+'&quot;, '+le+', &quot;'+color+'&quot;, &quot;'+eyes+'&quot;, '+(isMe?'true':'false')+')';
+      const clickFn = 'showGhostInfo(&quot;'+safeName+'&quot;, '+le+', &quot;'+color+'&quot;, &quot;'+eyes+'&quot;, '+(isMe?'true':'false')+', &quot;'+p.id+'&quot;, event)';
 
       ghostsHtml += '<div class="mansion-ghost" style="left:'+pos.x+'px; top:'+pos.y+'px; animation-delay:'+animDelay+'s;'+glow+'" onclick="'+clickFn+'">'
         + buildMansionGhostSVG(color, eyes, 55)
@@ -584,17 +584,26 @@ function distributeGhosts(count, area) {
   return positions;
 }
 
-function showGhostInfo(name, le, color, eyes, isMe) {
+function showGhostInfo(name, le, color, eyes, isMe, targetId, event) {
   const info = document.getElementById('mansionGhostInfo');
   if (!info) return;
   info.style.display = 'block';
   const yearsLeft = (le - (state.result?.ageNow || 30)).toFixed(1);
   info.innerHTML = '<div style="display:flex; align-items:center; gap:16px;">'
     + '<div>' + buildMansionGhostSVG(color, eyes, 70) + '</div>'
-    + '<div><h3>' + name + (isMe ? ' <span style="color:var(--gold);">(You)</span>' : '') + '</h3>'
+    + '<div style="flex:1;"><h3>' + name + (isMe ? ' <span style="color:var(--gold);">(You)</span>' : '') + '</h3>'
     + '<p style="color:var(--text2);">Life expectancy: <strong style="color:var(--accent2);">' + le + ' years</strong></p>'
     + '<p style="color:var(--text3); font-size:0.85rem;">~' + yearsLeft + ' years of haunting left</p>'
+    + (isMe ? '' : '<div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">'
+      + '<button class="btn-primary btn-sm" onclick="showGhostActionMenu(\'' + targetId + '\', \'' + name + '\', \'' + color + '\', \'' + eyes + '\', ' + le + ', event.clientX, event.clientY)">👻 Haunt</button>'
+      + '<button class="btn-secondary btn-sm" onclick="startGhostBattle(\'' + targetId + '\', \'' + name + '\')">⚔️ Battle</button>'
+      + '</div>')
     + '</div></div>';
+
+  // If not you, also show action menu on right-click area
+  if (!isMe && event && typeof showGhostActionMenu === 'function') {
+    showGhostActionMenu(targetId, name, color, eyes, le, event.clientX || 300, event.clientY || 300);
+  }
 }
 
 function checkJoinCodeInURL() {
