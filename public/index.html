@@ -870,7 +870,7 @@ footer p { margin-bottom: 8px; }
       <a class="nav-tab" href="/blog/" style="text-decoration:none; color:inherit;">Blog</a>
       <button class="nav-tab hidden" id="navDash" onclick="showPage('dashboard')">Dashboard</button>
       <button class="nav-tab hidden" id="navPrice" onclick="showPage('pricing')">Upgrade</button>
-      <button class="nav-tab hidden" id="profileBtn" onclick="showPage('profile')">Profile</button>
+      <button class="nav-tab" id="profileBtn" onclick="showPage('profile')">Sign In</button>
       <button class="nav-tab hidden" id="navMansion" onclick="showPage('mansion')">Mansion</button>
       <button class="btn-primary btn-sm" id="navCta" onclick="showPage('quiz')">Calculate</button>
     </div>
@@ -5843,7 +5843,8 @@ async function authMagicLink() {
 async function authSignOut() {
   await supaClient.auth.signOut();
   state.supaUser = null;
-  document.getElementById('profileBtn')?.classList.add('hidden');
+  const profileBtn = document.getElementById('profileBtn');
+  if (profileBtn) profileBtn.textContent = 'Sign In';
   renderProfilePage();
   showToast('Signed out. Your ghost is lonely now.');
 }
@@ -5857,7 +5858,8 @@ function renderProfilePage() {
   const loggedIn = !!state.supaUser;
   document.getElementById('authLoggedOut')?.classList.toggle('hidden', loggedIn);
   document.getElementById('authLoggedIn')?.classList.toggle('hidden', !loggedIn);
-  document.getElementById('profileBtn')?.classList.toggle('hidden', !loggedIn);
+  const profileBtn = document.getElementById('profileBtn');
+  if (profileBtn) profileBtn.textContent = loggedIn ? 'Profile' : 'Sign In';
   if (loggedIn) document.getElementById('navMansion')?.classList.remove('hidden');
   
   if (loggedIn) {
