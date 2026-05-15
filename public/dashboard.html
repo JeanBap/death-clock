@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Death Clock</title>
+<meta name="description" content="Track your life expectancy, habits, and longevity goals.">
+<meta name="theme-color" content="#e94560">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src https://js.stripe.com;">
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://death-clock.app/dashboard.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:title" content="Dashboard - Death Clock">
+<meta property="og:description" content="Track your life expectancy, habits, and longevity goals.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://death-clock.app/dashboard.html">
+<meta property="og:image" content="https://death-clock.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dashboard - Death Clock">
+<meta name="twitter:description" content="Track your life expectancy, habits, and longevity goals.">
+<meta name="twitter:image" content="https://death-clock.app/og-image.png">
+<link rel="stylesheet" href="/shared/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+<a href="#main" class="skip-link" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; z-index:9999; padding:12px 24px; background:var(--accent); color:#fff; font-weight:700; border-radius:0 0 8px 0; text-decoration:none;" onfocus="this.style.left='0'; this.style.width='auto'; this.style.height='auto';" onblur="this.style.left='-9999px'; this.style.width='1px'; this.style.height='1px';">Skip to main content</a>
+<nav id="mainNav">
+  <div class="container">
+    <div class="logo" onclick="window.location.href='/'" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36" style="flex-shrink:0" aria-hidden="true" role="img"><defs><radialGradient id="lgG" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#e8e8e8"/></radialGradient></defs><path d="M100 20C55 20 30 60 30 100c0 30 0 60 0 80q15-15 25 0 10 15 20 0 10-15 25 0 15-15 25 0 10 15 20 0 10-15 25 0c0-20 0-50 0-80 0-40-25-80-70-80z" fill="url(#lgG)"/><ellipse cx="75" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="80" cy="80" rx="6" ry="7" fill="#fff"/><ellipse cx="125" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="130" cy="80" rx="6" ry="7" fill="#fff"/><path d="M80 120Q100 145 120 120" fill="none" stroke="#1a1a2e" stroke-width="3" stroke-linecap="round"/><ellipse cx="108" cy="132" rx="10" ry="14" fill="#e94560"/><path d="M108 125Q108 146 108 146" fill="none" stroke="#c4304d" stroke-width="1.5"/></svg><span>Death</span>Clock</div>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-tab" href="/">Home</a>
+      <a class="nav-tab" href="/about.html">About</a>
+      <a class="nav-tab" href="/blog/">Blog</a>
+      <a class="nav-tab hidden" id="navDash" href="/dashboard.html">Dashboard</a>
+      <a class="nav-tab hidden" id="navPrice" href="/pricing.html">Upgrade</a>
+      <a class="nav-tab" id="profileBtn" href="/profile.html">Sign In</a>
+      <a class="nav-tab hidden" id="navMansion" href="/mansion.html">Mansion</a>
+      <a class="btn-primary btn-sm" href="/#quiz" id="navCta" style="text-decoration:none;">Calculate</a>
+    </div>
+  </div>
+</nav>
+<div aria-live="polite" id="srAnnounce" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"></div>
+<div class="deathy-timer-bar" id="deathyTimerBar">
+  <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+    <div class="deathy-walking" id="deathyWalker"></div>
+    <div id="deathySpeechBubble" style="font-size:0.7rem; color:var(--text2); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; font-style:italic;"></div>
+  </div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div style="text-align:center;">
+      <div class="timer-label">Time remaining</div>
+      <div class="timer-text" id="navTimer">--:--:--:--</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="timer-label">Ghost</div>
+      <div id="navGhostHealth" style="font-size:0.8rem; font-weight:700;">--</div>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+<!-- ===== DASHBOARD ===== -->
+<section id="page-dashboard" aria-label="Dashboard" class="hidden dashboard">
+  <div class="container">
+    <div class="dash-header">
+      <h2>Your Life Dashboard</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-green btn-sm" onclick="saveProfile()">Save Profile</button>
+        <button class="btn-primary btn-sm" onclick="showPage('quiz')">Recalculate</button>
+      </div>
+    </div>
+    <div class="dash-stats" id="dashStats"></div>
+    <div class="tab-bar" id="dashTabs">
+      <button class="tab-btn active" onclick="showTab('factors')">Factors</button>
+      <button class="tab-btn" onclick="showTab('bucketlist')">Bucket List</button>
+      <button class="tab-btn" onclick="showTab('myplan')">My Plan</button>
+      <button class="tab-btn" onclick="showTab('tips')">Tips</button>
+      <button class="tab-btn" onclick="showTab('performance')">My Performance</button>
+      <button class="tab-btn" onclick="showTab('products')">Recommendations</button>
+    </div>
+    <div id="tabContent"></div>
+  </div>
+</section>
+
+
+</main>
+<!-- ===== COOKIE BANNER ===== -->
+<div id="cookieBanner" class="cookie-banner hidden">
+  <p>We use essential cookies for site functionality and optional analytics cookies to improve our service. <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a></p>
+  <button class="btn-primary btn-sm" onclick="acceptCookies('all')">Accept All</button>
+  <button class="btn-secondary btn-sm" onclick="acceptCookies('essential')">Essential Only</button>
+</div>
+
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <p><strong>Disclaimer:</strong> Death Clock is for educational and motivational purposes only. It is not medical advice. Consult healthcare professionals for health decisions.</p>
+    <p>Calculations based on published actuarial data and peer-reviewed longevity research.</p>
+    <div style="margin-top:16px; display:flex; justify-content:center; gap:24px; flex-wrap:wrap;">
+      <a href="/blog/" style="font-weight:600;">Blog</a>
+      <a href="/blog/how-not-to-die.html">How Not to Die</a>
+        <a href="#" onclick="localStorage.setItem('dc_sound_off', localStorage.getItem('dc_sound_off')==='true'?'false':'true'); showToast(localStorage.getItem('dc_sound_off')==='true'?'Sound off':'Sound on'); return false;">🔊 Sound</a>
+      <a href="/blog/substances-and-lifespan.html">Substances &amp; Lifespan</a>
+      <a href="/blog/mental-health-and-longevity.html">Mental Health &amp; Longevity</a>
+      <a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a>
+      <a href="#" onclick="showPage('terms');return false;">Terms of Service</a>
+      <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a>
+    </div>
+    <p style="margin-top:12px;">&copy; 2026 Death Clock. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="/shared/core.js"></script>
+<script src="/shared/quiz.js"></script>
+<script src="/shared/dashboard.js"></script>
+<script src="/shared/deathy.js"></script>
+<script src="/shared/sharing.js"></script>
+<script>
+
+function pageInit() {
+  loadProfile();
+  if (!state.result) {
+    document.getElementById('dashContent').innerHTML = '<div style="text-align:center; padding:60px 20px;"><h2>No results yet</h2><p style="color:var(--text2); margin:16px 0;">Take the quiz first to see your dashboard.</p><a href="/#quiz" class="btn-primary" style="text-decoration:none;">Take the Quiz</a></div>';
+    return;
+  }
+  document.getElementById('navDash')?.classList.remove('hidden');
+  document.getElementById('navPrice')?.classList.remove('hidden');
+  renderDashboard();
+  startCountdown();
+}
+
+</script>
+</body>
+</html>
