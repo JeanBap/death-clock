@@ -512,17 +512,50 @@ footer p { margin-bottom: 8px; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 2.2rem; }
-  .hero p { font-size: 1rem; }
-  .death-date { font-size: 2rem; }
-  .countdown-unit { min-width: 60px; padding: 12px 8px; }
-  .countdown-num { font-size: 1.4rem; }
-  .factors-grid { grid-template-columns: 1fr; }
+  .hero { padding: 40px 16px 32px; }
+  .hero h1 { font-size: 2rem; }
+  .hero p { font-size: 0.95rem; margin-bottom: 20px; }
+  .hero .btn-primary { font-size: 1rem; padding: 14px 28px; }
+  .death-date { font-size: 1.6rem; }
+  .death-date-reveal { padding: 24px 16px; margin: 20px auto; }
+  .countdown { gap: 6px; }
+  .countdown-unit { min-width: 48px; padding: 8px 4px; }
+  .countdown-num { font-size: 1.1rem; }
+  .countdown-label { font-size: 0.6rem; }
+  .factors-grid { grid-template-columns: 1fr; gap: 12px; }
   .q-input-row { flex-direction: column; }
+  .questionnaire { padding: 20px 12px 60px; }
+  .q-question { font-size: 1.2rem; margin-bottom: 16px; }
+  .q-option { padding: 12px 14px; }
+  .q-conditions { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
   .pricing-grid { grid-template-columns: 1fr; }
-  .nav-links { gap: 4px; }
-  .nav-tab { padding: 6px 10px; font-size: 0.8rem; }
+  .price-card { padding: 24px 16px; }
+  .nav-links { gap: 2px; }
+  .nav-tab { padding: 6px 8px; font-size: 0.75rem; }
+  .btn-primary.btn-sm, .btn-secondary.btn-sm { padding: 6px 10px; font-size: 0.8rem; }
   .product-grid { grid-template-columns: 1fr; }
+  .tab-bar { gap: 2px; padding: 3px; }
+  .tab-btn { padding: 8px 12px; font-size: 0.8rem; }
+  .dash-header h2 { font-size: 1.4rem; }
+  .dash-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { padding: 12px; }
+  .stat-num { font-size: 1.5rem; }
+  .container { padding: 0 12px; }
+  .modal { padding: 20px; margin: 12px; }
+  .life-score-circle { width: 90px; height: 90px; }
+  .life-score-num { font-size: 1.8rem; }
+  .legal-page { padding: 20px 12px 60px; }
+  .legal-page h1 { font-size: 1.5rem; }
+  .cookie-banner { flex-direction: column; text-align: center; padding: 12px; gap: 10px; }
+  footer { padding: 24px 12px; }
+}
+@media (max-width: 380px) {
+  .hero h1 { font-size: 1.6rem; }
+  .countdown-unit { min-width: 40px; padding: 6px 2px; }
+  .countdown-num { font-size: 0.95rem; }
+  .nav-links { flex-wrap: wrap; justify-content: flex-end; }
+  .q-conditions { grid-template-columns: 1fr 1fr; }
+  .dash-stats { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
@@ -553,7 +586,7 @@ footer p { margin-bottom: 8px; }
     <div style="display:flex; justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap;">
       <div><div style="font-size:2rem; font-weight:800; color:var(--accent);">53M+</div><div style="font-size:0.8rem; color:var(--text3);">Research participants</div></div>
       <div><div style="font-size:2rem; font-weight:800; color:var(--green);">1,200+</div><div style="font-size:0.8rem; color:var(--text3);">Studies analyzed</div></div>
-      <div><div style="font-size:2rem; font-weight:800; color:var(--gold);">40+</div><div style="font-size:0.8rem; color:var(--text3);">Life factors tracked</div></div>
+      <div><div style="font-size:2rem; font-weight:800; color:var(--gold);">68+</div><div style="font-size:0.8rem; color:var(--text3);">Life factors tracked</div></div>
     </div>
   </div>
 </section>
@@ -771,6 +804,7 @@ footer p { margin-bottom: 8px; }
     <p><strong>Disclaimer:</strong> Death Clock is for educational and motivational purposes only. It is not medical advice. Consult healthcare professionals for health decisions.</p>
     <p>Calculations based on published actuarial data and peer-reviewed longevity research.</p>
     <div style="margin-top:16px; display:flex; justify-content:center; gap:24px; flex-wrap:wrap;">
+      <a href="/blog/how-not-to-die.html">Blog: How Not to Die</a>
       <a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a>
       <a href="#" onclick="showPage('terms');return false;">Terms of Service</a>
       <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a>
@@ -923,7 +957,31 @@ const lifeFactors = {
   // Family history
   family_longevity: { impact: 4, label: 'Family history of longevity (80+)', tip: 'Genetics play a role. Your baseline is favorable.', cat: 'genetics' },
   family_average: { impact: 0, label: 'Average family lifespan', tip: 'Lifestyle factors matter more than genetics for most people.', cat: 'genetics' },
-  family_early_death: { impact: -3, label: 'Family history of early death (<65)', tip: 'Family history is a risk signal. Proactive screening and lifestyle optimization are extra important for you.', cat: 'genetics', productCat: 'health_testing' }
+  family_early_death: { impact: -3, label: 'Family history of early death (<65)', tip: 'Family history is a risk signal. Proactive screening and lifestyle optimization are extra important for you.', cat: 'genetics', productCat: 'health_testing' },
+
+  // Vegetarian/Vegan diet (meta-analysis: 977,763 participants)
+  veg_vegan: { impact: 3.5, label: 'Vegan diet', tip: 'Vegan diets linked to 15% lower all-cause mortality (meta-analysis, n=977,763).', cat: 'diet' },
+  veg_vegetarian: { impact: 2.5, label: 'Vegetarian diet', tip: 'Vegetarian diets linked to 12% lower mortality (Adventist Health Study-2, n=96,000).', cat: 'diet' },
+  veg_pescatarian: { impact: 2, label: 'Pescatarian diet', tip: 'Fish-based diets combine plant benefits with omega-3 fatty acids.', cat: 'diet' },
+  veg_flexitarian: { impact: 1, label: 'Flexitarian (mostly plant-based)', tip: 'Reducing meat intake even partially provides longevity benefits.', cat: 'diet' },
+  veg_omnivore: { impact: 0, label: 'Omnivore (regular meat)', tip: 'Standard mixed diet. Consider reducing red and processed meat.', cat: 'diet' },
+
+  // Processed food (UPF meta-analysis: 18 studies, 1,148,387 participants)
+  upf_minimal: { impact: 2, label: 'Minimal processed food (<10%)', tip: 'Excellent! Whole foods diet strongly protective. NOVA study.', cat: 'diet' },
+  upf_low: { impact: 1, label: 'Low processed food (10-25%)', tip: 'Good dietary habits. Most of your food is real food.', cat: 'diet' },
+  upf_moderate: { impact: 0, label: 'Moderate processed food (25-50%)', tip: 'Average. Each 10% reduction in UPF lowers mortality 14%.', cat: 'diet', productCat: 'nutrition' },
+  upf_high: { impact: -2, label: 'High processed food (50-75%)', tip: '62% higher all-cause mortality (BMJ meta-analysis). Meal prep helps.', cat: 'diet', productCat: 'nutrition' },
+  upf_very_high: { impact: -4, label: 'Very high processed food (>75%)', tip: 'Ultra-processed food dominant diet. Each 10% less = 14% lower mortality.', cat: 'diet', productCat: 'nutrition' },
+
+  // Sports (Copenhagen City Heart Study: n=8,577, 25-year follow-up)
+  sport_tennis: { impact: 9.7, label: 'Tennis player', tip: 'Tennis adds the most years of any sport (Copenhagen study, n=8,577).', cat: 'fitness' },
+  sport_badminton: { impact: 6.2, label: 'Badminton player', tip: 'Racquet sports excel due to social + aerobic + agility combination.', cat: 'fitness' },
+  sport_soccer: { impact: 4.7, label: 'Soccer/football player', tip: 'Team sports provide social bonding plus cardiovascular training.', cat: 'fitness' },
+  sport_cycling: { impact: 3.7, label: 'Cyclist', tip: 'Regular cycling reduces mortality risk by 40% (BMJ).', cat: 'fitness' },
+  sport_swimming: { impact: 3.4, label: 'Swimmer', tip: 'Full-body low-impact exercise. 28% lower all-cause mortality.', cat: 'fitness' },
+  sport_running: { impact: 3.2, label: 'Runner/jogger', tip: 'Even slow jogging 1-2.4 hours/week reduces mortality 44%.', cat: 'fitness' },
+  sport_gym: { impact: 1.5, label: 'Gym/weights only', tip: 'Resistance training is great but adding social sport amplifies benefits.', cat: 'fitness' },
+  sport_none: { impact: 0, label: 'No specific sport', tip: 'Picking up a social sport is one of the highest-ROI longevity moves.', cat: 'fitness' }
 };
 
 // ============================================
@@ -975,7 +1033,7 @@ const questions = [
   { section: 'Demographics', key: 'sex', type: 'choice', question: 'What is your biological sex?', options: [
     { value: 'male', label: 'Male', impact: 'Males live ~5.4 years less than females on average' }, { value: 'female', label: 'Female', impact: 'Females have a baseline longevity advantage of ~5.4 years' }
   ]},
-  { section: 'Demographics', key: 'country', type: 'input', question: 'What country do you live in?', placeholder: 'e.g. United States, United Kingdom' },
+  { section: 'Demographics', key: 'country', type: 'country', question: 'What country do you live in?' },
   { section: 'Body & Fitness', key: 'body', type: 'body', question: 'What are your height and weight?' },
   { section: 'Body & Fitness', key: 'exercise', type: 'choice', question: 'How often do you exercise?', options: [
     { value: '5+', label: '5+ days/week', desc: 'Very active lifestyle', impact: '+4.5 years (VA study, n=719,147)' },
@@ -983,11 +1041,35 @@ const questions = [
     { value: '1-2x', label: '1-2 days/week', desc: 'Some physical activity', impact: '+1 year' },
     { value: 'none', label: 'Rarely or never', desc: 'Sedentary lifestyle', impact: '-4 years (as dangerous as smoking)' }
   ]},
+  { section: 'Body & Fitness', key: 'sport', type: 'choice', question: 'Do you regularly play any of these sports?', options: [
+    { value: 'tennis', label: 'Tennis / Padel', desc: 'Racquet sport, typically social', impact: '+9.7 years (Copenhagen study, n=8,577, 25-year follow-up)' },
+    { value: 'badminton', label: 'Badminton / Squash', desc: 'Indoor racquet sport', impact: '+6.2 years (Copenhagen City Heart Study)' },
+    { value: 'soccer', label: 'Soccer / Team sport', desc: 'Organised team sport', impact: '+4.7 years (social + cardio)' },
+    { value: 'cycling', label: 'Cycling', desc: 'Road or mountain biking', impact: '+3.7 years (BMJ: 40% lower mortality)' },
+    { value: 'swimming', label: 'Swimming', desc: 'Pool or open water', impact: '+3.4 years (28% lower all-cause mortality)' },
+    { value: 'running', label: 'Running / Jogging', desc: 'Regular running', impact: '+3.2 years (even slow jogging helps)' },
+    { value: 'gym', label: 'Gym / Weights only', desc: 'Resistance training', impact: '+1.5 years (good but add social sport)' },
+    { value: 'none', label: 'No specific sport', impact: '0 years (picking up a social sport = high ROI)' }
+  ]},
   { section: 'Diet & Substances', key: 'diet', type: 'choice', question: 'How would you describe your diet?', options: [
     { value: 'very_healthy', label: 'Very healthy', desc: 'Mostly whole foods, vegetables, lean protein', impact: '+5 years (Mediterranean diet, Harvard study)' },
     { value: 'healthy', label: 'Healthy', desc: 'Generally balanced with some indulgences', impact: '+3 years' },
     { value: 'average', label: 'Average', desc: 'Mix of healthy and processed foods', impact: '0 years (baseline)' },
     { value: 'poor', label: 'Poor', desc: 'Mostly processed, fast food, or irregular meals', impact: '-4 years' }
+  ]},
+  { section: 'Diet & Substances', key: 'veg_diet', type: 'choice', question: 'What best describes your dietary pattern?', options: [
+    { value: 'vegan', label: 'Vegan', desc: 'No animal products at all', impact: '+3.5 years (meta-analysis, n=977,763)' },
+    { value: 'vegetarian', label: 'Vegetarian', desc: 'No meat or fish', impact: '+2.5 years (Adventist Health Study-2)' },
+    { value: 'pescatarian', label: 'Pescatarian', desc: 'Fish but no meat', impact: '+2 years (omega-3 + plant benefits)' },
+    { value: 'flexitarian', label: 'Flexitarian', desc: 'Mostly plant-based, occasional meat', impact: '+1 year' },
+    { value: 'omnivore', label: 'Omnivore', desc: 'Regular meat consumption', impact: '0 years (baseline)' }
+  ]},
+  { section: 'Diet & Substances', key: 'processed_food', type: 'choice', question: 'How much of your diet is ultra-processed food?', options: [
+    { value: 'minimal', label: 'Minimal (<10%)', desc: 'Almost all whole/home-cooked food', impact: '+2 years (NOVA classification)' },
+    { value: 'low', label: 'Low (10-25%)', desc: 'Mostly whole foods', impact: '+1 year' },
+    { value: 'moderate', label: 'Moderate (25-50%)', desc: 'Mix of fresh and packaged', impact: '0 years (baseline)' },
+    { value: 'high', label: 'High (50-75%)', desc: 'Mostly packaged/ready meals', impact: '-2 years (BMJ meta-analysis, 18 studies)' },
+    { value: 'very_high', label: 'Very high (>75%)', desc: 'Almost all processed/fast food', impact: '-4 years (62% higher mortality)' }
   ]},
   { section: 'Diet & Substances', key: 'alcohol', type: 'choice', question: 'How much alcohol do you drink?', options: [
     { value: 'never', label: 'Never', desc: 'I do not drink alcohol', impact: '0 years (no alcohol-related risk)' },
@@ -1075,6 +1157,11 @@ const questions = [
 ];
 
 // ============================================
+// COUNTRY LIST
+// ============================================
+const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominican Republic","DR Congo","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Guatemala","Guinea","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Serbia","Sierra Leone","Singapore","Slovakia","Slovenia","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+
+// ============================================
 // RENDER FUNCTIONS
 // ============================================
 function showPage(page) {
@@ -1128,6 +1215,13 @@ function renderQuestion() {
   } else if (q.type === 'input') {
     const val = state.answers[q.key] || '';
     html += `<div style="max-width:400px"><input type="text" value="${val}" placeholder="${q.placeholder||''}" onchange="state.answers['${q.key}']=this.value"></div>`;
+  } else if (q.type === 'country') {
+    const val = state.answers[q.key] || '';
+    html += `<div style="max-width:400px; position:relative;">
+      <input type="text" id="countryInput" value="${val}" placeholder="Start typing your country..." autocomplete="off"
+        oninput="filterCountries(this.value)" onfocus="filterCountries(this.value)">
+      <div id="countryDropdown" style="position:absolute; top:100%; left:0; right:0; max-height:200px; overflow-y:auto; background:var(--bg2); border:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius); z-index:50; display:none;"></div>
+    </div>`;
   } else if (q.type === 'body') {
     const h = state.answers.height_cm || '';
     const w = state.answers.weight_kg || '';
@@ -1205,6 +1299,31 @@ function toggleCondition(cond) {
   }
   renderQuestion();
 }
+
+function filterCountries(val) {
+  const dd = document.getElementById('countryDropdown');
+  if (!dd) return;
+  if (!val) { dd.style.display = 'none'; return; }
+  const matches = countries.filter(c => c.toLowerCase().startsWith(val.toLowerCase())).slice(0, 8);
+  if (matches.length === 0) { dd.style.display = 'none'; return; }
+  dd.style.display = 'block';
+  dd.innerHTML = matches.map(c => `<div style="padding:10px 16px; cursor:pointer; color:var(--text); border-bottom:1px solid var(--border);"
+    onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''"
+    onclick="selectCountry('${c}')">${c}</div>`).join('');
+}
+
+function selectCountry(c) {
+  state.answers.country = c;
+  const inp = document.getElementById('countryInput');
+  if (inp) inp.value = c;
+  const dd = document.getElementById('countryDropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+document.addEventListener('click', e => {
+  const dd = document.getElementById('countryDropdown');
+  if (dd && !e.target.closest('#countryInput') && !e.target.closest('#countryDropdown')) dd.style.display = 'none';
+});
 
 function nextQuestion() {
   if (state.currentQuestion < questions.length - 1) {
@@ -1314,6 +1433,18 @@ function calculateResult() {
   // Occupation
   const occMap = { sedentary: 'occ_sedentary', moderate: 'occ_moderate', physical: 'occ_physical', hazardous: 'occ_hazardous' };
   if (a.occupation && occMap[a.occupation]) factors.push({ key: occMap[a.occupation], ...lifeFactors[occMap[a.occupation]] });
+
+  // Sports
+  const sportMap = { tennis: 'sport_tennis', badminton: 'sport_badminton', soccer: 'sport_soccer', cycling: 'sport_cycling', swimming: 'sport_swimming', running: 'sport_running', gym: 'sport_gym', none: 'sport_none' };
+  if (a.sport && sportMap[a.sport]) factors.push({ key: sportMap[a.sport], ...lifeFactors[sportMap[a.sport]] });
+
+  // Vegetarian/Vegan diet
+  const vegMap = { vegan: 'veg_vegan', vegetarian: 'veg_vegetarian', pescatarian: 'veg_pescatarian', flexitarian: 'veg_flexitarian', omnivore: 'veg_omnivore' };
+  if (a.veg_diet && vegMap[a.veg_diet]) factors.push({ key: vegMap[a.veg_diet], ...lifeFactors[vegMap[a.veg_diet]] });
+
+  // Processed food
+  const upfMap = { minimal: 'upf_minimal', low: 'upf_low', moderate: 'upf_moderate', high: 'upf_high', very_high: 'upf_very_high' };
+  if (a.processed_food && upfMap[a.processed_food]) factors.push({ key: upfMap[a.processed_food], ...lifeFactors[upfMap[a.processed_food]] });
 
   // Family history (parents)
   const p1 = a.parent1_age || 0;
