@@ -5834,7 +5834,10 @@ async function authMagicLink() {
   const email = document.getElementById('authEmail').value.trim();
   if (!email) { showAuthError('Enter your email first'); return; }
   try {
-    const { error } = await supaClient.auth.signInWithOtp({ email });
+    const { error } = await supaClient.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + '/' }
+    });
     if (error) throw error;
     showToast('Magic link sent! Check your inbox.');
   } catch(e) { showAuthError(e.message); }
