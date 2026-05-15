@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing - Death Clock Premium</title>
+<meta name="description" content="Unlock all habits, cloud sync, and advanced longevity insights.">
+<meta name="theme-color" content="#e94560">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src https://js.stripe.com;">
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://death-clock.app/pricing.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:title" content="Pricing - Death Clock Premium">
+<meta property="og:description" content="Unlock all habits, cloud sync, and advanced longevity insights.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://death-clock.app/pricing.html">
+<meta property="og:image" content="https://death-clock.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pricing - Death Clock Premium">
+<meta name="twitter:description" content="Unlock all habits, cloud sync, and advanced longevity insights.">
+<meta name="twitter:image" content="https://death-clock.app/og-image.png">
+<link rel="stylesheet" href="/shared/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+<a href="#main" class="skip-link" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; z-index:9999; padding:12px 24px; background:var(--accent); color:#fff; font-weight:700; border-radius:0 0 8px 0; text-decoration:none;" onfocus="this.style.left='0'; this.style.width='auto'; this.style.height='auto';" onblur="this.style.left='-9999px'; this.style.width='1px'; this.style.height='1px';">Skip to main content</a>
+<nav id="mainNav">
+  <div class="container">
+    <div class="logo" onclick="window.location.href='/'" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36" style="flex-shrink:0" aria-hidden="true" role="img"><defs><radialGradient id="lgG" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#e8e8e8"/></radialGradient></defs><path d="M100 20C55 20 30 60 30 100c0 30 0 60 0 80q15-15 25 0 10 15 20 0 10-15 25 0 15-15 25 0 10 15 20 0 10-15 25 0c0-20 0-50 0-80 0-40-25-80-70-80z" fill="url(#lgG)"/><ellipse cx="75" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="80" cy="80" rx="6" ry="7" fill="#fff"/><ellipse cx="125" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="130" cy="80" rx="6" ry="7" fill="#fff"/><path d="M80 120Q100 145 120 120" fill="none" stroke="#1a1a2e" stroke-width="3" stroke-linecap="round"/><ellipse cx="108" cy="132" rx="10" ry="14" fill="#e94560"/><path d="M108 125Q108 146 108 146" fill="none" stroke="#c4304d" stroke-width="1.5"/></svg><span>Death</span>Clock</div>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-tab" href="/">Home</a>
+      <a class="nav-tab" href="/about.html">About</a>
+      <a class="nav-tab" href="/blog/">Blog</a>
+      <a class="nav-tab hidden" id="navDash" href="/dashboard.html">Dashboard</a>
+      <a class="nav-tab hidden" id="navPrice" href="/pricing.html">Upgrade</a>
+      <a class="nav-tab" id="profileBtn" href="/profile.html">Sign In</a>
+      <a class="nav-tab hidden" id="navMansion" href="/mansion.html">Mansion</a>
+      <a class="btn-primary btn-sm" href="/#quiz" id="navCta" style="text-decoration:none;">Calculate</a>
+    </div>
+  </div>
+</nav>
+<div aria-live="polite" id="srAnnounce" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"></div>
+<div class="deathy-timer-bar" id="deathyTimerBar">
+  <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+    <div class="deathy-walking" id="deathyWalker"></div>
+    <div id="deathySpeechBubble" style="font-size:0.7rem; color:var(--text2); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; font-style:italic;"></div>
+  </div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div style="text-align:center;">
+      <div class="timer-label">Time remaining</div>
+      <div class="timer-text" id="navTimer">--:--:--:--</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="timer-label">Ghost</div>
+      <div id="navGhostHealth" style="font-size:0.8rem; font-weight:700;">--</div>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+<!-- ===== PRICING ===== -->
+<section id="page-pricing" class="hidden pricing">
+  <div class="container">
+    <h2>Unlock Your Full Lifespan Potential</h2>
+    <p class="pricing-sub">Choose a plan that fits your journey</p>
+    <div class="pricing-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+      <div class="price-card">
+        <div class="price-tier">Free</div>
+        <div class="price-amount">$0</div>
+        <div class="price-period">forever</div>
+        <div class="price-features">
+          <div class="price-feature">Death date calculation</div>
+          <div class="price-feature">100+ factor analysis</div>
+          <div class="price-feature">10 bucket list items</div>
+          <div class="price-feature">3 personal goals</div>
+          <div class="price-feature">Basic tips</div>
+          <div class="price-feature">Downloadable timer widget</div>
+        </div>
+        <button class="btn-secondary price-cta" onclick="showPage('quiz')">Get Started</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Premium</div>
+        <div class="price-amount">$4.99</div>
+        <div class="price-period">/month</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Free</div>
+          <div class="price-feature">Unlimited bucket list &amp; goals</div>
+          <div class="price-feature">Monthly recalculation</div>
+          <div class="price-feature">Full factor breakdown</div>
+          <div class="price-feature">"Years Added" progress tracker</div>
+          <div class="price-feature">Clinical test recommendations</div>
+        </div>
+        <button class="btn-primary price-cta">Subscribe $4.99/mo</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-tier">Pro Plus</div>
+        <div class="price-amount">$29.99</div>
+        <div class="price-period">/month</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Premium</div>
+          <div class="price-feature">Dynamic biological age tracking</div>
+          <div class="price-feature">AI longevity coach</div>
+          <div class="price-feature">Lab result integration</div>
+          <div class="price-feature">Personalised supplement &amp; meal plans</div>
+          <div class="price-feature">Challenge library &amp; streaks</div>
+          <div class="price-feature">Advanced analytics dashboard</div>
+          <div class="price-feature">Family Plan (parents/kids)</div>
+        </div>
+        <button class="btn-gold price-cta">Subscribe $29.99/mo</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Lifetime</div>
+        <div class="price-amount">$99</div>
+        <div class="price-period">one-time</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Premium</div>
+          <div class="price-feature">Pay once, keep forever</div>
+          <div class="price-feature">Early access to features</div>
+          <div class="price-feature">Priority support</div>
+        </div>
+        <button class="btn-green price-cta">Get Lifetime Access</button>
+      </div>
+      <div class="price-card" style="border-color:var(--accent); background:linear-gradient(135deg,#1a1a2e,#16213e);">
+        <div class="price-tier" style="color:var(--accent);">Longevity Deep Dive</div>
+        <div class="price-amount">$499</div>
+        <div class="price-period">one-time report</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Pro Plus</div>
+          <div class="price-feature">Board-certified longevity physician review</div>
+          <div class="price-feature">Full biomarker analysis &amp; interpretation</div>
+          <div class="price-feature">Personalised 90-day action plan</div>
+          <div class="price-feature">Genetic risk assessment</div>
+          <div class="price-feature">1-on-1 video consultation (30 min)</div>
+          <div class="price-feature">Custom supplement protocol</div>
+        </div>
+        <button class="btn-primary price-cta" style="background:linear-gradient(135deg,var(--accent),#ff6b6b);" onclick="startStripeCheckout('deep_dive')">Get Your Deep Dive</button>
+      </div>
+    </div>
+
+    <!-- LONGEVITY CLINIC QUOTE -->
+    <div style="margin-top:48px; background:linear-gradient(135deg,#0d1b2a,#1b2838); border:2px solid var(--gold); border-radius:16px; padding:32px; text-align:center; max-width:700px; margin-left:auto; margin-right:auto;">
+      <div style="font-size:2rem; margin-bottom:8px;">&#x1F3E5;</div>
+      <h3 style="color:var(--gold); font-size:1.4rem; margin-bottom:8px;">Get a Quote from a Longevity Clinic</h3>
+      <p style="color:var(--text2); font-size:0.95rem; margin-bottom:24px; max-width:500px; margin-left:auto; margin-right:auto;">
+        Ready to take it further? We partner with world-class longevity clinics. Tell us where you are and where you'd travel - we'll match you with the right clinic and get you a personalised quote.
+      </p>
+      <div id="clinicQuoteForm" style="text-align:left; max-width:420px; margin:0 auto;">
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Your Name</label>
+        <input type="text" id="clinicName" placeholder="Full name" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Email</label>
+        <input type="email" id="clinicEmail" placeholder="your@email.com" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Your Country</label>
+        <input type="text" id="clinicCountry" placeholder="e.g. United Kingdom" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Where are you willing to travel? (select all that apply)</label>
+        <div id="clinicDestinations" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:16px;">
+        </div>
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">What are you most interested in?</label>
+        <select id="clinicInterest" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+          <option value="">Select...</option>
+          <option value="full_panel">Full Longevity Panel & Biomarkers</option>
+          <option value="genetic">Genetic Testing & Risk Assessment</option>
+          <option value="stem_cell">Stem Cell Therapy</option>
+          <option value="hormone">Hormone Optimisation (HRT/TRT)</option>
+          <option value="iv_nad">IV Therapy / NAD+</option>
+          <option value="cryo">Cryotherapy & Recovery</option>
+          <option value="dental">Dental Longevity (full restoration)</option>
+          <option value="executive">Executive Health Check-up</option>
+          <option value="weight">Medical Weight Management</option>
+          <option value="all">Everything - Full Longevity Overhaul</option>
+        </select>
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Budget Range</label>
+        <select id="clinicBudget" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:16px; font-size:0.9rem;">
+          <option value="">Select...</option>
+          <option value="under_1k">Under $1,000</option>
+          <option value="1k_5k">$1,000 - $5,000</option>
+          <option value="5k_15k">$5,000 - $15,000</option>
+          <option value="15k_50k">$15,000 - $50,000</option>
+          <option value="50k_plus">$50,000+</option>
+          <option value="flexible">Flexible - show me options</option>
+        </select>
+
+        <button class="btn-gold" onclick="submitClinicQuote()" style="width:100%; padding:14px; font-size:1rem; font-weight:700;">Get My Personalised Quote</button>
+        <p style="font-size:0.7rem; color:var(--text3); margin-top:8px; text-align:center;">We'll match you with vetted clinics in your preferred destinations. No spam, no obligation.</p>
+      </div>
+      <div id="clinicQuoteSuccess" class="hidden" style="padding:32px; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:12px;">&#10003;</div>
+        <h4 style="color:var(--green); margin-bottom:8px;">Quote Request Submitted!</h4>
+        <p style="color:var(--text2);">We're matching you with clinics in your preferred destinations. Expect an email within 48 hours with personalised options and pricing.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+</main>
+<!-- ===== COOKIE BANNER ===== -->
+<div id="cookieBanner" class="cookie-banner hidden">
+  <p>We use essential cookies for site functionality and optional analytics cookies to improve our service. <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a></p>
+  <button class="btn-primary btn-sm" onclick="acceptCookies('all')">Accept All</button>
+  <button class="btn-secondary btn-sm" onclick="acceptCookies('essential')">Essential Only</button>
+</div>
+
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <p><strong>Disclaimer:</strong> Death Clock is for educational and motivational purposes only. It is not medical advice. Consult healthcare professionals for health decisions.</p>
+    <p>Calculations based on published actuarial data and peer-reviewed longevity research.</p>
+    <div style="margin-top:16px; display:flex; justify-content:center; gap:24px; flex-wrap:wrap;">
+      <a href="/blog/" style="font-weight:600;">Blog</a>
+      <a href="/blog/how-not-to-die.html">How Not to Die</a>
+        <a href="#" onclick="localStorage.setItem('dc_sound_off', localStorage.getItem('dc_sound_off')==='true'?'false':'true'); showToast(localStorage.getItem('dc_sound_off')==='true'?'Sound off':'Sound on'); return false;">🔊 Sound</a>
+      <a href="/blog/substances-and-lifespan.html">Substances &amp; Lifespan</a>
+      <a href="/blog/mental-health-and-longevity.html">Mental Health &amp; Longevity</a>
+      <a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a>
+      <a href="#" onclick="showPage('terms');return false;">Terms of Service</a>
+      <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a>
+    </div>
+    <p style="margin-top:12px;">&copy; 2026 Death Clock. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="/shared/core.js"></script>
+<script src="/shared/quiz.js"></script>
+<script src="/shared/dashboard.js"></script>
+<script>
+
+function pageInit() {
+  loadProfile();
+}
+
+</script>
+</body>
+</html>
