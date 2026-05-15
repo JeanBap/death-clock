@@ -758,6 +758,92 @@ footer p { margin-bottom: 8px; }
   .deathy-timer-bar .timer-text { font-size:0.75rem; }
   .deathy-walking { width:28px; height:28px; }
 }
+
+/* ===== HAUNTED MANSION ===== */
+.mansion-hall {
+  position: relative;
+  width: 100%;
+  min-height: 500px;
+  background: linear-gradient(180deg, #0a0612 0%, #1a0e2e 40%, #12081f 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #2a1a4a;
+  margin: 24px 0;
+}
+.mansion-ceiling {
+  position: absolute; top: 0; left: 0; right: 0; height: 80px;
+  background: linear-gradient(180deg, #0a0612 0%, transparent 100%);
+  z-index: 2;
+}
+.mansion-chandelier {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 3; animation: chandelierSway 4s ease-in-out infinite;
+}
+@keyframes chandelierSway {
+  0%, 100% { transform: translateX(-50%) rotate(-2deg); }
+  50% { transform: translateX(-50%) rotate(2deg); }
+}
+.mansion-floor {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 60px;
+  background: linear-gradient(180deg, transparent, #1a0a20 40%, #2a1530);
+  z-index: 2;
+}
+.mansion-ghost {
+  position: absolute;
+  cursor: pointer;
+  transition: transform 0.3s;
+  z-index: 5;
+  animation: mansionFloat 3s ease-in-out infinite;
+}
+.mansion-ghost:hover { transform: scale(1.15); z-index: 10; }
+.mansion-ghost .ghost-label {
+  position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 0.7rem; text-align: center;
+  background: rgba(0,0,0,0.7); padding: 2px 8px; border-radius: 8px;
+  color: var(--text); pointer-events: none;
+}
+.mansion-ghost .ghost-le {
+  font-size: 0.6rem; color: var(--accent2); display: block;
+}
+@keyframes mansionFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.mansion-cobweb {
+  position: absolute; z-index: 1; opacity: 0.3;
+}
+.mansion-candle {
+  position: absolute; z-index: 4;
+  animation: candleFlicker 0.8s ease-in-out infinite alternate;
+}
+@keyframes candleFlicker {
+  0% { opacity: 0.7; filter: brightness(0.9); }
+  100% { opacity: 1; filter: brightness(1.2); }
+}
+.mansion-window {
+  position: absolute; z-index: 1;
+  background: radial-gradient(ellipse, rgba(100,80,200,0.15), transparent);
+  border: 1px solid rgba(100,80,200,0.2); border-radius: 50% 50% 0 0;
+}
+.group-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px; cursor: pointer; transition: border-color 0.2s;
+}
+.group-card:hover { border-color: var(--accent); }
+.group-member-count { color: var(--text2); font-size: 0.85rem; }
+.invite-code-box {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px; text-align: center; font-family: monospace; font-size: 1.4rem;
+  letter-spacing: 4px; color: var(--gold); user-select: all; cursor: pointer;
+}
+.social-auth-section {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px; margin-bottom: 20px;
+}
+.username-input {
+  padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 1rem; width: 100%;
+}
 </style>
 </head>
 <body>
@@ -773,6 +859,7 @@ footer p { margin-bottom: 8px; }
       <button class="nav-tab hidden" id="navDash" onclick="showPage('dashboard')">Dashboard</button>
       <button class="nav-tab hidden" id="navPrice" onclick="showPage('pricing')">Upgrade</button>
       <button class="nav-tab hidden" id="profileBtn" onclick="showPage('profile')">Profile</button>
+      <button class="nav-tab hidden" id="navMansion" onclick="showPage('mansion')">Mansion</button>
       <button class="btn-primary btn-sm" id="navCta" onclick="showPage('quiz')">Calculate</button>
     </div>
   </div>
@@ -850,6 +937,22 @@ footer p { margin-bottom: 8px; }
             <div style="color:var(--text2); font-size:0.85rem;" id="profileEmail">-</div>
             <div style="margin-top:4px;"><span class="tier-badge" id="profileTier">FREE</span></div>
           </div>
+        </div>
+
+        <!-- Username for social -->
+        <div style="margin-bottom:16px; padding:12px; background:var(--bg); border-radius:8px;">
+          <label style="font-size:0.8rem; color:var(--text3); display:block; margin-bottom:4px;">Display Name (for Haunting Groups)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="socialUsername" placeholder="Choose a ghostly name..." class="username-input" style="flex:1;">
+            <button class="btn-primary btn-sm" onclick="saveSocialProfile()">Save</button>
+          </div>
+          <div id="socialProfileStatus" style="font-size:0.75rem; color:var(--text3); margin-top:4px;"></div>
+        </div>
+
+        <!-- Haunting Groups shortcut -->
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <button class="btn-secondary btn-sm" onclick="showPage('groups')" style="flex:1;">My Haunting Groups</button>
+          <button class="btn-secondary btn-sm" onclick="showPage('mansion')" style="flex:1;">Enter Mansion</button>
         </div>
         
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
@@ -1215,6 +1318,96 @@ footer p { margin-bottom: 8px; }
   <button class="btn-secondary btn-sm" onclick="acceptCookies('essential')">Essential Only</button>
 </div>
 
+
+<!-- ===== SOCIAL AUTH PROFILE ===== -->
+<section id="page-social-profile" class="page hidden">
+  <div class="container" style="max-width:600px; padding-top:40px;">
+    <h2 style="text-align:center; margin-bottom:24px;">Social Profile</h2>
+    <div id="socialProfileContent"></div>
+  </div>
+</section>
+
+<!-- ===== HAUNTING GROUPS ===== -->
+<section id="page-groups" class="page hidden">
+  <div class="container" style="max-width:700px; padding-top:40px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h2>Your Haunting Groups</h2>
+      <button class="btn-primary btn-sm" onclick="showCreateGroupModal()">+ New Group</button>
+    </div>
+    <div id="groupsList"></div>
+    <div style="margin-top:24px; padding:20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);">
+      <h3 style="margin-bottom:12px;">Join a Haunting Group</h3>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="joinCodeInput" placeholder="Enter 6-digit code or invite link" class="username-input" style="flex:1;">
+        <button class="btn-primary btn-sm" onclick="joinGroupByCode()">Join</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HAUNTED MANSION ===== -->
+<section id="page-mansion" class="page hidden">
+  <div class="container" style="max-width:900px; padding-top:40px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div>
+        <h2 id="mansionGroupName" style="margin-bottom:4px;">The Haunted Mansion</h2>
+        <p style="color:var(--text2); font-size:0.85rem;" id="mansionMemberCount">0 ghosts haunt these halls</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-secondary btn-sm" onclick="showInviteModal()">Invite Friends</button>
+        <button class="btn-secondary btn-sm" onclick="showPage('groups')">My Groups</button>
+      </div>
+    </div>
+    <div class="mansion-hall" id="mansionHall">
+      <div class="mansion-ceiling"></div>
+      <div class="mansion-chandelier" id="mansionChandelier"></div>
+      <div class="mansion-floor"></div>
+      <div id="mansionGhosts"></div>
+      <div id="mansionDecor"></div>
+    </div>
+    <div id="mansionGhostInfo" style="margin-top:16px; display:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px;"></div>
+  </div>
+</section>
+
+<!-- ===== CREATE GROUP MODAL ===== -->
+<div id="createGroupModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
+  <div style="background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:32px; max-width:450px; width:90%;">
+    <h3 style="margin-bottom:16px;">Create a Haunting Group</h3>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <input type="text" id="newGroupName" placeholder="Group name (e.g. The Undead Squad)" class="username-input">
+      <textarea id="newGroupDesc" placeholder="Description (optional)" rows="2" style="padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.9rem; resize:none;"></textarea>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-primary" onclick="createHauntingGroup()" style="flex:1;">Create Group</button>
+        <button class="btn-secondary" onclick="hideModal('createGroupModal')" style="flex:1;">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INVITE MODAL ===== -->
+<div id="inviteModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
+  <div style="background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:32px; max-width:450px; width:90%;">
+    <h3 style="margin-bottom:16px;">Invite Friends to Haunt Together</h3>
+    <div style="margin-bottom:16px;">
+      <p style="color:var(--text2); font-size:0.85rem; margin-bottom:8px;">Share this code:</p>
+      <div class="invite-code-box" id="inviteCodeDisplay" onclick="copyInviteCode()">------</div>
+      <p style="color:var(--text3); font-size:0.75rem; margin-top:4px; text-align:center;">Click to copy</p>
+    </div>
+    <div style="margin-bottom:16px;">
+      <p style="color:var(--text2); font-size:0.85rem; margin-bottom:8px;">Or invite by email:</p>
+      <div style="display:flex; gap:8px;">
+        <input type="email" id="inviteEmailInput" placeholder="friend@example.com" class="username-input" style="flex:1;">
+        <button class="btn-primary btn-sm" onclick="sendEmailInvite()">Send</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <p style="color:var(--text2); font-size:0.85rem; margin-bottom:8px;">Or share this link:</p>
+      <div style="background:var(--bg); padding:8px 12px; border-radius:8px; font-size:0.8rem; color:var(--text2); word-break:break-all; cursor:pointer;" id="inviteLinkDisplay" onclick="copyInviteLink()">-</div>
+    </div>
+    <button class="btn-secondary" onclick="hideModal('inviteModal')" style="width:100%;">Done</button>
+  </div>
+</div>
+
 <!-- ===== FOOTER ===== -->
 <footer>
   <div class="container">
@@ -1255,6 +1448,11 @@ const state = {
 // SUPABASE CLIENT
 // ============================================
 const SUPABASE_URL = 'https://myizauhtpcnkwguralwc.supabase.co';
+// Social features Supabase (upsideshare project)
+const SOCIAL_SUPABASE_URL = 'https://tosyulolriavzgkpwzrn.supabase.co';
+const SOCIAL_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvc3l1bG9scmlhdnpna3B3enJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzE0NzIsImV4cCI6MjA5NDM0NzQ3Mn0.LVxiplL8DGVB481AXiEDVGWplfXprMPK_zR8A__6j7M';
+let socialClient = null;
+try { socialClient = supabase.createClient(SOCIAL_SUPABASE_URL, SOCIAL_SUPABASE_ANON); } catch(e) { console.warn('Social Supabase init failed:', e); }
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15aXphdWh0cGNua3dndXJhbHdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTY2MzQsImV4cCI6MjA5MDAzMjYzNH0.8ApElblHWaZo5knum86q6fPk7qu5D0dU-aNSZPRoA0U';
 let supaClient = null;
 try { supaClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e) { console.warn('Supabase init failed:', e); }
@@ -2208,6 +2406,8 @@ function showPage(page) {
   if (tabs[page] !== undefined) document.querySelectorAll('.nav-tab')[tabs[page]]?.classList.add('active');
   if (page === 'quiz') { state.currentQuestion = 0; renderQuestion(); }
   if (page === 'dashboard') renderDashboard();
+  if (page === 'mansion') renderMansion();
+  if (page === 'groups') renderGroupsList();
   // Evolve ghost daily
   if (state.result) evolveGhost();
   window.scrollTo(0, 0);
@@ -5575,9 +5775,24 @@ async function authSignIn() {
     const { data, error } = await supaClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
     state.supaUser = data.user;
+    // Also sign in on social Supabase
+    if (socialClient) {
+      try {
+        const socialAuth = await socialClient.auth.signInWithPassword({ email, password });
+        if (socialAuth.error) {
+          // Auto-create social account if doesn't exist
+          await socialClient.auth.signUp({ email, password });
+          await socialClient.auth.signInWithPassword({ email, password });
+        }
+        state.socialUser = socialAuth.data?.user || null;
+        loadSocialProfile();
+      } catch(e2) { console.warn('Social signin:', e2); }
+    }
     showToast('Welcome back from the dead!');
     renderProfilePage();
     DataStore.load();
+    // Show mansion nav if logged in
+    document.getElementById('navMansion')?.classList.remove('hidden');
   } catch(e) { showAuthError(e.message); }
 }
 
@@ -5589,8 +5804,13 @@ async function authSignUp() {
     const { data, error } = await supaClient.auth.signUp({ email, password });
     if (error) throw error;
     state.supaUser = data.user;
+    // Also sign up on social Supabase
+    if (socialClient) {
+      try {
+        await socialClient.auth.signUp({ email, password });
+      } catch(e2) { console.warn('Social signup:', e2); }
+    }
     showToast('Account created! Check email to confirm.');
-    // Save existing data to new account
     if (state.result) DataStore.save();
     renderProfilePage();
   } catch(e) { showAuthError(e.message); }
@@ -5624,6 +5844,7 @@ function renderProfilePage() {
   document.getElementById('authLoggedOut')?.classList.toggle('hidden', loggedIn);
   document.getElementById('authLoggedIn')?.classList.toggle('hidden', !loggedIn);
   document.getElementById('profileBtn')?.classList.toggle('hidden', !loggedIn);
+  if (loggedIn) document.getElementById('navMansion')?.classList.remove('hidden');
   
   if (loggedIn) {
     const name = generateDeathyName ? generateDeathyName() : 'Ghost';
@@ -6651,6 +6872,454 @@ if (state.result) {
   setTimeout(updateNavTimer, 100);
   setTimeout(rotateDeathyPhrase, 500);
 }
+
+
+// ============================================
+// SOCIAL FEATURES: Haunting Groups + Mansion
+// ============================================
+state.socialUser = null;
+state.socialProfile = null;
+state.currentGroup = null;
+state.groups = [];
+
+async function getSocialSession() {
+  if (!socialClient) return null;
+  try {
+    const { data } = await socialClient.auth.getSession();
+    return data?.session?.user || null;
+  } catch(e) { return null; }
+}
+
+async function loadSocialProfile() {
+  const user = await getSocialSession();
+  if (!user) return;
+  state.socialUser = user;
+  try {
+    const { data } = await socialClient.from('dc_profiles').select('*').eq('id', user.id).single();
+    if (data) {
+      state.socialProfile = data;
+      const nameInput = document.getElementById('socialUsername');
+      if (nameInput) nameInput.value = data.display_name || data.username || '';
+      document.getElementById('navMansion')?.classList.remove('hidden');
+    }
+  } catch(e) { console.warn('Load social profile:', e); }
+}
+
+async function saveSocialProfile() {
+  const user = await getSocialSession();
+  if (!user) { showToast('Sign in first!'); return; }
+  const name = document.getElementById('socialUsername')?.value.trim();
+  if (!name || name.length < 2) { showToast('Name must be at least 2 characters'); return; }
+
+  const username = name.toLowerCase().replace(/[^a-z0-9_]/g, '_').slice(0, 20);
+  const profileData = {
+    id: user.id,
+    username: username,
+    display_name: name,
+    life_expectancy: state.result ? parseFloat(state.result.adjustedLE) : null,
+    health_score: state.result ? state.result.lifeScore : null,
+    country: state.answers?.country || null,
+    sport: state.answers?.sport || null,
+    ghost_color: getGhostColor(),
+    ghost_eye_style: getGhostEyeStyle(),
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    const { error } = await socialClient.from('dc_profiles').upsert(profileData);
+    if (error) throw error;
+    state.socialProfile = profileData;
+    document.getElementById('socialProfileStatus').textContent = 'Profile saved! You can now join haunting groups.';
+    document.getElementById('socialProfileStatus').style.color = 'var(--green)';
+    document.getElementById('navMansion')?.classList.remove('hidden');
+    showToast('Ghost identity saved!');
+  } catch(e) {
+    if (e.message?.includes('duplicate')) {
+      // Username taken, add random suffix
+      profileData.username = username + '_' + Math.floor(Math.random()*999);
+      const { error: e2 } = await socialClient.from('dc_profiles').upsert(profileData);
+      if (!e2) {
+        state.socialProfile = profileData;
+        showToast('Saved (username adjusted)!');
+      } else { showToast('Error: ' + e2.message); }
+    } else { showToast('Error: ' + e.message); }
+  }
+}
+
+function getGhostColor() {
+  if (!state.result) return '#00ff88';
+  const score = state.result.lifeScore || 50;
+  if (score >= 80) return '#00ff88';
+  if (score >= 60) return '#4de6a8';
+  if (score >= 40) return '#f0c040';
+  if (score >= 20) return '#e94560';
+  return '#8b0000';
+}
+
+function getGhostEyeStyle() {
+  if (!state.result) return 'normal';
+  const score = state.result.lifeScore || 50;
+  if (score >= 80) return 'happy';
+  if (score >= 60) return 'normal';
+  if (score >= 40) return 'worried';
+  return 'dead';
+}
+
+function generateInviteCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+// ===== GROUP MANAGEMENT =====
+async function createHauntingGroup() {
+  const user = await getSocialSession();
+  if (!user) { showToast('Sign in first!'); return; }
+  if (!state.socialProfile) { showToast('Save your social profile first!'); return; }
+
+  const name = document.getElementById('newGroupName')?.value.trim();
+  if (!name) { showToast('Enter a group name'); return; }
+  const desc = document.getElementById('newGroupDesc')?.value.trim();
+  const code = generateInviteCode();
+
+  try {
+    const { data, error } = await socialClient.from('dc_haunting_groups').insert({
+      name, description: desc || null, invite_code: code, owner_id: user.id
+    }).select().single();
+    if (error) throw error;
+
+    // Add owner as member
+    await socialClient.from('dc_group_members').insert({
+      group_id: data.id, user_id: user.id, role: 'owner'
+    });
+
+    hideModal('createGroupModal');
+    state.currentGroup = data;
+    showToast('Group created! Share code: ' + code);
+    showPage('mansion');
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+function showCreateGroupModal() {
+  document.getElementById('createGroupModal')?.classList.remove('hidden');
+  document.getElementById('createGroupModal').style.display = 'flex';
+}
+
+function showInviteModal() {
+  if (!state.currentGroup) { showToast('Select a group first'); return; }
+  const modal = document.getElementById('inviteModal');
+  modal?.classList.remove('hidden');
+  modal.style.display = 'flex';
+  document.getElementById('inviteCodeDisplay').textContent = state.currentGroup.invite_code;
+  document.getElementById('inviteLinkDisplay').textContent = 'https://death-clock.app?join=' + state.currentGroup.invite_code;
+}
+
+function hideModal(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+}
+
+function copyInviteCode() {
+  const code = state.currentGroup?.invite_code;
+  if (code) {
+    navigator.clipboard?.writeText(code);
+    showToast('Code copied: ' + code);
+  }
+}
+
+function copyInviteLink() {
+  const code = state.currentGroup?.invite_code;
+  if (code) {
+    const link = 'https://death-clock.app?join=' + code;
+    navigator.clipboard?.writeText(link);
+    showToast('Invite link copied!');
+  }
+}
+
+async function joinGroupByCode() {
+  const user = await getSocialSession();
+  if (!user) { showToast('Sign in first!'); return; }
+  if (!state.socialProfile) { showToast('Save your social profile first!'); return; }
+
+  let input = document.getElementById('joinCodeInput')?.value.trim();
+  if (!input) { showToast('Enter a code or link'); return; }
+
+  // Extract code from link if needed
+  if (input.includes('join=')) input = input.split('join=')[1].split('&')[0];
+  input = input.toUpperCase();
+
+  try {
+    // Find group by code
+    const { data: group, error } = await socialClient.from('dc_haunting_groups')
+      .select('*').eq('invite_code', input).single();
+    if (error || !group) { showToast('Invalid code. Check and try again.'); return; }
+
+    // Check if already member
+    const { data: existing } = await socialClient.from('dc_group_members')
+      .select('id').eq('group_id', group.id).eq('user_id', user.id).single();
+    if (existing) {
+      state.currentGroup = group;
+      showToast('You are already in this group!');
+      showPage('mansion');
+      return;
+    }
+
+    // Check member count
+    const { count } = await socialClient.from('dc_group_members')
+      .select('*', { count: 'exact', head: true }).eq('group_id', group.id);
+    if (count >= group.max_members) { showToast('Group is full!'); return; }
+
+    // Join
+    const { error: joinErr } = await socialClient.from('dc_group_members').insert({
+      group_id: group.id, user_id: user.id, role: 'ghost'
+    });
+    if (joinErr) throw joinErr;
+
+    state.currentGroup = group;
+    showToast('Welcome to ' + group.name + '!');
+    showPage('mansion');
+  } catch(e) { showToast('Error joining: ' + e.message); }
+}
+
+async function sendEmailInvite() {
+  if (!state.currentGroup) return;
+  const email = document.getElementById('inviteEmailInput')?.value.trim();
+  if (!email || !email.includes('@')) { showToast('Enter a valid email'); return; }
+  const user = await getSocialSession();
+  if (!user) return;
+
+  try {
+    await socialClient.from('dc_invites').insert({
+      group_id: state.currentGroup.id,
+      invited_by: user.id,
+      email: email
+    });
+    showToast('Invite sent to ' + email + '! (Share the code too: ' + state.currentGroup.invite_code + ')');
+    document.getElementById('inviteEmailInput').value = '';
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function renderGroupsList() {
+  const user = await getSocialSession();
+  if (!user) {
+    document.getElementById('groupsList').innerHTML = '<div class="social-auth-section"><p style="text-align:center; color:var(--text2);">Sign in on your Profile page to create or join haunting groups.</p><button class="btn-primary" onclick="showPage(&quot;profile&quot;)" style="margin-top:12px; display:block; margin-left:auto; margin-right:auto;">Go to Profile</button></div>';
+    return;
+  }
+
+  try {
+    // Get user's groups
+    const { data: memberships } = await socialClient.from('dc_group_members')
+      .select('group_id, role').eq('user_id', user.id);
+
+    if (!memberships || memberships.length === 0) {
+      document.getElementById('groupsList').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text2);"><p style="font-size:1.1rem; margin-bottom:8px;">No haunting groups yet</p><p style="font-size:0.85rem;">Create one or join with a code!</p></div>';
+      return;
+    }
+
+    const groupIds = memberships.map(m => m.group_id);
+    const { data: groups } = await socialClient.from('dc_haunting_groups')
+      .select('*').in('id', groupIds);
+
+    // Get member counts
+    let html = '';
+    for (const g of (groups || [])) {
+      const { count } = await socialClient.from('dc_group_members')
+        .select('*', { count: 'exact', head: true }).eq('group_id', g.id);
+      const role = memberships.find(m => m.group_id === g.id)?.role || 'ghost';
+      html += '<div class="group-card" onclick="enterMansion(&quot;'+g.id+'&quot;)"><div style="display:flex; justify-content:space-between; align-items:center;"><div><h3 style="margin-bottom:4px;">'+escHtml(g.name)+'</h3><p class="group-member-count">'+count+' ghost'+(count!==1?'s':'')+' haunting</p></div><div style="text-align:right;"><span style="font-size:0.75rem; color:var(--text3);">'+role+'</span><br><span style="font-size:0.75rem; color:var(--gold);">'+g.invite_code+'</span></div></div>'+(g.description?'<p style="color:var(--text2); font-size:0.85rem; margin-top:8px;">'+escHtml(g.description)+'</p>':'')+'</div>';
+    }
+    document.getElementById('groupsList').innerHTML = html;
+    state.groups = groups || [];
+  } catch(e) {
+    document.getElementById('groupsList').innerHTML = '<p style="color:var(--accent);">Error loading groups: '+e.message+'</p>';
+  }
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function enterMansion(groupId) {
+  const { data: group } = await socialClient.from('dc_haunting_groups')
+    .select('*').eq('id', groupId).single();
+  if (group) {
+    state.currentGroup = group;
+    showPage('mansion');
+  }
+}
+
+// ===== HAUNTED MANSION RENDERING =====
+function buildMansionGhostSVG(color, eyeStyle, size) {
+  size = size || 60;
+  const eyeMap = {
+    happy: '<ellipse cx="38" cy="42" rx="6" ry="3" fill="#1a1a2e"/><ellipse cx="62" cy="42" rx="6" ry="3" fill="#1a1a2e"/>',
+    normal: '<ellipse cx="38" cy="42" rx="7" ry="8" fill="#1a1a2e"/><ellipse cx="40" cy="40" rx="2.5" ry="3" fill="#fff"/><ellipse cx="62" cy="42" rx="7" ry="8" fill="#1a1a2e"/><ellipse cx="64" cy="40" rx="2.5" ry="3" fill="#fff"/>',
+    worried: '<ellipse cx="38" cy="44" rx="8" ry="10" fill="#1a1a2e"/><ellipse cx="40" cy="42" rx="3" ry="3.5" fill="#fff"/><ellipse cx="62" cy="44" rx="8" ry="10" fill="#1a1a2e"/><ellipse cx="64" cy="42" rx="3" ry="3.5" fill="#fff"/>',
+    dead: '<line x1="32" y1="38" x2="44" y2="48" stroke="#1a1a2e" stroke-width="3"/><line x1="44" y1="38" x2="32" y2="48" stroke="#1a1a2e" stroke-width="3"/><line x1="56" y1="38" x2="68" y2="48" stroke="#1a1a2e" stroke-width="3"/><line x1="68" y1="38" x2="56" y2="48" stroke="#1a1a2e" stroke-width="3"/>'
+  };
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="'+size+'" height="'+(size*1.2)+'"><defs><radialGradient id="mg'+color.replace('#','')+'"><stop offset="0%" stop-color="'+color+'" stop-opacity="0.9"/><stop offset="100%" stop-color="'+color+'" stop-opacity="0.5"/></radialGradient></defs><path d="M50 5C25 5 10 30 10 55c0 20 0 45 0 60q8-10 13 0 6 10 12 0 6-10 15 0 9-10 15 0 6 10 12 0 6-10 13 0c0-15 0-40 0-60C90 30 75 5 50 5z" fill="url(#mg'+color.replace('#','')+')" opacity="0.85"/>'+(eyeMap[eyeStyle]||eyeMap.normal)+'</svg>';
+}
+
+function buildChandelierSVG() {
+  return '<svg width="120" height="100" viewBox="0 0 120 100"><line x1="60" y1="0" x2="60" y2="25" stroke="#8b7355" stroke-width="2"/><path d="M20 40Q60 25 100 40" fill="none" stroke="#8b7355" stroke-width="2"/><line x1="20" y1="40" x2="20" y2="55" stroke="#666" stroke-width="1"/><line x1="45" y1="33" x2="45" y2="48" stroke="#666" stroke-width="1"/><line x1="60" y1="30" x2="60" y2="45" stroke="#666" stroke-width="1"/><line x1="75" y1="33" x2="75" y2="48" stroke="#666" stroke-width="1"/><line x1="100" y1="40" x2="100" y2="55" stroke="#666" stroke-width="1"/><circle cx="20" cy="58" r="4" fill="#f0c040" opacity="0.8"><animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/></circle><circle cx="45" cy="51" r="4" fill="#f0c040" opacity="0.8"><animate attributeName="opacity" values="0.8;0.5;0.8" dur="1.8s" repeatCount="indefinite"/></circle><circle cx="60" cy="48" r="5" fill="#f0c040" opacity="0.9"><animate attributeName="opacity" values="0.7;1;0.7" dur="1.2s" repeatCount="indefinite"/></circle><circle cx="75" cy="51" r="4" fill="#f0c040" opacity="0.8"><animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/></circle><circle cx="100" cy="58" r="4" fill="#f0c040" opacity="0.8"><animate attributeName="opacity" values="0.9;0.6;0.9" dur="1.6s" repeatCount="indefinite"/></circle></svg>';
+}
+
+function buildCobwebSVG(size) {
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 80 80" opacity="0.3"><path d="M0 0Q40 10 80 0M0 0Q10 40 0 80M0 0Q25 25 50 50M0 0Q35 15 70 30M0 0Q15 35 30 70" fill="none" stroke="#888" stroke-width="0.5"/><path d="M10 3Q20 10 15 20M25 6Q30 18 22 30M5 10Q15 15 10 25" fill="none" stroke="#888" stroke-width="0.3"/></svg>';
+}
+
+async function renderMansion() {
+  const user = await getSocialSession();
+  if (!user || !state.currentGroup) {
+    // No group selected - try to load first group or show prompt
+    if (user) {
+      const { data: memberships } = await socialClient.from('dc_group_members')
+        .select('group_id').eq('user_id', user.id).limit(1);
+      if (memberships && memberships.length > 0) {
+        const { data: group } = await socialClient.from('dc_haunting_groups')
+          .select('*').eq('id', memberships[0].group_id).single();
+        if (group) { state.currentGroup = group; renderMansion(); return; }
+      }
+    }
+    document.getElementById('mansionHall').innerHTML = '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:10;"><div style="text-align:center; padding:40px;"><p style="font-size:1.2rem; margin-bottom:16px;">No haunting group yet</p><p style="color:var(--text2); margin-bottom:20px;">Create or join a group to see ghosts in the mansion!</p><button class="btn-primary" onclick="showPage(&quot;groups&quot;)">My Groups</button></div></div>';
+    return;
+  }
+
+  const group = state.currentGroup;
+  document.getElementById('mansionGroupName').textContent = group.name;
+
+  try {
+    // Fetch all members with profiles
+    const { data: members } = await socialClient.from('dc_group_members')
+      .select('user_id, role, joined_at').eq('group_id', group.id);
+
+    if (!members || members.length === 0) {
+      document.getElementById('mansionMemberCount').textContent = 'Empty mansion... invite some ghosts!';
+      return;
+    }
+
+    const userIds = members.map(m => m.user_id);
+    const { data: profiles } = await socialClient.from('dc_profiles')
+      .select('*').in('id', userIds);
+
+    document.getElementById('mansionMemberCount').textContent =
+      members.length + ' ghost' + (members.length !== 1 ? 's' : '') + ' haunt these halls';
+
+    // Render chandelier
+    document.getElementById('mansionChandelier').innerHTML = buildChandelierSVG();
+
+    // Render decor (cobwebs, windows, candles)
+    const hall = document.getElementById('mansionHall');
+    const hallW = hall.offsetWidth || 800;
+    const hallH = hall.offsetHeight || 500;
+
+    let decorHtml = '';
+    // Cobwebs in corners
+    decorHtml += '<div class="mansion-cobweb" style="top:0; left:0;">'+buildCobwebSVG(80)+'</div>';
+    decorHtml += '<div class="mansion-cobweb" style="top:0; right:0; transform:scaleX(-1);">'+buildCobwebSVG(80)+'</div>';
+    // Windows
+    decorHtml += '<div class="mansion-window" style="top:40px; left:10%; width:80px; height:100px;"></div>';
+    decorHtml += '<div class="mansion-window" style="top:40px; right:10%; width:80px; height:100px;"></div>';
+    // Candles on floor edges
+    for (let i = 0; i < 4; i++) {
+      const x = 10 + (i * 25);
+      decorHtml += '<div class="mansion-candle" style="bottom:50px; left:'+x+'%;"><svg width="12" height="24"><rect x="3" y="10" width="6" height="14" fill="#8b7355" rx="1"/><ellipse cx="6" cy="10" rx="4" ry="6" fill="#f0c040" opacity="0.9"><animate attributeName="ry" values="5;7;5" dur="'+(0.8+i*0.3)+'s" repeatCount="indefinite"/></ellipse></svg></div>';
+    }
+    document.getElementById('mansionDecor').innerHTML = decorHtml;
+
+    // Render ghosts floating around
+    const ghostArea = { x: 60, y: 100, w: hallW - 120, h: hallH - 200 };
+    let ghostsHtml = '';
+    const positions = distributeGhosts(profiles?.length || 0, ghostArea);
+
+    (profiles || []).forEach((p, i) => {
+      const pos = positions[i] || { x: 100 + i * 80, y: 150 + (i % 3) * 60 };
+      const color = p.ghost_color || '#00ff88';
+      const eyes = p.ghost_eye_style || 'normal';
+      const name = p.display_name || p.username || 'Ghost';
+      const le = p.life_expectancy ? p.life_expectancy.toFixed(1) : '??';
+      const animDelay = (i * 0.5) % 3;
+      const isMe = p.id === user.id;
+      const safeName = escHtml(name).replace(/'/g, '&#39;');
+      const glow = isMe ? ' filter:drop-shadow(0 0 8px '+color+');' : '';
+      const clickFn = 'showGhostInfo(&quot;'+safeName+'&quot;, '+le+', &quot;'+color+'&quot;, &quot;'+eyes+'&quot;, '+(isMe?'true':'false')+')';
+
+      ghostsHtml += '<div class="mansion-ghost" style="left:'+pos.x+'px; top:'+pos.y+'px; animation-delay:'+animDelay+'s;'+glow+'" onclick="'+clickFn+'">'
+        + buildMansionGhostSVG(color, eyes, 55)
+        + '<div class="ghost-label">'+(isMe ? '<span style="color:var(--gold);">'+escHtml(name)+' (You)</span>' : escHtml(name))+'<span class="ghost-le">'+le+' years</span></div></div>';
+    });
+
+    document.getElementById('mansionGhosts').innerHTML = ghostsHtml;
+
+  } catch(e) {
+    console.error('Mansion render error:', e);
+    showToast('Error loading mansion: ' + e.message);
+  }
+}
+
+function distributeGhosts(count, area) {
+  const positions = [];
+  const cols = Math.ceil(Math.sqrt(count));
+  const rows = Math.ceil(count / cols);
+  const cellW = area.w / cols;
+  const cellH = area.h / rows;
+
+  for (let i = 0; i < count; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    positions.push({
+      x: area.x + col * cellW + cellW * 0.2 + Math.random() * cellW * 0.4,
+      y: area.y + row * cellH + cellH * 0.2 + Math.random() * cellH * 0.3
+    });
+  }
+  return positions;
+}
+
+function showGhostInfo(name, le, color, eyes, isMe) {
+  const info = document.getElementById('mansionGhostInfo');
+  if (!info) return;
+  info.style.display = 'block';
+  const yearsLeft = (le - (state.result?.ageNow || 30)).toFixed(1);
+  info.innerHTML = '<div style="display:flex; align-items:center; gap:16px;">'
+    + '<div>' + buildMansionGhostSVG(color, eyes, 70) + '</div>'
+    + '<div><h3>' + name + (isMe ? ' <span style="color:var(--gold);">(You)</span>' : '') + '</h3>'
+    + '<p style="color:var(--text2);">Life expectancy: <strong style="color:var(--accent2);">' + le + ' years</strong></p>'
+    + '<p style="color:var(--text3); font-size:0.85rem;">~' + yearsLeft + ' years of haunting left</p>'
+    + '</div></div>';
+}
+
+// Check for join code in URL on load
+function checkJoinCodeInURL() {
+  const params = new URLSearchParams(window.location.search);
+  const joinCode = params.get('join');
+  if (joinCode) {
+    // Store for after login
+    localStorage.setItem('dc_pending_join', joinCode);
+    showToast('Join code detected! Sign in to join the haunting group.');
+    showPage('profile');
+  }
+}
+
+// Process pending join after login
+async function processPendingJoin() {
+  const code = localStorage.getItem('dc_pending_join');
+  if (!code) return;
+  localStorage.removeItem('dc_pending_join');
+
+  const user = await getSocialSession();
+  if (!user || !state.socialProfile) return;
+
+  document.getElementById('joinCodeInput').value = code;
+  await joinGroupByCode();
+}
+
+// Init social on page load
+(function initSocial() {
+  setTimeout(async () => {
+    if (socialClient) {
+      await loadSocialProfile();
+      checkJoinCodeInURL();
+      // Process pending join if we just logged in
+      if (state.socialUser) processPendingJoin();
+    }
+  }, 1500);
+})();
 
 </script>
 </body>
