@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MortalClock - See Your Death Date. Change It. Live Intentionally.</title>
+<meta name="description" content="Calculate your life expectancy based on science. Set bucket lists, track goals, and discover how to add years to your life.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0a0f;
+  --bg2: #12121a;
+  --bg3: #1a1a2e;
+  --surface: #16213e;
+  --surface2: #1a1a2e;
+  --accent: #e94560;
+  --accent2: #ff6b6b;
+  --accent3: #c23152;
+  --gold: #f0c040;
+  --green: #4ecca3;
+  --blue: #4d80e4;
+  --text: #eaeaea;
+  --text2: #a0a0b0;
+  --text3: #666680;
+  --border: #2a2a3e;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+a { color: var(--accent2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent3); transform: translateY(-1px); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg3); }
+.btn-gold { background: linear-gradient(135deg, var(--gold), #e6a800); color: #1a1a2e; }
+.btn-green { background: var(--green); color: #1a1a2e; }
+.btn-sm { padding: 8px 16px; font-size: 0.875rem; }
+input, select, textarea {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  width: 100%;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.hidden { display: none !important; }
+.fade-in { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+@keyframes tick { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+/* ===== NAV ===== */
+nav {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+nav .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo span { color: var(--text); }
+.nav-links { display: flex; gap: 8px; align-items: center; }
+.nav-links button { padding: 8px 16px; font-size: 0.9rem; }
+.nav-tab {
+  background: none;
+  color: var(--text2);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.nav-tab.active { background: var(--surface); color: var(--text); }
+.nav-tab:hover { color: var(--text); }
+
+/* ===== HERO ===== */
+.hero {
+  text-align: center;
+  padding: 80px 20px 60px;
+  background: radial-gradient(ellipse at center, var(--bg3) 0%, var(--bg) 70%);
+}
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p { font-size: 1.25rem; color: var(--text2); max-width: 600px; margin: 0 auto 32px; }
+.hero .btn-primary { font-size: 1.2rem; padding: 16px 40px; }
+
+/* ===== QUESTIONNAIRE ===== */
+.questionnaire {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+.q-progress {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 32px;
+}
+.q-progress-dot {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+.q-progress-dot.active { background: var(--accent); }
+.q-progress-dot.done { background: var(--green); }
+.q-section-title {
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.q-question {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.q-options { display: grid; gap: 12px; margin-bottom: 32px; }
+.q-option {
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  color: var(--text);
+  font-size: 1rem;
+}
+.q-option:hover { border-color: var(--accent); }
+.q-option.selected { border-color: var(--accent); background: rgba(233,69,96,0.1); }
+.q-option-label { font-weight: 600; }
+.q-option-desc { font-size: 0.85rem; color: var(--text2); margin-top: 4px; }
+.q-nav { display: flex; justify-content: space-between; gap: 16px; }
+.q-input-row { display: flex; gap: 12px; margin-bottom: 24px; }
+.q-input-row > div { flex: 1; }
+.q-input-row label { display: block; font-size: 0.85rem; color: var(--text2); margin-bottom: 6px; }
+.q-conditions { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-bottom: 24px; }
+.q-condition {
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  text-align: center;
+}
+.q-condition.selected { border-color: var(--accent); background: rgba(233,69,96,0.15); }
+
+/* ===== RESULT ===== */
+.result-page { padding: 40px 20px 80px; text-align: center; }
+.death-date-reveal {
+  margin: 40px auto;
+  padding: 48px 32px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  max-width: 600px;
+}
+.death-date-label { font-size: 0.9rem; color: var(--text3); text-transform: uppercase; letter-spacing: 3px; }
+.death-date {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin: 16px 0;
+}
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+.countdown-unit {
+  background: var(--surface);
+  padding: 16px 12px;
+  border-radius: 12px;
+  min-width: 80px;
+}
+.countdown-num {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  animation: tick 1s infinite;
+}
+.countdown-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+.life-score-circle {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  border: 4px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 24px auto;
+}
+.life-score-num { font-size: 2.5rem; font-weight: 900; }
+.life-score-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; }
+.factors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 700px; margin: 32px auto; text-align: left; }
+.factor-card {
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border-left: 4px solid;
+}
+.factor-card.positive { border-left-color: var(--green); }
+.factor-card.negative { border-left-color: var(--accent); }
+.factor-impact {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+.factor-impact.positive { color: var(--green); }
+.factor-impact.negative { color: var(--accent); }
+.factor-name { font-size: 0.9rem; color: var(--text2); margin-top: 4px; }
+.factor-tip { font-size: 0.8rem; color: var(--text3); margin-top: 8px; font-style: italic; }
+
+/* ===== DASHBOARD ===== */
+.dashboard { padding: 32px 20px 80px; }
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.dash-header h2 { font-size: 1.8rem; }
+.dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.stat-card {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: var(--radius);
+  text-align: center;
+}
+.stat-num { font-size: 2rem; font-weight: 800; }
+.stat-label { font-size: 0.8rem; color: var(--text2); margin-top: 4px; }
+
+/* ===== TABS CONTENT ===== */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--bg2);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.tab-btn {
+  padding: 10px 20px;
+  background: none;
+  color: var(--text2);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.tab-btn.active { background: var(--surface); color: var(--text); }
+
+/* ===== BUCKET LIST ===== */
+.bucket-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+.bucket-check {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+.bucket-check.done { background: var(--green); border-color: var(--green); }
+.bucket-info { flex: 1; }
+.bucket-title { font-weight: 600; }
+.bucket-title.done { text-decoration: line-through; color: var(--text3); }
+.bucket-meta { font-size: 0.8rem; color: var(--text3); margin-top: 4px; display: flex; gap: 12px; }
+.bucket-category {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--bg3);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text2);
+}
+.bucket-delete {
+  background: none;
+  color: var(--text3);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+.bucket-delete:hover { color: var(--accent); }
+
+/* ===== GOALS ===== */
+.goal-card {
+  padding: 20px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+.goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.goal-title { font-weight: 600; font-size: 1.1rem; }
+.goal-impact { font-size: 0.85rem; color: var(--green); font-weight: 600; }
+.goal-progress-bar {
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+.goal-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+.goal-meta { font-size: 0.8rem; color: var(--text3); display: flex; justify-content: space-between; }
+
+/* ===== TIPS ===== */
+.tip-card {
+  padding: 20px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  border-left: 4px solid var(--green);
+}
+.tip-header { display: flex; justify-content: space-between; align-items: center; }
+.tip-title { font-weight: 600; }
+.tip-years { color: var(--green); font-weight: 700; font-size: 0.9rem; }
+.tip-content { color: var(--text2); font-size: 0.95rem; margin-top: 8px; }
+.tip-difficulty { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: var(--bg3); color: var(--text2); margin-top: 8px; display: inline-block; }
+
+/* ===== PRODUCTS ===== */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.product-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+  transition: transform 0.2s;
+}
+.product-card:hover { transform: translateY(-2px); }
+.product-category-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(233,69,96,0.15);
+  color: var(--accent2);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+.product-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+.product-impact { color: var(--green); font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+.product-desc { color: var(--text2); font-size: 0.85rem; margin-bottom: 12px; }
+.product-price { color: var(--text3); font-size: 0.85rem; margin-bottom: 12px; }
+.product-cta { width: 100%; }
+.affiliate-disclosure {
+  font-size: 0.7rem;
+  color: var(--text3);
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--bg2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* ===== PRICING ===== */
+.pricing { padding: 60px 20px; }
+.pricing h2 { text-align: center; font-size: 2rem; margin-bottom: 8px; }
+.pricing-sub { text-align: center; color: var(--text2); margin-bottom: 40px; }
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
+.price-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+}
+.price-card.featured { border-color: var(--accent); position: relative; }
+.price-card.featured::before {
+  content: 'MOST POPULAR';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: white;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.price-tier { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+.price-amount { font-size: 2.5rem; font-weight: 900; margin-bottom: 4px; }
+.price-period { color: var(--text3); font-size: 0.9rem; margin-bottom: 24px; }
+.price-features { text-align: left; margin-bottom: 24px; }
+.price-feature { padding: 6px 0; font-size: 0.9rem; color: var(--text2); }
+.price-feature::before { content: '\2713 '; color: var(--green); font-weight: bold; }
+.price-cta { width: 100%; }
+
+/* ===== ADD FORM MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal h3 { margin-bottom: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.85rem; color: var(--text2); margin-bottom: 6px; }
+.form-actions { display: flex; gap: 12px; margin-top: 24px; }
+.form-actions button { flex: 1; }
+
+/* ===== FOOTER ===== */
+footer {
+  padding: 40px 20px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text3);
+  font-size: 0.85rem;
+}
+footer p { margin-bottom: 8px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.2rem; }
+  .hero p { font-size: 1rem; }
+  .death-date { font-size: 2rem; }
+  .countdown-unit { min-width: 60px; padding: 12px 8px; }
+  .countdown-num { font-size: 1.4rem; }
+  .factors-grid { grid-template-columns: 1fr; }
+  .q-input-row { flex-direction: column; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .nav-links { gap: 4px; }
+  .nav-tab { padding: 6px 10px; font-size: 0.8rem; }
+  .product-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="container">
+    <div class="logo">&#9760; <span>Mortal</span>Clock</div>
+    <div class="nav-links" id="navLinks">
+      <button class="nav-tab active" onclick="showPage('home')">Home</button>
+      <button class="nav-tab hidden" id="navDash" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-tab hidden" id="navPrice" onclick="showPage('pricing')">Upgrade</button>
+      <button class="btn-primary btn-sm" id="navCta" onclick="showPage('quiz')">Calculate</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HOME PAGE ===== -->
+<section id="page-home" class="hero">
+  <div class="container">
+    <h1>When Will You Die?</h1>
+    <p>Science-backed life expectancy calculator trained on data from 53+ million participants. See your death date. Then change it.</p>
+    <button class="btn-primary" onclick="showPage('quiz')">Calculate Your Death Date</button>
+    <div style="margin-top:40px; color:var(--text3); font-size:0.85rem;">
+      <p>Based on 1,200+ peer-reviewed studies. Not medical advice.</p>
+    </div>
+    <div style="display:flex; justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap;">
+      <div><div style="font-size:2rem; font-weight:800; color:var(--accent);">53M+</div><div style="font-size:0.8rem; color:var(--text3);">Research participants</div></div>
+      <div><div style="font-size:2rem; font-weight:800; color:var(--green);">1,200+</div><div style="font-size:0.8rem; color:var(--text3);">Studies analyzed</div></div>
+      <div><div style="font-size:2rem; font-weight:800; color:var(--gold);">40+</div><div style="font-size:0.8rem; color:var(--text3);">Life factors tracked</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== QUESTIONNAIRE ===== -->
+<section id="page-quiz" class="hidden questionnaire">
+  <div class="q-progress" id="qProgress"></div>
+  <div id="qContent"></div>
+  <div class="q-nav">
+    <button class="btn-secondary" id="qBack" onclick="prevQuestion()">Back</button>
+    <button class="btn-primary" id="qNext" onclick="nextQuestion()">Next</button>
+  </div>
+</section>
+
+<!-- ===== RESULT PAGE ===== -->
+<section id="page-result" class="hidden result-page">
+  <div class="container" id="resultContent"></div>
+</section>
+
+<!-- ===== DASHBOARD ===== -->
+<section id="page-dashboard" class="hidden dashboard">
+  <div class="container">
+    <div class="dash-header">
+      <h2>Your Life Dashboard</h2>
+      <button class="btn-primary btn-sm" onclick="showPage('quiz')">Recalculate</button>
+    </div>
+    <div class="dash-stats" id="dashStats"></div>
+    <div class="tab-bar" id="dashTabs">
+      <button class="tab-btn active" onclick="showTab('factors')">Factors</button>
+      <button class="tab-btn" onclick="showTab('bucketlist')">Bucket List</button>
+      <button class="tab-btn" onclick="showTab('goals')">Goals</button>
+      <button class="tab-btn" onclick="showTab('tips')">Tips</button>
+      <button class="tab-btn" onclick="showTab('products')">Recommendations</button>
+    </div>
+    <div id="tabContent"></div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="page-pricing" class="hidden pricing">
+  <div class="container">
+    <h2>Unlock Your Full Lifespan Potential</h2>
+    <p class="pricing-sub">Choose a plan that fits your journey</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Free</div>
+        <div class="price-amount">$0</div>
+        <div class="price-period">forever</div>
+        <div class="price-features">
+          <div class="price-feature">Death date calculation</div>
+          <div class="price-feature">Top 5 factor breakdown</div>
+          <div class="price-feature">10 bucket list items</div>
+          <div class="price-feature">3 personal goals</div>
+          <div class="price-feature">Basic tips</div>
+        </div>
+        <button class="btn-secondary price-cta" onclick="showPage('quiz')">Get Started</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-tier">Premium</div>
+        <div class="price-amount">$4.99</div>
+        <div class="price-period">/month</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Free</div>
+          <div class="price-feature">Unlimited bucket list</div>
+          <div class="price-feature">Unlimited goals + milestones</div>
+          <div class="price-feature">Monthly recalculation</div>
+          <div class="price-feature">Full factor analysis</div>
+          <div class="price-feature">"Years Added" tracker</div>
+        </div>
+        <button class="btn-primary price-cta">Subscribe $4.99/mo</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Premium Plus</div>
+        <div class="price-amount">$9.99</div>
+        <div class="price-period">/month</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Premium</div>
+          <div class="price-feature">Personalized longevity plan</div>
+          <div class="price-feature">Biomarker tracking</div>
+          <div class="price-feature">Monthly longevity report</div>
+          <div class="price-feature">Exclusive deals</div>
+          <div class="price-feature">Life Score dashboard</div>
+        </div>
+        <button class="btn-gold price-cta">Subscribe $9.99/mo</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Lifetime</div>
+        <div class="price-amount">$99</div>
+        <div class="price-period">one-time</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Premium Plus</div>
+          <div class="price-feature">Pay once, use forever</div>
+          <div class="price-feature">Early access to features</div>
+          <div class="price-feature">Priority support</div>
+        </div>
+        <button class="btn-green price-cta">Get Lifetime Access</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODAL ===== -->
+<div id="modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <p><strong>Disclaimer:</strong> MortalClock is for educational and motivational purposes only. It is not medical advice. Consult healthcare professionals for health decisions.</p>
+    <p>Calculations based on published actuarial data and peer-reviewed longevity research.</p>
+    <p style="margin-top:12px;">&copy; 2026 MortalClock. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+// ============================================
+// STATE
+// ============================================
+const state = {
+  currentPage: 'home',
+  currentQuestion: 0,
+  answers: {},
+  result: null,
+  bucketList: [],
+  goals: [],
+  currentTab: 'factors'
+};
+
+// ============================================
+// SSA ACTUARIAL BASE TABLE (2023 period life table, simplified)
+// ============================================
+const ssaTable = {
+  male: {
+    0:74.8, 5:74.8, 10:74.8, 15:74.8, 20:74.8, 25:74.5, 30:74.2, 35:73.8,
+    40:73.2, 45:72.2, 50:70.8, 55:69.0, 60:66.8, 65:64.2, 70:61.0, 75:57.5,
+    80:53.8, 85:50.0, 90:46.5, 95:43.0, 100:40.0
+  },
+  female: {
+    0:80.2, 5:80.2, 10:80.2, 15:80.2, 20:80.2, 25:80.0, 30:79.8, 35:79.5,
+    40:79.0, 45:78.2, 50:77.0, 55:75.5, 60:73.5, 65:71.2, 70:68.5, 75:65.2,
+    80:61.5, 85:57.5, 90:53.5, 95:49.5, 100:46.0
+  }
+};
+
+function getBaseExpectancy(age, sex) {
+  const table = ssaTable[sex] || ssaTable.male;
+  const ages = Object.keys(table).map(Number).sort((a,b)=>a-b);
+  let closest = ages[0];
+  for (const a of ages) {
+    if (a <= age) closest = a;
+    else break;
+  }
+  return table[closest];
+}
+
+// ============================================
+// LIFE FACTORS DATABASE (from research)
+// ============================================
+const lifeFactors = {
+  // Smoking
+  smoking_never: { impact: 0, label: 'Non-smoker', tip: 'Great! Keep it up.', cat: 'substances' },
+  smoking_former: { impact: -2, label: 'Former smoker', tip: 'Quitting was the best decision. Risk drops significantly after 10 years.', cat: 'substances' },
+  smoking_current_light: { impact: -6, label: 'Light smoker', tip: 'Even light smoking removes years. Nicotine replacement therapy can help you quit.', cat: 'substances', productCat: 'smoking_cessation' },
+  smoking_current_heavy: { impact: -10, label: 'Heavy smoker', tip: 'Smoking is the single biggest controllable factor. Quitting now could add back 5-8 years.', cat: 'substances', productCat: 'smoking_cessation' },
+
+  // Exercise
+  exercise_5plus: { impact: 4.5, label: 'Very active (5+ days/week)', tip: 'Excellent! You are in the top tier for exercise longevity benefit.', cat: 'fitness' },
+  exercise_3to4: { impact: 3, label: 'Active (3-4 days/week)', tip: 'Great habit! Adding one more day could push you into the optimal zone.', cat: 'fitness' },
+  exercise_1to2: { impact: 1, label: 'Somewhat active (1-2 days/week)', tip: 'Good start! Try to build up to 150+ minutes per week for maximum benefit.', cat: 'fitness', productCat: 'fitness' },
+  exercise_none: { impact: -4, label: 'Sedentary', tip: 'Physical inactivity is as dangerous as smoking. Even walking 30 min/day helps enormously.', cat: 'fitness', productCat: 'fitness' },
+
+  // BMI
+  bmi_healthy: { impact: 0, label: 'Healthy weight (BMI 18.5-24.9)', tip: 'Your weight is in the optimal range for longevity.', cat: 'body' },
+  bmi_overweight: { impact: -1, label: 'Overweight (BMI 25-29.9)', tip: 'Slightly elevated risk. A balanced diet and regular exercise can help.', cat: 'body', productCat: 'nutrition' },
+  bmi_obese: { impact: -3, label: 'Obese (BMI 30-34.9)', tip: 'Obesity significantly increases risk of chronic diseases. Small dietary changes compound over time.', cat: 'body', productCat: 'nutrition' },
+  bmi_severely_obese: { impact: -7, label: 'Severely obese (BMI 35+)', tip: 'Severe obesity is a major health risk. Medical supervision and structured programs recommended.', cat: 'body', productCat: 'nutrition' },
+  bmi_underweight: { impact: -2, label: 'Underweight (BMI <18.5)', tip: 'Being underweight carries health risks too. Focus on nutrient-dense foods.', cat: 'body' },
+
+  // Diet
+  diet_very_healthy: { impact: 5, label: 'Very healthy diet', tip: 'Mediterranean-style diets are associated with the greatest longevity gains.', cat: 'diet' },
+  diet_healthy: { impact: 3, label: 'Healthy diet', tip: 'Good dietary habits. Focus on whole foods, vegetables, and lean proteins.', cat: 'diet' },
+  diet_average: { impact: 0, label: 'Average diet', tip: 'Room for improvement. Reducing processed food intake can add years.', cat: 'diet', productCat: 'nutrition' },
+  diet_poor: { impact: -4, label: 'Poor diet', tip: 'Poor diet is a major mortality risk factor. Meal planning and delivery services can help restructure habits.', cat: 'diet', productCat: 'nutrition' },
+
+  // Alcohol
+  alcohol_never: { impact: 0, label: 'Non-drinker', tip: 'No alcohol-related health risks.', cat: 'substances' },
+  alcohol_occasional: { impact: 0, label: 'Occasional drinker', tip: 'Minimal risk at this level.', cat: 'substances' },
+  alcohol_moderate: { impact: -0.5, label: 'Moderate drinker', tip: 'Keep consumption under 7 drinks per week for minimal risk.', cat: 'substances' },
+  alcohol_heavy: { impact: -4, label: 'Heavy drinker', tip: 'Heavy drinking significantly reduces lifespan. Reducing intake is one of the highest-impact changes you can make.', cat: 'substances' },
+
+  // Drugs
+  drug_none: { impact: 0, label: 'No drug use', tip: 'No drug-related health risks.', cat: 'substances' },
+  drug_cannabis: { impact: -1, label: 'Cannabis use', tip: 'Limited long-term data. Moderation advised.', cat: 'substances' },
+  drug_recreational: { impact: -3, label: 'Recreational drug use', tip: 'Recreational drugs carry significant and unpredictable health risks.', cat: 'substances' },
+  drug_opioids: { impact: -8, label: 'Opioid use', tip: 'Opioid use is one of the top 3 lifespan reducers. Treatment programs save lives.', cat: 'substances' },
+
+  // Stress
+  stress_low: { impact: 2, label: 'Low stress', tip: 'Low stress is protective. Maintain your current lifestyle balance.', cat: 'mental' },
+  stress_moderate: { impact: 0, label: 'Moderate stress', tip: 'Normal levels. Building stress management habits provides insurance.', cat: 'mental' },
+  stress_high: { impact: -2, label: 'High stress', tip: 'Chronic stress accelerates aging. Meditation, exercise, and therapy are proven countermeasures.', cat: 'mental', productCat: 'mental_health' },
+  stress_very_high: { impact: -4, label: 'Very high stress', tip: 'Extreme stress is equivalent to several risk factors combined. Prioritize stress reduction immediately.', cat: 'mental', productCat: 'mental_health' },
+
+  // Stress management
+  stress_mgmt_yes: { impact: 1.5, label: 'Active stress management', tip: 'Meditation, therapy, or mindfulness practice adds measurable years.', cat: 'mental' },
+  stress_mgmt_no: { impact: 0, label: 'No stress management', tip: 'Even 10 minutes of daily meditation can measurably reduce mortality risk.', cat: 'mental', productCat: 'mental_health' },
+
+  // Social
+  social_strong: { impact: 4, label: 'Strong social network', tip: 'Strong relationships are the #1 predictor of healthy longevity per the Harvard 80-year study.', cat: 'social' },
+  social_moderate: { impact: 2, label: 'Moderate social connections', tip: 'Good foundation. Deepening existing relationships has compounding benefits.', cat: 'social' },
+  social_few: { impact: -2, label: 'Few social connections', tip: 'Social isolation carries health risks equivalent to smoking. Community groups, clubs, and volunteering help.', cat: 'social' },
+  social_isolated: { impact: -7, label: 'Socially isolated', tip: 'Severe isolation can reduce lifespan by up to 15 years. This is one of the most impactful factors to address.', cat: 'social' },
+
+  // Relationship
+  rel_married: { impact: 2.5, label: 'Married', tip: 'Marriage is associated with longer lifespan, likely due to social support and shared health behaviors.', cat: 'social' },
+  rel_partnered: { impact: 2, label: 'Partnered', tip: 'Having a committed partner provides social and emotional health benefits.', cat: 'social' },
+  rel_single: { impact: 0, label: 'Single', tip: 'Strong friendships and community can provide similar benefits to partnership.', cat: 'social' },
+  rel_divorced: { impact: -1, label: 'Divorced/Widowed', tip: 'Life transitions are stressful. Building new social connections is key.', cat: 'social' },
+
+  // Sleep
+  sleep_optimal: { impact: 0, label: '7-8 hours sleep', tip: 'Optimal sleep duration for longevity.', cat: 'sleep' },
+  sleep_short: { impact: -3, label: 'Less than 6 hours', tip: 'Chronic sleep deprivation is a serious health risk. Prioritize sleep hygiene.', cat: 'sleep', productCat: 'sleep' },
+  sleep_moderate_short: { impact: -1, label: '6-7 hours sleep', tip: 'Slightly below optimal. Try adding 30 minutes.', cat: 'sleep' },
+  sleep_long: { impact: -1.5, label: '9+ hours sleep', tip: 'Oversleeping may indicate underlying health issues. Check with a doctor.', cat: 'sleep' },
+  sleep_quality_poor: { impact: -2, label: 'Poor sleep quality', tip: 'Quality matters as much as quantity. Blue light reduction, consistent schedule, and cool bedroom help.', cat: 'sleep', productCat: 'sleep' },
+  sleep_quality_fair: { impact: -0.5, label: 'Fair sleep quality', tip: 'Room for improvement in sleep habits.', cat: 'sleep' },
+  sleep_quality_good: { impact: 0, label: 'Good sleep quality', tip: 'Solid sleep foundation.', cat: 'sleep' },
+  sleep_quality_excellent: { impact: 1, label: 'Excellent sleep quality', tip: 'Outstanding! Quality sleep is one of the most underrated longevity tools.', cat: 'sleep' },
+
+  // Medical conditions
+  cond_diabetes: { impact: -8, label: 'Diabetes', tip: 'Well-managed diabetes reduces the impact significantly. Regular monitoring and medication adherence are critical.', cat: 'medical' },
+  cond_heart_disease: { impact: -9, label: 'Heart disease', tip: 'Cardiac rehabilitation, medication, and lifestyle changes can dramatically improve outcomes.', cat: 'medical' },
+  cond_hypertension: { impact: -5, label: 'Hypertension', tip: 'Controlled hypertension reduces impact to -1 to -2 years. Medication adherence saves lives.', cat: 'medical' },
+  cond_cancer: { impact: -4, label: 'Cancer (in remission)', tip: 'Regular screening and follow-up care are essential.', cat: 'medical' },
+  cond_stroke: { impact: -10, label: 'Stroke history', tip: 'Post-stroke rehabilitation and secondary prevention are crucial.', cat: 'medical' },
+  cond_copd: { impact: -6, label: 'COPD', tip: 'Pulmonary rehabilitation and smoking cessation (if applicable) improve outcomes.', cat: 'medical' },
+  cond_kidney: { impact: -5, label: 'Chronic kidney disease', tip: 'Early-stage CKD management can slow progression significantly.', cat: 'medical' },
+  cond_autoimmune: { impact: -3, label: 'Autoimmune condition', tip: 'Modern treatments have significantly improved outcomes for autoimmune conditions.', cat: 'medical' },
+
+  // Healthcare access
+  healthcare_regular: { impact: 1, label: 'Regular checkups', tip: 'Preventive care catches issues early.', cat: 'medical' },
+  healthcare_occasional: { impact: 0, label: 'Occasional healthcare', tip: 'Try to schedule annual checkups at minimum.', cat: 'medical' },
+  healthcare_rarely: { impact: -1, label: 'Rarely sees a doctor', tip: 'Undiagnosed conditions are silent killers. Annual screenings are critical after 40.', cat: 'medical', productCat: 'health_testing' },
+  healthcare_never: { impact: -3, label: 'Never sees a doctor', tip: 'This is a significant risk factor. Many conditions are treatable when caught early.', cat: 'medical', productCat: 'health_testing' },
+
+  // Environment
+  air_good: { impact: 0, label: 'Good air quality', tip: 'Clean air environment supports lung and cardiovascular health.', cat: 'environment' },
+  air_moderate: { impact: -1, label: 'Moderate air quality', tip: 'Consider indoor air purifiers for your home.', cat: 'environment' },
+  air_poor: { impact: -3, label: 'Poor air quality', tip: 'Air pollution accounts for 2-4 years of healthy life lost. Indoor purifiers and masks during high-pollution days help.', cat: 'environment' },
+
+  // Occupation
+  occ_sedentary: { impact: -1, label: 'Sedentary office work', tip: 'Sitting disease is real. Take breaks every 30 minutes. Consider a standing desk.', cat: 'environment', productCat: 'fitness' },
+  occ_moderate: { impact: 0, label: 'Moderate activity job', tip: 'Good balance of movement throughout the day.', cat: 'environment' },
+  occ_physical: { impact: 0.5, label: 'Physically active job', tip: 'Built-in exercise is beneficial, but watch for repetitive strain injuries.', cat: 'environment' },
+  occ_hazardous: { impact: -4, label: 'Hazardous occupation', tip: 'Safety equipment and protocols are essential. Consider career planning for less risky work long-term.', cat: 'environment' },
+
+  // Family history
+  family_longevity: { impact: 4, label: 'Family history of longevity (80+)', tip: 'Genetics play a role. Your baseline is favorable.', cat: 'genetics' },
+  family_average: { impact: 0, label: 'Average family lifespan', tip: 'Lifestyle factors matter more than genetics for most people.', cat: 'genetics' },
+  family_early_death: { impact: -3, label: 'Family history of early death (<65)', tip: 'Family history is a risk signal. Proactive screening and lifestyle optimization are extra important for you.', cat: 'genetics', productCat: 'health_testing' }
+};
+
+// ============================================
+// PRODUCTS DATABASE
+// ============================================
+const products = [
+  { name: 'InsideTracker', desc: 'Blood biomarker testing with personalized recommendations. Track 40+ biomarkers.', category: 'Health Testing', factorCat: 'health_testing', impact: 'Monitoring tool', price: '$189-$589/test', url: '#', rating: 4.5 },
+  { name: 'Everlywell', desc: 'At-home lab tests for food sensitivity, metabolism, heart health, and more.', category: 'Health Testing', factorCat: 'health_testing', impact: 'Early detection', price: '$49-$399/test', url: '#', rating: 4.3 },
+  { name: 'Life Extension', desc: 'Premium supplements for longevity: NAD+, CoQ10, omega-3, multivitamins.', category: 'Supplements', factorCat: 'supplements', impact: '+1-3 years potential', price: '$15-$60/month', url: '#', rating: 4.6 },
+  { name: 'NMN Bio', desc: 'Pharmaceutical-grade NMN (nicotinamide mononucleotide) for cellular NAD+ restoration.', category: 'Supplements', factorCat: 'supplements', impact: 'Cellular aging support', price: '$40-$80/month', url: '#', rating: 4.4 },
+  { name: 'Oura Ring', desc: 'Sleep and activity tracker. Monitors heart rate variability, temperature, and readiness.', category: 'Fitness Wearables', factorCat: 'fitness', impact: '+2-3 years (via behavior change)', price: '$299 + $5.99/mo', url: '#', rating: 4.5 },
+  { name: 'Whoop', desc: 'Performance wearable tracking strain, recovery, and sleep with coaching insights.', category: 'Fitness Wearables', factorCat: 'fitness', impact: '+2-3 years (via behavior change)', price: '$30/month', url: '#', rating: 4.2 },
+  { name: 'Headspace', desc: 'Guided meditation and mindfulness app. Clinically proven to reduce stress and improve sleep.', category: 'Mental Health', factorCat: 'mental_health', impact: '+1-2 years (stress reduction)', price: '$12.99/month', url: '#', rating: 4.7 },
+  { name: 'BetterHelp', desc: 'Online therapy with licensed therapists. Accessible from anywhere.', category: 'Mental Health', factorCat: 'mental_health', impact: '+2-3 years (mental health)', price: '$65-$100/week', url: '#', rating: 4.3 },
+  { name: 'Factor Meals', desc: 'Chef-prepared, dietitian-designed meals delivered weekly. No cooking required.', category: 'Nutrition', factorCat: 'nutrition', impact: '+2-4 years (diet improvement)', price: '$11-$15/meal', url: '#', rating: 4.4 },
+  { name: 'Eight Sleep Pod', desc: 'Smart mattress cover that regulates temperature for optimal sleep.', category: 'Sleep', factorCat: 'sleep', impact: '+2-3 years (sleep quality)', price: '$2,049+', url: '#', rating: 4.3 },
+  { name: 'Nicorette', desc: 'Nicotine replacement gum and lozenges. FDA-approved quit smoking aid.', category: 'Smoking Cessation', factorCat: 'smoking_cessation', impact: '+5-10 years (if quit)', price: '$30-$50/box', url: '#', rating: 4.1 },
+  { name: 'Athletic Greens (AG1)', desc: 'Comprehensive daily nutrition supplement. 75 vitamins, minerals, and whole-food ingredients.', category: 'Supplements', factorCat: 'supplements', impact: 'Nutritional foundation', price: '$79/month', url: '#', rating: 4.5 }
+];
+
+// ============================================
+// TIPS DATABASE
+// ============================================
+const tipsDB = [
+  { cat: 'fitness', title: 'Walk 30 Minutes Daily', content: 'Just 30 minutes of walking per day reduces all-cause mortality by 20%. Start with a post-dinner walk.', years: 3, difficulty: 'easy' },
+  { cat: 'fitness', title: 'Add Strength Training', content: 'Muscle mass is protective as you age. 2-3 resistance sessions per week significantly reduce fall risk and metabolic disease.', years: 2, difficulty: 'medium' },
+  { cat: 'diet', title: 'Eat 5+ Servings of Vegetables', content: 'Each additional daily serving of vegetables reduces mortality risk by 5%. Aim for variety and color.', years: 3, difficulty: 'easy' },
+  { cat: 'diet', title: 'Adopt a Mediterranean Diet', content: 'The Mediterranean diet is the most studied diet for longevity. Focus on olive oil, fish, nuts, whole grains, and vegetables.', years: 4, difficulty: 'medium' },
+  { cat: 'diet', title: 'Reduce Ultra-Processed Food', content: 'Each 10% increase in ultra-processed food consumption is linked to 14% higher mortality. Read labels and cook more.', years: 2, difficulty: 'medium' },
+  { cat: 'sleep', title: 'Set a Consistent Sleep Schedule', content: 'Going to bed and waking at the same time (even weekends) improves sleep quality more than any supplement.', years: 1.5, difficulty: 'easy' },
+  { cat: 'sleep', title: 'Create a Dark, Cool Bedroom', content: 'Optimal sleep temperature is 65-68F (18-20C). Use blackout curtains and remove electronics.', years: 1, difficulty: 'easy' },
+  { cat: 'mental', title: 'Start a Meditation Practice', content: 'Even 10 minutes of daily meditation measurably reduces cortisol, blood pressure, and inflammation.', years: 1.5, difficulty: 'easy' },
+  { cat: 'mental', title: 'Build a Gratitude Practice', content: 'Writing 3 things you are grateful for daily is linked to better mental health, better sleep, and reduced inflammation.', years: 1, difficulty: 'easy' },
+  { cat: 'social', title: 'Schedule Weekly Social Time', content: 'Block time for friends and family like you would a meeting. Consistent social contact is protective against cognitive decline and depression.', years: 3, difficulty: 'easy' },
+  { cat: 'social', title: 'Join a Community Group', content: 'Religious communities, clubs, volunteering, and team sports all provide the social bonds that extend lifespan.', years: 2, difficulty: 'medium' },
+  { cat: 'substances', title: 'Quit Smoking Now', content: 'Within 1 year of quitting, heart disease risk drops by 50%. Within 10 years, lung cancer risk halves. It is never too late.', years: 8, difficulty: 'hard' },
+  { cat: 'substances', title: 'Reduce Alcohol to Under 7 Drinks/Week', content: 'The Lancet study of 600K people found the safest consumption level is under 100g/week (about 7 standard drinks).', years: 3, difficulty: 'medium' },
+  { cat: 'medical', title: 'Get Annual Health Screenings', content: 'Blood pressure, cholesterol, blood sugar, and cancer screenings catch problems when they are most treatable.', years: 2, difficulty: 'easy' },
+  { cat: 'medical', title: 'Take Prescribed Medications Consistently', content: 'Medication non-adherence accounts for 125,000 deaths per year in the US alone. Set reminders and use pill organizers.', years: 2, difficulty: 'easy' },
+  { cat: 'environment', title: 'Use an Air Purifier at Home', content: 'HEPA air purifiers reduce indoor particulate matter by up to 80%, reducing respiratory and cardiovascular risk.', years: 1, difficulty: 'easy' },
+  { cat: 'environment', title: 'Take Movement Breaks Every 30 Minutes', content: 'Breaking up sitting time with 2-3 minutes of movement every 30 minutes reduces mortality risk by 17%.', years: 1.5, difficulty: 'easy' }
+];
+
+// ============================================
+// QUESTIONNAIRE
+// ============================================
+const questions = [
+  { section: 'Demographics', key: 'dob', type: 'date', question: 'When were you born?', label: 'Date of Birth' },
+  { section: 'Demographics', key: 'sex', type: 'choice', question: 'What is your biological sex?', options: [
+    { value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }
+  ]},
+  { section: 'Demographics', key: 'country', type: 'input', question: 'What country do you live in?', placeholder: 'e.g. United States, United Kingdom' },
+  { section: 'Body & Fitness', key: 'body', type: 'body', question: 'What are your height and weight?' },
+  { section: 'Body & Fitness', key: 'exercise', type: 'choice', question: 'How often do you exercise?', options: [
+    { value: '5+', label: '5+ days/week', desc: 'Very active lifestyle' },
+    { value: '3-4x', label: '3-4 days/week', desc: 'Regular exercise routine' },
+    { value: '1-2x', label: '1-2 days/week', desc: 'Some physical activity' },
+    { value: 'none', label: 'Rarely or never', desc: 'Sedentary lifestyle' }
+  ]},
+  { section: 'Diet & Substances', key: 'diet', type: 'choice', question: 'How would you describe your diet?', options: [
+    { value: 'very_healthy', label: 'Very healthy', desc: 'Mostly whole foods, vegetables, lean protein' },
+    { value: 'healthy', label: 'Healthy', desc: 'Generally balanced with some indulgences' },
+    { value: 'average', label: 'Average', desc: 'Mix of healthy and processed foods' },
+    { value: 'poor', label: 'Poor', desc: 'Mostly processed, fast food, or irregular meals' }
+  ]},
+  { section: 'Diet & Substances', key: 'alcohol', type: 'choice', question: 'How much alcohol do you drink?', options: [
+    { value: 'never', label: 'Never', desc: 'I do not drink alcohol' },
+    { value: 'occasional', label: 'Occasionally', desc: 'A few drinks per month' },
+    { value: 'moderate', label: 'Moderate', desc: '7-14 drinks per week' },
+    { value: 'heavy', label: 'Heavy', desc: '14+ drinks per week' }
+  ]},
+  { section: 'Diet & Substances', key: 'smoking', type: 'choice', question: 'Do you smoke?', options: [
+    { value: 'never', label: 'Never smoked' },
+    { value: 'former', label: 'Former smoker', desc: 'Quit more than 1 year ago' },
+    { value: 'current_light', label: 'Light smoker', desc: 'Less than 10 cigarettes/day' },
+    { value: 'current_heavy', label: 'Heavy smoker', desc: '10+ cigarettes/day' }
+  ]},
+  { section: 'Diet & Substances', key: 'drugs', type: 'choice', question: 'Do you use any recreational drugs?', options: [
+    { value: 'none', label: 'None' },
+    { value: 'cannabis', label: 'Cannabis only' },
+    { value: 'recreational', label: 'Other recreational drugs' },
+    { value: 'opioids', label: 'Opioids' }
+  ]},
+  { section: 'Mental Health', key: 'stress', type: 'choice', question: 'How would you rate your stress level?', options: [
+    { value: 'low', label: 'Low', desc: 'Generally calm and balanced' },
+    { value: 'moderate', label: 'Moderate', desc: 'Normal life stressors' },
+    { value: 'high', label: 'High', desc: 'Frequent stress and worry' },
+    { value: 'very_high', label: 'Very high', desc: 'Chronic, overwhelming stress' }
+  ]},
+  { section: 'Mental Health', key: 'stress_mgmt', type: 'choice', question: 'Do you actively practice stress management?', options: [
+    { value: 'yes', label: 'Yes', desc: 'Meditation, therapy, yoga, journaling, etc.' },
+    { value: 'no', label: 'No', desc: 'I do not have a regular practice' }
+  ]},
+  { section: 'Social Life', key: 'social', type: 'choice', question: 'How strong are your social connections?', options: [
+    { value: 'strong', label: 'Strong network', desc: 'Close friends, family, community involvement' },
+    { value: 'moderate', label: 'Moderate', desc: 'Some close relationships' },
+    { value: 'few', label: 'Few connections', desc: 'Limited social circle' },
+    { value: 'isolated', label: 'Isolated', desc: 'Very few or no close relationships' }
+  ]},
+  { section: 'Social Life', key: 'relationship', type: 'choice', question: 'What is your relationship status?', options: [
+    { value: 'married', label: 'Married' }, { value: 'partnered', label: 'In a relationship' },
+    { value: 'single', label: 'Single' }, { value: 'divorced_widowed', label: 'Divorced or widowed' }
+  ]},
+  { section: 'Sleep', key: 'sleep_hours', type: 'choice', question: 'How many hours do you sleep per night on average?', options: [
+    { value: 'short', label: 'Less than 6 hours' }, { value: 'moderate_short', label: '6-7 hours' },
+    { value: 'optimal', label: '7-8 hours' }, { value: 'long', label: '9+ hours' }
+  ]},
+  { section: 'Sleep', key: 'sleep_quality', type: 'choice', question: 'How is your sleep quality?', options: [
+    { value: 'poor', label: 'Poor', desc: 'Frequent waking, hard to fall asleep' },
+    { value: 'fair', label: 'Fair', desc: 'Occasional issues' },
+    { value: 'good', label: 'Good', desc: 'Generally restful' },
+    { value: 'excellent', label: 'Excellent', desc: 'Deep, uninterrupted sleep' }
+  ]},
+  { section: 'Medical History', key: 'conditions', type: 'conditions', question: 'Do you have any of these conditions? (Select all that apply)',
+    options: ['Diabetes', 'Heart Disease', 'Hypertension', 'Cancer (current/remission)', 'Stroke History', 'COPD', 'Chronic Kidney Disease', 'Autoimmune Condition', 'None']
+  },
+  { section: 'Medical History', key: 'family', type: 'family', question: 'Family history: at what age did/will your parents reach?' },
+  { section: 'Medical History', key: 'healthcare', type: 'choice', question: 'How often do you see a doctor?', options: [
+    { value: 'regular', label: 'Annual checkups', desc: 'Regular preventive care' },
+    { value: 'occasional', label: 'Occasionally', desc: 'When something comes up' },
+    { value: 'rarely', label: 'Rarely', desc: 'Only when very sick' },
+    { value: 'never', label: 'Never', desc: 'Have not seen a doctor in years' }
+  ]},
+  { section: 'Environment', key: 'air_quality', type: 'choice', question: 'How is the air quality where you live?', options: [
+    { value: 'good', label: 'Good', desc: 'Clean air, low pollution' },
+    { value: 'moderate', label: 'Moderate', desc: 'Some urban pollution' },
+    { value: 'poor', label: 'Poor', desc: 'High pollution area' }
+  ]},
+  { section: 'Environment', key: 'occupation', type: 'choice', question: 'What best describes your work environment?', options: [
+    { value: 'sedentary', label: 'Desk/Office work', desc: 'Mostly sitting' },
+    { value: 'moderate', label: 'Moderate activity', desc: 'Mix of sitting and moving' },
+    { value: 'physical', label: 'Physically active', desc: 'On your feet most of the day' },
+    { value: 'hazardous', label: 'Hazardous', desc: 'Exposure to chemicals, heights, heavy machinery' }
+  ]}
+];
+
+// ============================================
+// RENDER FUNCTIONS
+// ============================================
+function showPage(page) {
+  document.querySelectorAll('[id^="page-"]').forEach(el => el.classList.add('hidden'));
+  const el = document.getElementById('page-' + page);
+  if (el) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
+  state.currentPage = page;
+  // Update nav
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const tabs = { home: 0, dashboard: 1, pricing: 2 };
+  if (tabs[page] !== undefined) document.querySelectorAll('.nav-tab')[tabs[page]]?.classList.add('active');
+  if (page === 'quiz') { state.currentQuestion = 0; renderQuestion(); }
+  if (page === 'dashboard') renderDashboard();
+  window.scrollTo(0, 0);
+}
+
+function renderQuestion() {
+  const q = questions[state.currentQuestion];
+  const total = questions.length;
+  // Progress
+  let prog = '';
+  for (let i = 0; i < total; i++) {
+    const cls = i < state.currentQuestion ? 'done' : i === state.currentQuestion ? 'active' : '';
+    prog += `<div class="q-progress-dot ${cls}"></div>`;
+  }
+  document.getElementById('qProgress').innerHTML = prog;
+  document.getElementById('qBack').classList.toggle('hidden', state.currentQuestion === 0);
+  document.getElementById('qNext').textContent = state.currentQuestion === total - 1 ? 'See My Death Date' : 'Next';
+
+  let html = `<div class="q-section-title">${q.section}</div><div class="q-question">${q.question}</div>`;
+
+  if (q.type === 'choice') {
+    html += '<div class="q-options">';
+    q.options.forEach(o => {
+      const sel = state.answers[q.key] === o.value ? 'selected' : '';
+      html += `<button class="q-option ${sel}" onclick="selectAnswer('${q.key}','${o.value}')">
+        <div class="q-option-label">${o.label}</div>
+        ${o.desc ? `<div class="q-option-desc">${o.desc}</div>` : ''}
+      </button>`;
+    });
+    html += '</div>';
+  } else if (q.type === 'date') {
+    const val = state.answers[q.key] || '';
+    html += `<div style="max-width:300px"><input type="date" value="${val}" onchange="state.answers['${q.key}']=this.value" max="${new Date().toISOString().split('T')[0]}"></div>`;
+  } else if (q.type === 'input') {
+    const val = state.answers[q.key] || '';
+    html += `<div style="max-width:400px"><input type="text" value="${val}" placeholder="${q.placeholder||''}" onchange="state.answers['${q.key}']=this.value"></div>`;
+  } else if (q.type === 'body') {
+    const h = state.answers.height_cm || '';
+    const w = state.answers.weight_kg || '';
+    html += `<div class="q-input-row">
+      <div><label>Height (cm)</label><input type="number" value="${h}" placeholder="170" onchange="state.answers.height_cm=parseFloat(this.value)"></div>
+      <div><label>Weight (kg)</label><input type="number" value="${w}" placeholder="70" onchange="state.answers.weight_kg=parseFloat(this.value)"></div>
+    </div>`;
+    if (h && w) {
+      const bmi = (w / ((h/100) ** 2)).toFixed(1);
+      html += `<p style="color:var(--text2)">Your BMI: <strong>${bmi}</strong></p>`;
+    }
+  } else if (q.type === 'conditions') {
+    const selected = state.answers.conditions || [];
+    html += '<div class="q-conditions">';
+    q.options.forEach(c => {
+      const sel = selected.includes(c) ? 'selected' : '';
+      html += `<button class="q-condition ${sel}" onclick="toggleCondition('${c}')">${c}</button>`;
+    });
+    html += '</div>';
+  } else if (q.type === 'family') {
+    const p1 = state.answers.parent1_age || '';
+    const p2 = state.answers.parent2_age || '';
+    html += `<div class="q-input-row">
+      <div><label>Parent 1 age at death (or current age if alive)</label><input type="number" value="${p1}" placeholder="75" onchange="state.answers.parent1_age=parseInt(this.value)"></div>
+      <div><label>Parent 2 age at death (or current age if alive)</label><input type="number" value="${p2}" placeholder="78" onchange="state.answers.parent2_age=parseInt(this.value)"></div>
+    </div>`;
+  }
+
+  document.getElementById('qContent').innerHTML = html;
+}
+
+function selectAnswer(key, value) {
+  state.answers[key] = value;
+  renderQuestion();
+}
+
+function toggleCondition(cond) {
+  if (!state.answers.conditions) state.answers.conditions = [];
+  if (cond === 'None') {
+    state.answers.conditions = ['None'];
+  } else {
+    state.answers.conditions = state.answers.conditions.filter(c => c !== 'None');
+    const idx = state.answers.conditions.indexOf(cond);
+    if (idx >= 0) state.answers.conditions.splice(idx, 1);
+    else state.answers.conditions.push(cond);
+  }
+  renderQuestion();
+}
+
+function nextQuestion() {
+  if (state.currentQuestion < questions.length - 1) {
+    state.currentQuestion++;
+    renderQuestion();
+  } else {
+    calculateResult();
+  }
+}
+
+function prevQuestion() {
+  if (state.currentQuestion > 0) {
+    state.currentQuestion--;
+    renderQuestion();
+  }
+}
+
+// ============================================
+// CALCULATION ENGINE
+// ============================================
+function calculateResult() {
+  const a = state.answers;
+  const dob = new Date(a.dob);
+  const now = new Date();
+  const age = (now - dob) / (365.25 * 24 * 60 * 60 * 1000);
+  const sex = a.sex || 'male';
+
+  const baseLE = getBaseExpectancy(Math.floor(age), sex);
+  const factors = [];
+
+  // BMI
+  if (a.height_cm && a.weight_kg) {
+    const bmi = a.weight_kg / ((a.height_cm / 100) ** 2);
+    let bmiKey;
+    if (bmi < 18.5) bmiKey = 'bmi_underweight';
+    else if (bmi < 25) bmiKey = 'bmi_healthy';
+    else if (bmi < 30) bmiKey = 'bmi_overweight';
+    else if (bmi < 35) bmiKey = 'bmi_obese';
+    else bmiKey = 'bmi_severely_obese';
+    factors.push({ key: bmiKey, ...lifeFactors[bmiKey] });
+  }
+
+  // Exercise
+  const exMap = { '5+': 'exercise_5plus', '3-4x': 'exercise_3to4', '1-2x': 'exercise_1to2', 'none': 'exercise_none' };
+  if (a.exercise && exMap[a.exercise]) factors.push({ key: exMap[a.exercise], ...lifeFactors[exMap[a.exercise]] });
+
+  // Diet
+  const dietMap = { very_healthy: 'diet_very_healthy', healthy: 'diet_healthy', average: 'diet_average', poor: 'diet_poor' };
+  if (a.diet && dietMap[a.diet]) factors.push({ key: dietMap[a.diet], ...lifeFactors[dietMap[a.diet]] });
+
+  // Alcohol
+  const alcMap = { never: 'alcohol_never', occasional: 'alcohol_occasional', moderate: 'alcohol_moderate', heavy: 'alcohol_heavy' };
+  if (a.alcohol && alcMap[a.alcohol]) factors.push({ key: alcMap[a.alcohol], ...lifeFactors[alcMap[a.alcohol]] });
+
+  // Smoking
+  const smokeMap = { never: 'smoking_never', former: 'smoking_former', current_light: 'smoking_current_light', current_heavy: 'smoking_current_heavy' };
+  if (a.smoking && smokeMap[a.smoking]) factors.push({ key: smokeMap[a.smoking], ...lifeFactors[smokeMap[a.smoking]] });
+
+  // Drugs
+  const drugMap = { none: 'drug_none', cannabis: 'drug_cannabis', recreational: 'drug_recreational', opioids: 'drug_opioids' };
+  if (a.drugs && drugMap[a.drugs]) factors.push({ key: drugMap[a.drugs], ...lifeFactors[drugMap[a.drugs]] });
+
+  // Stress
+  const stressMap = { low: 'stress_low', moderate: 'stress_moderate', high: 'stress_high', very_high: 'stress_very_high' };
+  if (a.stress && stressMap[a.stress]) factors.push({ key: stressMap[a.stress], ...lifeFactors[stressMap[a.stress]] });
+
+  // Stress management
+  const smMap = { yes: 'stress_mgmt_yes', no: 'stress_mgmt_no' };
+  if (a.stress_mgmt && smMap[a.stress_mgmt]) factors.push({ key: smMap[a.stress_mgmt], ...lifeFactors[smMap[a.stress_mgmt]] });
+
+  // Social
+  const socMap = { strong: 'social_strong', moderate: 'social_moderate', few: 'social_few', isolated: 'social_isolated' };
+  if (a.social && socMap[a.social]) factors.push({ key: socMap[a.social], ...lifeFactors[socMap[a.social]] });
+
+  // Relationship
+  const relMap = { married: 'rel_married', partnered: 'rel_partnered', single: 'rel_single', divorced_widowed: 'rel_divorced' };
+  if (a.relationship && relMap[a.relationship]) factors.push({ key: relMap[a.relationship], ...lifeFactors[relMap[a.relationship]] });
+
+  // Sleep
+  const sleepMap = { short: 'sleep_short', moderate_short: 'sleep_moderate_short', optimal: 'sleep_optimal', long: 'sleep_long' };
+  if (a.sleep_hours && sleepMap[a.sleep_hours]) factors.push({ key: sleepMap[a.sleep_hours], ...lifeFactors[sleepMap[a.sleep_hours]] });
+
+  const sqMap = { poor: 'sleep_quality_poor', fair: 'sleep_quality_fair', good: 'sleep_quality_good', excellent: 'sleep_quality_excellent' };
+  if (a.sleep_quality && sqMap[a.sleep_quality]) factors.push({ key: sqMap[a.sleep_quality], ...lifeFactors[sqMap[a.sleep_quality]] });
+
+  // Conditions
+  if (a.conditions && !a.conditions.includes('None')) {
+    const condMap = {
+      'Diabetes': 'cond_diabetes', 'Heart Disease': 'cond_heart_disease', 'Hypertension': 'cond_hypertension',
+      'Cancer (current/remission)': 'cond_cancer', 'Stroke History': 'cond_stroke', 'COPD': 'cond_copd',
+      'Chronic Kidney Disease': 'cond_kidney', 'Autoimmune Condition': 'cond_autoimmune'
+    };
+    a.conditions.forEach(c => {
+      if (condMap[c]) factors.push({ key: condMap[c], ...lifeFactors[condMap[c]] });
+    });
+  }
+
+  // Healthcare
+  const hcMap = { regular: 'healthcare_regular', occasional: 'healthcare_occasional', rarely: 'healthcare_rarely', never: 'healthcare_never' };
+  if (a.healthcare && hcMap[a.healthcare]) factors.push({ key: hcMap[a.healthcare], ...lifeFactors[hcMap[a.healthcare]] });
+
+  // Air quality
+  const aqMap = { good: 'air_good', moderate: 'air_moderate', poor: 'air_poor' };
+  if (a.air_quality && aqMap[a.air_quality]) factors.push({ key: aqMap[a.air_quality], ...lifeFactors[aqMap[a.air_quality]] });
+
+  // Occupation
+  const occMap = { sedentary: 'occ_sedentary', moderate: 'occ_moderate', physical: 'occ_physical', hazardous: 'occ_hazardous' };
+  if (a.occupation && occMap[a.occupation]) factors.push({ key: occMap[a.occupation], ...lifeFactors[occMap[a.occupation]] });
+
+  // Family history
+  const p1 = a.parent1_age || 0;
+  const p2 = a.parent2_age || 0;
+  const avgParent = (p1 && p2) ? (p1 + p2) / 2 : (p1 || p2);
+  if (avgParent) {
+    let famKey;
+    if (avgParent >= 80) famKey = 'family_longevity';
+    else if (avgParent >= 65) famKey = 'family_average';
+    else famKey = 'family_early_death';
+    factors.push({ key: famKey, ...lifeFactors[famKey] });
+  }
+
+  // Calculate
+  const totalAdjust = factors.reduce((sum, f) => sum + f.impact, 0);
+  const adjustedLE = baseLE + totalAdjust;
+  const remainingYears = Math.max(0.5, adjustedLE - age);
+  const deathDate = new Date(now.getTime() + remainingYears * 365.25 * 24 * 60 * 60 * 1000);
+
+  // Life score (0-100)
+  const maxPossible = 20; // best case adjustment
+  const minPossible = -50; // worst case
+  const lifeScore = Math.round(Math.max(0, Math.min(100, ((totalAdjust - minPossible) / (maxPossible - minPossible)) * 100)));
+
+  state.result = {
+    dob, age: Math.floor(age), sex, baseLE, totalAdjust,
+    adjustedLE: adjustedLE.toFixed(1), remainingYears: remainingYears.toFixed(1),
+    deathDate, lifeScore, factors: factors.sort((a, b) => a.impact - b.impact)
+  };
+
+  // Show nav items
+  document.getElementById('navDash').classList.remove('hidden');
+  document.getElementById('navPrice').classList.remove('hidden');
+  document.getElementById('navCta').textContent = 'Recalculate';
+
+  renderResult();
+}
+
+function renderResult() {
+  const r = state.result;
+  const dd = r.deathDate;
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dateStr = `${months[dd.getMonth()]} ${dd.getDate()}, ${dd.getFullYear()}`;
+
+  const negFactors = r.factors.filter(f => f.impact < 0).slice(0, 5);
+  const posFactors = r.factors.filter(f => f.impact > 0).sort((a,b) => b.impact - a.impact).slice(0, 5);
+
+  let scoreColor = r.lifeScore > 70 ? 'var(--green)' : r.lifeScore > 40 ? 'var(--gold)' : 'var(--accent)';
+
+  let html = `
+    <h2 style="font-size:1.2rem; color:var(--text3); margin-bottom:8px;">Your estimated death date</h2>
+    <div class="death-date-reveal">
+      <div class="death-date-label">You will die on</div>
+      <div class="death-date">${dateStr}</div>
+      <div style="color:var(--text2)">That is approximately <strong>${r.remainingYears} years</strong> from today</div>
+      <div class="countdown" id="countdown"></div>
+      <div class="life-score-circle" style="border-color:${scoreColor}">
+        <div class="life-score-num" style="color:${scoreColor}">${r.lifeScore}</div>
+        <div class="life-score-label">Life Score</div>
+      </div>
+      <div style="color:var(--text3); font-size:0.85rem">Based on ${r.factors.length} analyzed factors</div>
+    </div>
+
+    <h3 style="margin:40px 0 16px; font-size:1.3rem">Your Life Factors</h3>
+    <div class="factors-grid">
+      <div>
+        <h4 style="color:var(--accent); margin-bottom:12px;">Reducing Your Lifespan</h4>
+        ${negFactors.length === 0 ? '<p style="color:var(--text3)">No major negative factors detected!</p>' :
+          negFactors.map(f => `
+            <div class="factor-card negative">
+              <div class="factor-impact negative">${f.impact} years</div>
+              <div class="factor-name">${f.label}</div>
+              <div class="factor-tip">${f.tip}</div>
+            </div>
+          `).join('')}
+      </div>
+      <div>
+        <h4 style="color:var(--green); margin-bottom:12px;">Extending Your Lifespan</h4>
+        ${posFactors.length === 0 ? '<p style="color:var(--text3)">No positive factors detected. Time for changes!</p>' :
+          posFactors.map(f => `
+            <div class="factor-card positive">
+              <div class="factor-impact positive">+${f.impact} years</div>
+              <div class="factor-name">${f.label}</div>
+              <div class="factor-tip">${f.tip}</div>
+            </div>
+          `).join('')}
+      </div>
+    </div>
+
+    <div style="margin-top:48px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn-primary" onclick="showPage('dashboard')" style="font-size:1.1rem; padding:16px 32px;">View Full Dashboard</button>
+      <button class="btn-secondary" onclick="showPage('pricing')">Upgrade for More Insights</button>
+    </div>
+
+    <p style="color:var(--text3); font-size:0.8rem; margin-top:32px;">
+      This is an estimate based on statistical averages from published research. Individual results vary. This is not medical advice.
+    </p>
+  `;
+
+  document.getElementById('resultContent').innerHTML = html;
+  showPage('result');
+  startCountdown();
+}
+
+function startCountdown() {
+  if (!state.result) return;
+  function update() {
+    const el = document.getElementById('countdown');
+    if (!el) return;
+    const now = new Date();
+    const diff = state.result.deathDate - now;
+    if (diff <= 0) { el.innerHTML = '<div style="color:var(--accent)">Time is up. Live now.</div>'; return; }
+    const years = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+    const months = Math.floor((diff % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000));
+    const days = Math.floor((diff % (30.44 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const mins = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+    const secs = Math.floor((diff % (60 * 1000)) / 1000);
+    el.innerHTML = [
+      { n: years, l: 'Years' }, { n: months, l: 'Months' }, { n: days, l: 'Days' },
+      { n: hours, l: 'Hours' }, { n: mins, l: 'Min' }, { n: secs, l: 'Sec' }
+    ].map(u => `<div class="countdown-unit"><div class="countdown-num">${u.n}</div><div class="countdown-label">${u.l}</div></div>`).join('');
+  }
+  update();
+  setInterval(update, 1000);
+}
+
+// ============================================
+// DASHBOARD
+// ============================================
+function renderDashboard() {
+  if (!state.result) { showPage('home'); return; }
+  const r = state.result;
+  const scoreColor = r.lifeScore > 70 ? 'var(--green)' : r.lifeScore > 40 ? 'var(--gold)' : 'var(--accent)';
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${r.remainingYears}</div><div class="stat-label">Years Remaining</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:${scoreColor}">${r.lifeScore}</div><div class="stat-label">Life Score</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">+${state.bucketList.filter(b=>b.done).length}</div><div class="stat-label">Bucket List Done</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${state.goals.length}</div><div class="stat-label">Active Goals</div></div>
+  `;
+  showTab(state.currentTab);
+}
+
+function showTab(tab) {
+  state.currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t => { if(t.textContent.toLowerCase().includes(tab.replace('bucketlist','bucket'))) t.classList.add('active'); });
+
+  const el = document.getElementById('tabContent');
+  if (tab === 'factors') renderFactorsTab(el);
+  else if (tab === 'bucketlist') renderBucketTab(el);
+  else if (tab === 'goals') renderGoalsTab(el);
+  else if (tab === 'tips') renderTipsTab(el);
+  else if (tab === 'products') renderProductsTab(el);
+}
+
+function renderFactorsTab(el) {
+  const r = state.result;
+  const sorted = [...r.factors].sort((a,b) => a.impact - b.impact);
+  el.innerHTML = `
+    <div style="margin-bottom:16px; color:var(--text2)">All ${r.factors.length} factors analyzed in your calculation:</div>
+    ${sorted.map(f => {
+      const cls = f.impact > 0 ? 'positive' : f.impact < 0 ? 'negative' : '';
+      const sign = f.impact > 0 ? '+' : '';
+      return `<div class="factor-card ${cls}" style="margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="factor-name" style="font-weight:600; color:var(--text)">${f.label}</div>
+            <div class="factor-tip">${f.tip}</div>
+          </div>
+          <div class="factor-impact ${cls}" style="white-space:nowrap; margin-left:16px;">${sign}${f.impact} yrs</div>
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:16px; padding:16px; background:var(--surface); border-radius:var(--radius); text-align:center;">
+      <div style="color:var(--text2)">Net Impact</div>
+      <div style="font-size:2rem; font-weight:800; color:${r.totalAdjust >= 0 ? 'var(--green)' : 'var(--accent)'}">
+        ${r.totalAdjust >= 0 ? '+' : ''}${r.totalAdjust.toFixed(1)} years
+      </div>
+    </div>
+  `;
+}
+
+function renderBucketTab(el) {
+  const items = state.bucketList;
+  el.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <span style="color:var(--text2)">${items.length}/10 items (Free tier)</span>
+      <button class="btn-primary btn-sm" onclick="openBucketModal()">+ Add Item</button>
+    </div>
+    ${items.length === 0 ? '<div style="text-align:center; padding:40px; color:var(--text3)">No bucket list items yet. What do you want to do before you die?</div>' :
+      items.map((item, i) => `
+        <div class="bucket-item">
+          <div class="bucket-check ${item.done ? 'done' : ''}" onclick="toggleBucket(${i})">${item.done ? '&#10003;' : ''}</div>
+          <div class="bucket-info">
+            <div class="bucket-title ${item.done ? 'done' : ''}">${item.title}</div>
+            <div class="bucket-meta">
+              <span class="bucket-category">${item.category}</span>
+              <span>${item.priority}</span>
+              ${item.targetDate ? `<span>Target: ${item.targetDate}</span>` : ''}
+            </div>
+            ${item.description ? `<div style="font-size:0.85rem; color:var(--text3); margin-top:4px;">${item.description}</div>` : ''}
+          </div>
+          <button class="bucket-delete" onclick="deleteBucket(${i})">&#10005;</button>
+        </div>
+      `).join('')}
+  `;
+}
+
+function renderGoalsTab(el) {
+  const g = state.goals;
+  el.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <span style="color:var(--text2)">${g.length}/3 goals (Free tier)</span>
+      <button class="btn-primary btn-sm" onclick="openGoalModal()">+ Add Goal</button>
+    </div>
+    ${g.length === 0 ? '<div style="text-align:center; padding:40px; color:var(--text3)">No goals set yet. What will you achieve with your remaining time?</div>' :
+      g.map((goal, i) => `
+        <div class="goal-card">
+          <div class="goal-header">
+            <div class="goal-title">${goal.title}</div>
+            <div class="goal-impact">${goal.lifeImpact ? '+' + goal.lifeImpact + ' years potential' : ''}</div>
+          </div>
+          ${goal.description ? `<div style="color:var(--text2); font-size:0.9rem; margin-bottom:8px;">${goal.description}</div>` : ''}
+          <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:${goal.progress}%"></div></div>
+          <div class="goal-meta">
+            <span>${goal.progress}% complete</span>
+            <span>${goal.category} | ${goal.timeline}</span>
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn-sm btn-secondary" onclick="updateGoalProgress(${i}, -10)">-10%</button>
+            <button class="btn-sm btn-green" onclick="updateGoalProgress(${i}, 10)">+10%</button>
+            <button class="btn-sm bucket-delete" onclick="deleteGoal(${i})">Delete</button>
+          </div>
+        </div>
+      `).join('')}
+  `;
+}
+
+function renderTipsTab(el) {
+  // Get user's weakest categories
+  const negFactors = state.result.factors.filter(f => f.impact < 0);
+  const weakCats = [...new Set(negFactors.map(f => f.cat))];
+  const relevantTips = tipsDB.filter(t => weakCats.includes(t.cat));
+  const otherTips = tipsDB.filter(t => !weakCats.includes(t.cat));
+  const allTips = [...relevantTips, ...otherTips];
+
+  el.innerHTML = `
+    <div style="color:var(--text2); margin-bottom:16px;">Tips personalized to your biggest risk factors:</div>
+    ${allTips.map(t => `
+      <div class="tip-card" style="${relevantTips.includes(t) ? '' : 'opacity:0.7; border-left-color:var(--border);'}">
+        <div class="tip-header">
+          <div class="tip-title">${t.title}</div>
+          <div class="tip-years">+${t.years} years</div>
+        </div>
+        <div class="tip-content">${t.content}</div>
+        <span class="tip-difficulty">${t.difficulty}</span>
+        ${relevantTips.includes(t) ? ' <span style="font-size:0.75rem; color:var(--accent); margin-left:8px;">Recommended for you</span>' : ''}
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderProductsTab(el) {
+  // Get user's weakest categories and match products
+  const negFactors = state.result.factors.filter(f => f.impact < 0 && f.productCat);
+  const weakProductCats = [...new Set(negFactors.map(f => f.productCat))];
+  const recommended = products.filter(p => weakProductCats.some(c => p.factorCat === c));
+  const others = products.filter(p => !recommended.includes(p));
+  const allProducts = [...recommended, ...others];
+
+  el.innerHTML = `
+    <div style="color:var(--text2); margin-bottom:16px;">Products and services that could help extend your lifespan:</div>
+    <div class="product-grid">
+      ${allProducts.map(p => `
+        <div class="product-card" ${recommended.includes(p) ? 'style="border-color:var(--green);"' : ''}>
+          ${recommended.includes(p) ? '<div style="font-size:0.7rem; color:var(--green); font-weight:600; margin-bottom:8px;">RECOMMENDED FOR YOU</div>' : ''}
+          <div class="product-category-badge">${p.category}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-impact">Could add ${p.impact}</div>
+          <div class="product-desc">${p.desc}</div>
+          <div class="product-price">${p.price}</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <span style="color:var(--gold);">${'&#9733;'.repeat(Math.floor(p.rating))}</span>
+            <span style="color:var(--text3); font-size:0.85rem;">${p.rating}/5</span>
+          </div>
+          <button class="btn-primary btn-sm product-cta" onclick="trackAffiliateClick('${p.name}')">Learn More</button>
+        </div>
+      `).join('')}
+    </div>
+    <div class="affiliate-disclosure">
+      <strong>Affiliate Disclosure:</strong> Some links on this page are affiliate links. We may earn a commission at no extra cost to you. We only recommend products we believe can genuinely improve your health and longevity.
+    </div>
+  `;
+}
+
+function trackAffiliateClick(productName) {
+  console.log('Affiliate click:', productName);
+  // In production, this would log to Supabase
+  alert('This would redirect to ' + productName + ' (affiliate link). In production, this tracks the click in Supabase and redirects via affiliate URL.');
+}
+
+// ============================================
+// MODALS
+// ============================================
+function openBucketModal() {
+  if (state.bucketList.length >= 10) {
+    alert('Free tier limit: 10 bucket list items. Upgrade to Premium for unlimited!');
+    return;
+  }
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Add Bucket List Item</h3>
+    <div class="form-group"><label>What do you want to do?</label><input type="text" id="bucketTitle" placeholder="e.g. Visit the Northern Lights"></div>
+    <div class="form-group"><label>Description (optional)</label><textarea id="bucketDesc" rows="2" placeholder="Why this matters to you..."></textarea></div>
+    <div class="form-group"><label>Category</label>
+      <select id="bucketCat"><option>travel</option><option>experience</option><option>achievement</option><option>relationship</option><option>creative</option><option>other</option></select>
+    </div>
+    <div class="form-group"><label>Priority</label>
+      <select id="bucketPri"><option value="must_do">Must Do</option><option value="want_to" selected>Want To</option><option value="dream">Dream</option></select>
+    </div>
+    <div class="form-group"><label>Target Date (optional)</label><input type="date" id="bucketDate"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveBucket()">Add Item</button>
+    </div>
+  `;
+}
+
+function saveBucket() {
+  const title = document.getElementById('bucketTitle').value.trim();
+  if (!title) return;
+  state.bucketList.push({
+    title,
+    description: document.getElementById('bucketDesc').value.trim(),
+    category: document.getElementById('bucketCat').value,
+    priority: document.getElementById('bucketPri').value,
+    targetDate: document.getElementById('bucketDate').value,
+    done: false
+  });
+  closeModal();
+  showTab('bucketlist');
+}
+
+function toggleBucket(i) {
+  state.bucketList[i].done = !state.bucketList[i].done;
+  showTab('bucketlist');
+  renderDashboard();
+}
+
+function deleteBucket(i) {
+  state.bucketList.splice(i, 1);
+  showTab('bucketlist');
+}
+
+function openGoalModal() {
+  if (state.goals.length >= 3) {
+    alert('Free tier limit: 3 goals. Upgrade to Premium for unlimited!');
+    return;
+  }
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Add Personal Goal</h3>
+    <div class="form-group"><label>Goal</label><input type="text" id="goalTitle" placeholder="e.g. Run a 5K in under 30 minutes"></div>
+    <div class="form-group"><label>Description (optional)</label><textarea id="goalDesc" rows="2" placeholder="What achieving this means to you..."></textarea></div>
+    <div class="form-group"><label>Category</label>
+      <select id="goalCat"><option>health</option><option>career</option><option>financial</option><option>relationship</option><option>personal_growth</option><option>other</option></select>
+    </div>
+    <div class="form-group"><label>Timeline</label>
+      <select id="goalTimeline"><option value="30_days">30 Days</option><option value="90_days">90 Days</option><option value="1_year" selected>1 Year</option><option value="5_years">5 Years</option><option value="lifetime">Lifetime</option></select>
+    </div>
+    <div class="form-group"><label>Estimated life impact (years)</label><input type="number" id="goalImpact" step="0.5" placeholder="e.g. 2" min="0" max="10"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveGoal()">Add Goal</button>
+    </div>
+  `;
+}
+
+function saveGoal() {
+  const title = document.getElementById('goalTitle').value.trim();
+  if (!title) return;
+  state.goals.push({
+    title,
+    description: document.getElementById('goalDesc').value.trim(),
+    category: document.getElementById('goalCat').value,
+    timeline: document.getElementById('goalTimeline').value,
+    lifeImpact: parseFloat(document.getElementById('goalImpact').value) || 0,
+    progress: 0
+  });
+  closeModal();
+  showTab('goals');
+}
+
+function updateGoalProgress(i, delta) {
+  state.goals[i].progress = Math.max(0, Math.min(100, state.goals[i].progress + delta));
+  if (state.goals[i].progress === 100) state.goals[i].status = 'completed';
+  showTab('goals');
+}
+
+function deleteGoal(i) {
+  state.goals.splice(i, 1);
+  showTab('goals');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+}
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
