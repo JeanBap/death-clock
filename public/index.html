@@ -104,12 +104,14 @@ nav .container {
 .logo {
   font-size: 1.4rem;
   font-weight: 800;
-  color: var(--accent);
+  color: var(--text);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  user-select: none;
 }
 .logo span { color: var(--text); }
+.logo svg { filter: drop-shadow(0 0 6px rgba(233,69,96,0.3)); }
 .nav-links { display: flex; gap: 8px; align-items: center; }
 .nav-links button { padding: 8px 16px; font-size: 0.9rem; }
 .nav-tab {
@@ -701,7 +703,7 @@ footer p { margin-bottom: 8px; }
 <!-- NAV -->
 <nav id="mainNav">
   <div class="container">
-    <div class="logo">&#9760; <span>Death</span>Clock</div>
+    <div class="logo" onclick="showPage('home')" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36" style="flex-shrink:0"><defs><radialGradient id="lgG" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#e8e8e8"/></radialGradient></defs><path d="M100 20C55 20 30 60 30 100c0 30 0 60 0 80q15-15 25 0 10 15 20 0 10-15 25 0 15-15 25 0 10 15 20 0 10-15 25 0c0-20 0-50 0-80 0-40-25-80-70-80z" fill="url(#lgG)"/><ellipse cx="75" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="80" cy="80" rx="6" ry="7" fill="#fff"/><ellipse cx="125" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="130" cy="80" rx="6" ry="7" fill="#fff"/><path d="M80 120Q100 145 120 120" fill="none" stroke="#1a1a2e" stroke-width="3" stroke-linecap="round"/><ellipse cx="108" cy="132" rx="10" ry="14" fill="#e94560"/><path d="M108 125Q108 146 108 146" fill="none" stroke="#c4304d" stroke-width="1.5"/></svg><span>Death</span>Clock</div>
     <div class="nav-links" id="navLinks">
       <button class="nav-tab active" onclick="showPage('home')">Home</button>
       <button class="nav-tab" onclick="showPage('about')">About</button>
