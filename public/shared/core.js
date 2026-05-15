@@ -512,3 +512,59 @@ function upgradeTier(tier) {
   if (state.currentPage === 'dashboard') renderDashboard();
 }
 
+
+// ============================================
+// PROFILE PERSISTENCE
+// ============================================
+function saveGoalState() {
+  try { localStorage.setItem('deathclock_goals', JSON.stringify(state.longevityGoal)); } catch(e) {}
+}
+
+function loadGoalState() {
+  try {
+    const saved = localStorage.getItem('deathclock_goals');
+    if (saved) state.longevityGoal = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function saveProfile() {
+  if (!state.result) { showToast('Complete the calculator first.'); return; }
+  if (state.userTier === 'free') {
+    showPaywall('save');
+    return;
+  }
+  DataStore.save().then(mode => {
+    if (mode === 'cloud') {
+      showToast('Profile synced to the cloud! Your ghost follows you everywhere now.');
+    } else {
+      showToast('Profile saved locally. Sign in to sync across devices.');
+    }
+  }).catch(() => showToast('Save failed. Try again.'));
+}
+
+function loadProfile() {
+  // Sync load from localStorage for initial render (async cloud load happens via DataStore)
+  try {
+    const saved = localStorage.getItem('deathclock_profile');
+    if (!saved) return false;
+    const profile = JSON.parse(saved);
+    state.answers = profile.answers || {};
+    state.bucketList = profile.bucketList || profile.bucket_list || [];
+    state.longevityGoal = profile.longevityGoal || profile.longevity_goal || null;
+    state.userTier = profile.tier || state.userTier;
+    if (profile.result) {
+      state.result = {
+        ...profile.result,
+        deathDate: new Date(profile.result.deathDate),
+        dob: new Date(profile.result.dob)
+      };
+      if (state.result.factors) state.result.factors.sort((a, b) => a.impact - b.impact);
+      document.getElementById('navDash')?.classList.remove('hidden');
+      document.getElementById('navPrice')?.classList.remove('hidden');
+      const cta = document.getElementById('navCta');
+      if (cta) cta.textContent = 'Recalculate';
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
