@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MortalClock - See Your Death Date. Change It. Live Intentionally.</title>
+<title>Death Clock - See Your Death Date. Change It. Live Intentionally.</title>
 <meta name="description" content="Calculate your life expectancy based on science. Set bucket lists, track goals, and discover how to add years to your life.">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -174,6 +174,10 @@ nav .container {
 .q-option.selected { border-color: var(--accent); background: rgba(233,69,96,0.1); }
 .q-option-label { font-weight: 600; }
 .q-option-desc { font-size: 0.85rem; color: var(--text2); margin-top: 4px; }
+.q-option-impact { font-size: 0.8rem; margin-top: 6px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+.q-option-impact.positive { color: var(--green); background: rgba(78,204,163,0.1); }
+.q-option-impact.negative { color: var(--accent2); background: rgba(233,69,96,0.1); }
+.q-option-impact.neutral { color: var(--text3); background: rgba(255,255,255,0.05); }
 .q-nav { display: flex; justify-content: space-between; gap: 16px; }
 .q-input-row { display: flex; gap: 12px; margin-bottom: 24px; }
 .q-input-row > div { flex: 1; }
@@ -188,7 +192,27 @@ nav .container {
   font-size: 0.9rem;
   transition: all 0.2s;
   text-align: center;
+  color: var(--text);
 }
+.q-condition-impact { font-size: 0.7rem; color: var(--accent2); margin-top: 2px; }
+
+/* Cookie Banner */
+.cookie-banner {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg2); border-top: 1px solid var(--border);
+  padding: 16px 20px; z-index: 300;
+  display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+}
+.cookie-banner p { color: var(--text2); font-size: 0.85rem; max-width: 600px; }
+.cookie-banner a { color: var(--accent2); }
+
+/* Legal Pages */
+.legal-page { max-width: 800px; margin: 0 auto; padding: 40px 20px 80px; }
+.legal-page h1 { font-size: 2rem; margin-bottom: 24px; color: var(--accent); }
+.legal-page h2 { font-size: 1.3rem; margin: 24px 0 12px; color: var(--text); }
+.legal-page p, .legal-page li { color: var(--text2); font-size: 0.95rem; margin-bottom: 12px; }
+.legal-page ul { padding-left: 20px; margin-bottom: 16px; }
+.legal-back { margin-bottom: 24px; }
 .q-condition.selected { border-color: var(--accent); background: rgba(233,69,96,0.15); }
 
 /* ===== RESULT ===== */
@@ -507,7 +531,7 @@ footer p { margin-bottom: 8px; }
 <!-- NAV -->
 <nav id="mainNav">
   <div class="container">
-    <div class="logo">&#9760; <span>Mortal</span>Clock</div>
+    <div class="logo">&#9760; <span>Death</span>Clock</div>
     <div class="nav-links" id="navLinks">
       <button class="nav-tab active" onclick="showPage('home')">Home</button>
       <button class="nav-tab hidden" id="navDash" onclick="showPage('dashboard')">Dashboard</button>
@@ -636,12 +660,122 @@ footer p { margin-bottom: 8px; }
   <div class="modal" id="modalContent"></div>
 </div>
 
+<!-- ===== PRIVACY POLICY ===== -->
+<section id="page-privacy" class="hidden legal-page">
+  <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
+  <h1>Privacy Policy</h1>
+  <p><strong>Last updated:</strong> May 15, 2026</p>
+
+  <h2>1. Who We Are</h2>
+  <p>Death Clock ("we", "us", "our") operates the website death-clock.app. This privacy policy explains how we collect, use, and protect your personal data in compliance with the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and other applicable data protection laws.</p>
+
+  <h2>2. Data We Collect</h2>
+  <p><strong>Calculator Data:</strong> When you use our life expectancy calculator, we collect the health and lifestyle information you provide (age, sex, exercise habits, diet, sleep, medical conditions, etc.). Anonymous calculations are stored with a session token and no personal identifier.</p>
+  <p><strong>Account Data:</strong> If you create an account, we collect your email address and display name. We use Supabase Authentication which handles password security.</p>
+  <p><strong>Usage Data:</strong> We collect anonymized analytics data including pages visited, features used, and affiliate link clicks. We do not use third-party tracking pixels or sell your data to advertisers.</p>
+
+  <h2>3. How We Use Your Data</h2>
+  <p>We use your data to: calculate your life expectancy estimate, save your results and goals if you create an account, provide personalized health tips and product recommendations, improve our calculation algorithm, and send you optional email updates (which you can unsubscribe from at any time).</p>
+
+  <h2>4. Legal Basis for Processing (GDPR)</h2>
+  <p><strong>Consent:</strong> For optional cookies and marketing emails. <strong>Legitimate Interest:</strong> For core calculator functionality and service improvement. <strong>Contract:</strong> For account features and paid subscriptions.</p>
+
+  <h2>5. Data Retention</h2>
+  <p>Anonymous calculator data: retained for 12 months. Account data: retained while your account is active. You can request deletion at any time. After account deletion, data is permanently removed within 30 days.</p>
+
+  <h2>6. Your Rights</h2>
+  <p>Under GDPR and CCPA, you have the right to: access your personal data, correct inaccurate data, request deletion of your data, restrict or object to processing, data portability (receive your data in a machine-readable format), and withdraw consent at any time. To exercise these rights, email us at privacy@death-clock.app.</p>
+
+  <h2>7. Cookies</h2>
+  <p>We use essential cookies for authentication and session management. We use optional analytics cookies to understand how the site is used. You can manage your cookie preferences via the cookie banner. See our Cookie Policy for details.</p>
+
+  <h2>8. Third-Party Services</h2>
+  <p>We use: Supabase (database and authentication, EU servers), Stripe (payment processing), Vercel (hosting). We do not sell your personal data to third parties. Affiliate product links may use cookies set by the affiliate partner.</p>
+
+  <h2>9. Data Security</h2>
+  <p>All data is encrypted in transit (TLS) and at rest. We use Row Level Security (RLS) in our database so users can only access their own data. Health questionnaire answers are stored securely and never shared with third parties.</p>
+
+  <h2>10. Children</h2>
+  <p>Death Clock is not intended for use by anyone under the age of 16. We do not knowingly collect data from children.</p>
+
+  <h2>11. Changes to This Policy</h2>
+  <p>We may update this policy from time to time. Changes will be posted on this page with an updated date. Significant changes will be communicated via email to registered users.</p>
+
+  <h2>12. Contact</h2>
+  <p>For privacy inquiries: privacy@death-clock.app</p>
+</section>
+
+<!-- ===== TERMS OF SERVICE ===== -->
+<section id="page-terms" class="hidden legal-page">
+  <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
+  <h1>Terms of Service</h1>
+  <p><strong>Last updated:</strong> May 15, 2026</p>
+
+  <h2>1. Acceptance of Terms</h2>
+  <p>By using Death Clock (death-clock.app), you agree to these Terms of Service. If you do not agree, please do not use our service.</p>
+
+  <h2>2. Not Medical Advice</h2>
+  <p><strong>Death Clock is for educational and motivational purposes only.</strong> Our life expectancy estimates are based on statistical averages from published research and actuarial data. They are NOT medical diagnoses, predictions, or professional health advice. Individual results vary significantly. Always consult qualified healthcare professionals for medical decisions.</p>
+
+  <h2>3. Accuracy Disclaimer</h2>
+  <p>While our calculations are based on peer-reviewed studies involving 53+ million participants, no algorithm can accurately predict an individual's lifespan. Many factors (genetics, accidents, medical breakthroughs) are inherently unpredictable. Our estimates should be treated as general guidance, not certainty.</p>
+
+  <h2>4. Account and Subscriptions</h2>
+  <p>Free accounts provide limited features. Premium subscriptions are billed via Stripe. You may cancel at any time. Refunds follow Stripe's standard policies. Lifetime purchases are non-refundable after 14 days.</p>
+
+  <h2>5. Affiliate Disclosures</h2>
+  <p>Death Clock participates in affiliate programs. When you click product recommendations and make a purchase, we may earn a commission at no extra cost to you. All affiliate relationships are clearly disclosed per FTC guidelines. We only recommend products we believe can positively impact health and longevity.</p>
+
+  <h2>6. User Content</h2>
+  <p>You retain ownership of any content you create (bucket list items, goals). We do not share your personal content with other users unless you explicitly opt in to social features.</p>
+
+  <h2>7. Limitation of Liability</h2>
+  <p>Death Clock and its creators shall not be liable for any psychological distress, health decisions, or other consequences arising from the use of our life expectancy estimates. Use of this service is at your own risk.</p>
+
+  <h2>8. Contact</h2>
+  <p>For questions about these terms: legal@death-clock.app</p>
+</section>
+
+<!-- ===== COOKIE POLICY ===== -->
+<section id="page-cookies" class="hidden legal-page">
+  <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
+  <h1>Cookie Policy</h1>
+  <p><strong>Last updated:</strong> May 15, 2026</p>
+
+  <h2>What Are Cookies</h2>
+  <p>Cookies are small text files stored on your device when you visit a website. They help the site remember your preferences and improve your experience.</p>
+
+  <h2>Essential Cookies</h2>
+  <p>These are required for the site to function. They include authentication tokens (so you stay logged in), session identifiers, and CSRF protection tokens. These cannot be disabled.</p>
+
+  <h2>Analytics Cookies</h2>
+  <p>We use minimal analytics to understand how the site is used (page views, calculator completions, feature usage). This data is anonymized and aggregated. You can opt out via the cookie banner.</p>
+
+  <h2>Affiliate Cookies</h2>
+  <p>When you click on product recommendations, the affiliate partner may set a cookie to track the referral. These cookies are governed by the respective partner's privacy policy.</p>
+
+  <h2>Managing Cookies</h2>
+  <p>You can manage your cookie preferences using the cookie banner on first visit, or by clearing cookies in your browser settings. Disabling essential cookies may prevent some features from working.</p>
+</section>
+
+<!-- ===== COOKIE BANNER ===== -->
+<div id="cookieBanner" class="cookie-banner hidden">
+  <p>We use essential cookies for site functionality and optional analytics cookies to improve our service. <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a></p>
+  <button class="btn-primary btn-sm" onclick="acceptCookies('all')">Accept All</button>
+  <button class="btn-secondary btn-sm" onclick="acceptCookies('essential')">Essential Only</button>
+</div>
+
 <!-- ===== FOOTER ===== -->
 <footer>
   <div class="container">
-    <p><strong>Disclaimer:</strong> MortalClock is for educational and motivational purposes only. It is not medical advice. Consult healthcare professionals for health decisions.</p>
+    <p><strong>Disclaimer:</strong> Death Clock is for educational and motivational purposes only. It is not medical advice. Consult healthcare professionals for health decisions.</p>
     <p>Calculations based on published actuarial data and peer-reviewed longevity research.</p>
-    <p style="margin-top:12px;">&copy; 2026 MortalClock. All rights reserved.</p>
+    <div style="margin-top:16px; display:flex; justify-content:center; gap:24px; flex-wrap:wrap;">
+      <a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a>
+      <a href="#" onclick="showPage('terms');return false;">Terms of Service</a>
+      <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a>
+    </div>
+    <p style="margin-top:12px;">&copy; 2026 Death Clock. All rights reserved.</p>
   </div>
 </footer>
 
@@ -839,90 +973,104 @@ const tipsDB = [
 const questions = [
   { section: 'Demographics', key: 'dob', type: 'date', question: 'When were you born?', label: 'Date of Birth' },
   { section: 'Demographics', key: 'sex', type: 'choice', question: 'What is your biological sex?', options: [
-    { value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }
+    { value: 'male', label: 'Male', impact: 'Males live ~5.4 years less than females on average' }, { value: 'female', label: 'Female', impact: 'Females have a baseline longevity advantage of ~5.4 years' }
   ]},
   { section: 'Demographics', key: 'country', type: 'input', question: 'What country do you live in?', placeholder: 'e.g. United States, United Kingdom' },
   { section: 'Body & Fitness', key: 'body', type: 'body', question: 'What are your height and weight?' },
   { section: 'Body & Fitness', key: 'exercise', type: 'choice', question: 'How often do you exercise?', options: [
-    { value: '5+', label: '5+ days/week', desc: 'Very active lifestyle' },
-    { value: '3-4x', label: '3-4 days/week', desc: 'Regular exercise routine' },
-    { value: '1-2x', label: '1-2 days/week', desc: 'Some physical activity' },
-    { value: 'none', label: 'Rarely or never', desc: 'Sedentary lifestyle' }
+    { value: '5+', label: '5+ days/week', desc: 'Very active lifestyle', impact: '+4.5 years (VA study, n=719,147)' },
+    { value: '3-4x', label: '3-4 days/week', desc: 'Regular exercise routine', impact: '+3 years' },
+    { value: '1-2x', label: '1-2 days/week', desc: 'Some physical activity', impact: '+1 year' },
+    { value: 'none', label: 'Rarely or never', desc: 'Sedentary lifestyle', impact: '-4 years (as dangerous as smoking)' }
   ]},
   { section: 'Diet & Substances', key: 'diet', type: 'choice', question: 'How would you describe your diet?', options: [
-    { value: 'very_healthy', label: 'Very healthy', desc: 'Mostly whole foods, vegetables, lean protein' },
-    { value: 'healthy', label: 'Healthy', desc: 'Generally balanced with some indulgences' },
-    { value: 'average', label: 'Average', desc: 'Mix of healthy and processed foods' },
-    { value: 'poor', label: 'Poor', desc: 'Mostly processed, fast food, or irregular meals' }
+    { value: 'very_healthy', label: 'Very healthy', desc: 'Mostly whole foods, vegetables, lean protein', impact: '+5 years (Mediterranean diet, Harvard study)' },
+    { value: 'healthy', label: 'Healthy', desc: 'Generally balanced with some indulgences', impact: '+3 years' },
+    { value: 'average', label: 'Average', desc: 'Mix of healthy and processed foods', impact: '0 years (baseline)' },
+    { value: 'poor', label: 'Poor', desc: 'Mostly processed, fast food, or irregular meals', impact: '-4 years' }
   ]},
   { section: 'Diet & Substances', key: 'alcohol', type: 'choice', question: 'How much alcohol do you drink?', options: [
-    { value: 'never', label: 'Never', desc: 'I do not drink alcohol' },
-    { value: 'occasional', label: 'Occasionally', desc: 'A few drinks per month' },
-    { value: 'moderate', label: 'Moderate', desc: '7-14 drinks per week' },
-    { value: 'heavy', label: 'Heavy', desc: '14+ drinks per week' }
+    { value: 'never', label: 'Never', desc: 'I do not drink alcohol', impact: '0 years (no alcohol-related risk)' },
+    { value: 'occasional', label: 'Occasionally', desc: 'A few drinks per month', impact: '0 years (minimal risk)' },
+    { value: 'moderate', label: 'Moderate', desc: '7-14 drinks per week', impact: '-0.5 years (Lancet, n=599,912)' },
+    { value: 'heavy', label: 'Heavy', desc: '14+ drinks per week', impact: '-4 years (Lancet, n=599,912)' }
   ]},
   { section: 'Diet & Substances', key: 'smoking', type: 'choice', question: 'Do you smoke?', options: [
-    { value: 'never', label: 'Never smoked' },
-    { value: 'former', label: 'Former smoker', desc: 'Quit more than 1 year ago' },
-    { value: 'current_light', label: 'Light smoker', desc: 'Less than 10 cigarettes/day' },
-    { value: 'current_heavy', label: 'Heavy smoker', desc: '10+ cigarettes/day' }
+    { value: 'never', label: 'Never smoked', impact: '0 years (baseline)' },
+    { value: 'former', label: 'Former smoker', desc: 'Quit more than 1 year ago', impact: '-2 years (risk drops 50% within 1 year of quitting)' },
+    { value: 'current_light', label: 'Light smoker', desc: 'Less than 10 cigarettes/day', impact: '-6 years' },
+    { value: 'current_heavy', label: 'Heavy smoker', desc: '10+ cigarettes/day', impact: '-10 years (single biggest controllable factor)' }
   ]},
   { section: 'Diet & Substances', key: 'drugs', type: 'choice', question: 'Do you use any recreational drugs?', options: [
-    { value: 'none', label: 'None' },
-    { value: 'cannabis', label: 'Cannabis only' },
-    { value: 'recreational', label: 'Other recreational drugs' },
-    { value: 'opioids', label: 'Opioids' }
+    { value: 'none', label: 'None', impact: '0 years (no risk)' },
+    { value: 'cannabis', label: 'Cannabis only', impact: '-1 year (limited data)' },
+    { value: 'recreational', label: 'Other recreational drugs', impact: '-3 years' },
+    { value: 'opioids', label: 'Opioids', impact: '-8 years (top 3 lifespan reducer, VA study)' }
   ]},
   { section: 'Mental Health', key: 'stress', type: 'choice', question: 'How would you rate your stress level?', options: [
-    { value: 'low', label: 'Low', desc: 'Generally calm and balanced' },
-    { value: 'moderate', label: 'Moderate', desc: 'Normal life stressors' },
-    { value: 'high', label: 'High', desc: 'Frequent stress and worry' },
-    { value: 'very_high', label: 'Very high', desc: 'Chronic, overwhelming stress' }
+    { value: 'low', label: 'Low', desc: 'Generally calm and balanced', impact: '+2 years' },
+    { value: 'moderate', label: 'Moderate', desc: 'Normal life stressors', impact: '0 years (baseline)' },
+    { value: 'high', label: 'High', desc: 'Frequent stress and worry', impact: '-2 years (20-30% increased mortality)' },
+    { value: 'very_high', label: 'Very high', desc: 'Chronic, overwhelming stress', impact: '-4 years' }
   ]},
   { section: 'Mental Health', key: 'stress_mgmt', type: 'choice', question: 'Do you actively practice stress management?', options: [
-    { value: 'yes', label: 'Yes', desc: 'Meditation, therapy, yoga, journaling, etc.' },
-    { value: 'no', label: 'No', desc: 'I do not have a regular practice' }
+    { value: 'yes', label: 'Yes', desc: 'Meditation, therapy, yoga, journaling, etc.', impact: '+1.5 years (VA study)' },
+    { value: 'no', label: 'No', desc: 'I do not have a regular practice', impact: '0 years (missed protective benefit)' }
   ]},
   { section: 'Social Life', key: 'social', type: 'choice', question: 'How strong are your social connections?', options: [
-    { value: 'strong', label: 'Strong network', desc: 'Close friends, family, community involvement' },
-    { value: 'moderate', label: 'Moderate', desc: 'Some close relationships' },
-    { value: 'few', label: 'Few connections', desc: 'Limited social circle' },
-    { value: 'isolated', label: 'Isolated', desc: 'Very few or no close relationships' }
+    { value: 'strong', label: 'Strong network', desc: 'Close friends, family, community involvement', impact: '+4 years (Harvard 80-year study: #1 longevity predictor)' },
+    { value: 'moderate', label: 'Moderate', desc: 'Some close relationships', impact: '+2 years' },
+    { value: 'few', label: 'Few connections', desc: 'Limited social circle', impact: '-2 years' },
+    { value: 'isolated', label: 'Isolated', desc: 'Very few or no close relationships', impact: '-7 years (equivalent to smoking 15 cigs/day)' }
   ]},
   { section: 'Social Life', key: 'relationship', type: 'choice', question: 'What is your relationship status?', options: [
-    { value: 'married', label: 'Married' }, { value: 'partnered', label: 'In a relationship' },
-    { value: 'single', label: 'Single' }, { value: 'divorced_widowed', label: 'Divorced or widowed' }
+    { value: 'married', label: 'Married', impact: '+2.5 years (social support + shared health behaviors)' },
+    { value: 'partnered', label: 'In a relationship', impact: '+2 years' },
+    { value: 'single', label: 'Single', impact: '0 years (baseline)' },
+    { value: 'divorced_widowed', label: 'Divorced or widowed', impact: '-1 year (life transition stress)' }
   ]},
   { section: 'Sleep', key: 'sleep_hours', type: 'choice', question: 'How many hours do you sleep per night on average?', options: [
-    { value: 'short', label: 'Less than 6 hours' }, { value: 'moderate_short', label: '6-7 hours' },
-    { value: 'optimal', label: '7-8 hours' }, { value: 'long', label: '9+ hours' }
+    { value: 'short', label: 'Less than 6 hours', impact: '-3 years (chronic deprivation)' },
+    { value: 'moderate_short', label: '6-7 hours', impact: '-1 year (slightly below optimal)' },
+    { value: 'optimal', label: '7-8 hours', impact: '0 years (optimal for longevity)' },
+    { value: 'long', label: '9+ hours', impact: '-1.5 years (may indicate underlying issues)' }
   ]},
   { section: 'Sleep', key: 'sleep_quality', type: 'choice', question: 'How is your sleep quality?', options: [
-    { value: 'poor', label: 'Poor', desc: 'Frequent waking, hard to fall asleep' },
-    { value: 'fair', label: 'Fair', desc: 'Occasional issues' },
-    { value: 'good', label: 'Good', desc: 'Generally restful' },
-    { value: 'excellent', label: 'Excellent', desc: 'Deep, uninterrupted sleep' }
+    { value: 'poor', label: 'Poor', desc: 'Frequent waking, hard to fall asleep', impact: '-2 years' },
+    { value: 'fair', label: 'Fair', desc: 'Occasional issues', impact: '-0.5 years' },
+    { value: 'good', label: 'Good', desc: 'Generally restful', impact: '0 years (solid foundation)' },
+    { value: 'excellent', label: 'Excellent', desc: 'Deep, uninterrupted sleep', impact: '+1 year (underrated longevity tool)' }
   ]},
   { section: 'Medical History', key: 'conditions', type: 'conditions', question: 'Do you have any of these conditions? (Select all that apply)',
-    options: ['Diabetes', 'Heart Disease', 'Hypertension', 'Cancer (current/remission)', 'Stroke History', 'COPD', 'Chronic Kidney Disease', 'Autoimmune Condition', 'None']
+    options: [
+      { label: 'Diabetes', impact: '-8 yrs' },
+      { label: 'Heart Disease', impact: '-9 yrs' },
+      { label: 'Hypertension', impact: '-5 yrs' },
+      { label: 'Cancer (current/remission)', impact: '-4 yrs' },
+      { label: 'Stroke History', impact: '-10 yrs' },
+      { label: 'COPD', impact: '-6 yrs' },
+      { label: 'Chronic Kidney Disease', impact: '-5 yrs' },
+      { label: 'Autoimmune Condition', impact: '-3 yrs' },
+      { label: 'None', impact: '' }
+    ]
   },
-  { section: 'Medical History', key: 'family', type: 'family', question: 'Family history: at what age did/will your parents reach?' },
+  { section: 'Medical History', key: 'family', type: 'family', question: 'Family history: at what age did/will your parents and grandparents reach?', hint: 'Parents with 80+ longevity: +2 to +4 years. Parents who died before 65: -2 to -4 years. Grandparents 90+: additional +1 to +3 years.' },
   { section: 'Medical History', key: 'healthcare', type: 'choice', question: 'How often do you see a doctor?', options: [
-    { value: 'regular', label: 'Annual checkups', desc: 'Regular preventive care' },
-    { value: 'occasional', label: 'Occasionally', desc: 'When something comes up' },
-    { value: 'rarely', label: 'Rarely', desc: 'Only when very sick' },
-    { value: 'never', label: 'Never', desc: 'Have not seen a doctor in years' }
+    { value: 'regular', label: 'Annual checkups', desc: 'Regular preventive care', impact: '+1 year (early detection saves lives)' },
+    { value: 'occasional', label: 'Occasionally', desc: 'When something comes up', impact: '0 years (baseline)' },
+    { value: 'rarely', label: 'Rarely', desc: 'Only when very sick', impact: '-1 year' },
+    { value: 'never', label: 'Never', desc: 'Have not seen a doctor in years', impact: '-3 years (undiagnosed conditions are silent killers)' }
   ]},
   { section: 'Environment', key: 'air_quality', type: 'choice', question: 'How is the air quality where you live?', options: [
-    { value: 'good', label: 'Good', desc: 'Clean air, low pollution' },
-    { value: 'moderate', label: 'Moderate', desc: 'Some urban pollution' },
-    { value: 'poor', label: 'Poor', desc: 'High pollution area' }
+    { value: 'good', label: 'Good', desc: 'Clean air, low pollution', impact: '0 years (clean environment)' },
+    { value: 'moderate', label: 'Moderate', desc: 'Some urban pollution', impact: '-1 year' },
+    { value: 'poor', label: 'Poor', desc: 'High pollution area', impact: '-3 years (Lancet: up to -4 years in worst areas)' }
   ]},
   { section: 'Environment', key: 'occupation', type: 'choice', question: 'What best describes your work environment?', options: [
-    { value: 'sedentary', label: 'Desk/Office work', desc: 'Mostly sitting' },
-    { value: 'moderate', label: 'Moderate activity', desc: 'Mix of sitting and moving' },
-    { value: 'physical', label: 'Physically active', desc: 'On your feet most of the day' },
-    { value: 'hazardous', label: 'Hazardous', desc: 'Exposure to chemicals, heights, heavy machinery' }
+    { value: 'sedentary', label: 'Desk/Office work', desc: 'Mostly sitting', impact: '-1 year (sitting disease is real)' },
+    { value: 'moderate', label: 'Moderate activity', desc: 'Mix of sitting and moving', impact: '0 years (good balance)' },
+    { value: 'physical', label: 'Physically active', desc: 'On your feet most of the day', impact: '+0.5 years' },
+    { value: 'hazardous', label: 'Hazardous', desc: 'Exposure to chemicals, heights, heavy machinery', impact: '-4 years (OSHA data)' }
   ]}
 ];
 
@@ -962,9 +1110,15 @@ function renderQuestion() {
     html += '<div class="q-options">';
     q.options.forEach(o => {
       const sel = state.answers[q.key] === o.value ? 'selected' : '';
+      let impactClass = 'neutral';
+      if (o.impact) {
+        if (o.impact.startsWith('+') || o.impact.match(/^\+/)) impactClass = 'positive';
+        else if (o.impact.startsWith('-')) impactClass = 'negative';
+      }
       html += `<button class="q-option ${sel}" onclick="selectAnswer('${q.key}','${o.value}')">
         <div class="q-option-label">${o.label}</div>
         ${o.desc ? `<div class="q-option-desc">${o.desc}</div>` : ''}
+        ${o.impact ? `<div class="q-option-impact ${impactClass}">${o.impact}</div>` : ''}
       </button>`;
     });
     html += '</div>';
@@ -983,23 +1137,52 @@ function renderQuestion() {
     </div>`;
     if (h && w) {
       const bmi = (w / ((h/100) ** 2)).toFixed(1);
+      let bmiImpact = '', bmiClass = 'neutral';
+      if (bmi < 18.5) { bmiImpact = '-2 years (underweight)'; bmiClass = 'negative'; }
+      else if (bmi < 25) { bmiImpact = '0 years (optimal range)'; bmiClass = 'positive'; }
+      else if (bmi < 30) { bmiImpact = '-1 year (overweight)'; bmiClass = 'negative'; }
+      else if (bmi < 35) { bmiImpact = '-3 years (obese, Lancet study)'; bmiClass = 'negative'; }
+      else { bmiImpact = '-7 years (severely obese)'; bmiClass = 'negative'; }
       html += `<p style="color:var(--text2)">Your BMI: <strong>${bmi}</strong></p>`;
+      html += `<div class="q-option-impact ${bmiClass}" style="margin-top:8px">${bmiImpact}</div>`;
+    } else {
+      html += `<div class="q-option-impact neutral" style="margin-top:8px">BMI 18.5-24.9 is optimal. Each 5 points above 25 costs ~2-3 years.</div>`;
     }
   } else if (q.type === 'conditions') {
     const selected = state.answers.conditions || [];
     html += '<div class="q-conditions">';
     q.options.forEach(c => {
-      const sel = selected.includes(c) ? 'selected' : '';
-      html += `<button class="q-condition ${sel}" onclick="toggleCondition('${c}')">${c}</button>`;
+      const label = typeof c === 'object' ? c.label : c;
+      const impact = typeof c === 'object' ? c.impact : '';
+      const sel = selected.includes(label) ? 'selected' : '';
+      html += `<button class="q-condition ${sel}" onclick="toggleCondition('${label.replace(/'/g, "\\'")}')">
+        <div>${label}</div>
+        ${impact ? `<div class="q-condition-impact">${impact}</div>` : ''}
+      </button>`;
     });
     html += '</div>';
   } else if (q.type === 'family') {
     const p1 = state.answers.parent1_age || '';
     const p2 = state.answers.parent2_age || '';
-    html += `<div class="q-input-row">
-      <div><label>Parent 1 age at death (or current age if alive)</label><input type="number" value="${p1}" placeholder="75" onchange="state.answers.parent1_age=parseInt(this.value)"></div>
-      <div><label>Parent 2 age at death (or current age if alive)</label><input type="number" value="${p2}" placeholder="78" onchange="state.answers.parent2_age=parseInt(this.value)"></div>
+    const gp1 = state.answers.grandparent1_age || '';
+    const gp2 = state.answers.grandparent2_age || '';
+    html += `<div style="margin-bottom:16px;">
+      <div style="font-weight:600; margin-bottom:8px; color:var(--text)">Parents</div>
+      <div class="q-input-row">
+        <div><label>Parent 1 age at death (or current age if alive)</label><input type="number" value="${p1}" placeholder="75" onchange="state.answers.parent1_age=parseInt(this.value)"></div>
+        <div><label>Parent 2 age at death (or current age if alive)</label><input type="number" value="${p2}" placeholder="78" onchange="state.answers.parent2_age=parseInt(this.value)"></div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-weight:600; margin-bottom:8px; color:var(--text)">Grandparents (optional, improves accuracy)</div>
+      <div class="q-input-row">
+        <div><label>Oldest grandparent age at death (or current)</label><input type="number" value="${gp1}" placeholder="85" onchange="state.answers.grandparent1_age=parseInt(this.value)"></div>
+        <div><label>Average grandparent age at death (or current)</label><input type="number" value="${gp2}" placeholder="80" onchange="state.answers.grandparent2_age=parseInt(this.value)"></div>
+      </div>
     </div>`;
+    if (q.hint) {
+      html += `<div class="q-option-impact neutral" style="display:block; margin-bottom:16px;">${q.hint}</div>`;
+    }
   }
 
   document.getElementById('qContent').innerHTML = html;
@@ -1108,13 +1291,14 @@ function calculateResult() {
   if (a.sleep_quality && sqMap[a.sleep_quality]) factors.push({ key: sqMap[a.sleep_quality], ...lifeFactors[sqMap[a.sleep_quality]] });
 
   // Conditions
-  if (a.conditions && !a.conditions.includes('None')) {
+  const condLabels = (a.conditions || []).map(c => typeof c === 'object' ? c.label : c);
+  if (condLabels.length > 0 && !condLabels.includes('None')) {
     const condMap = {
       'Diabetes': 'cond_diabetes', 'Heart Disease': 'cond_heart_disease', 'Hypertension': 'cond_hypertension',
       'Cancer (current/remission)': 'cond_cancer', 'Stroke History': 'cond_stroke', 'COPD': 'cond_copd',
       'Chronic Kidney Disease': 'cond_kidney', 'Autoimmune Condition': 'cond_autoimmune'
     };
-    a.conditions.forEach(c => {
+    condLabels.forEach(c => {
       if (condMap[c]) factors.push({ key: condMap[c], ...lifeFactors[condMap[c]] });
     });
   }
@@ -1131,7 +1315,7 @@ function calculateResult() {
   const occMap = { sedentary: 'occ_sedentary', moderate: 'occ_moderate', physical: 'occ_physical', hazardous: 'occ_hazardous' };
   if (a.occupation && occMap[a.occupation]) factors.push({ key: occMap[a.occupation], ...lifeFactors[occMap[a.occupation]] });
 
-  // Family history
+  // Family history (parents)
   const p1 = a.parent1_age || 0;
   const p2 = a.parent2_age || 0;
   const avgParent = (p1 && p2) ? (p1 + p2) / 2 : (p1 || p2);
@@ -1141,6 +1325,18 @@ function calculateResult() {
     else if (avgParent >= 65) famKey = 'family_average';
     else famKey = 'family_early_death';
     factors.push({ key: famKey, ...lifeFactors[famKey] });
+  }
+
+  // Family history (grandparents bonus)
+  const gp1 = a.grandparent1_age || 0;
+  const gp2 = a.grandparent2_age || 0;
+  const avgGP = (gp1 && gp2) ? (gp1 + gp2) / 2 : (gp1 || gp2);
+  if (avgGP >= 90) {
+    factors.push({ key: 'gp_longevity', impact: 3, label: 'Grandparent longevity (90+)', tip: 'Exceptional family genetics. Longevity genes often pass through generations.', cat: 'genetics' });
+  } else if (avgGP >= 80) {
+    factors.push({ key: 'gp_good', impact: 1, label: 'Grandparent longevity (80+)', tip: 'Good genetic baseline from grandparents.', cat: 'genetics' });
+  } else if (avgGP > 0 && avgGP < 65) {
+    factors.push({ key: 'gp_early', impact: -1, label: 'Grandparent early death (<65)', tip: 'Family history flag. Proactive screening is extra important.', cat: 'genetics' });
   }
 
   // Calculate
@@ -1541,9 +1737,31 @@ function closeModal() {
 }
 
 // ============================================
+// COOKIES
+// ============================================
+function acceptCookies(level) {
+  const consent = { level, timestamp: new Date().toISOString() };
+  try { localStorage.setItem('dc_cookie_consent', JSON.stringify(consent)); } catch(e) {}
+  document.getElementById('cookieBanner').classList.add('hidden');
+}
+
+function checkCookieConsent() {
+  try {
+    const consent = localStorage.getItem('dc_cookie_consent');
+    if (!consent) {
+      document.getElementById('cookieBanner').classList.remove('hidden');
+    }
+  } catch(e) {
+    // localStorage not available, show banner
+    document.getElementById('cookieBanner').classList.remove('hidden');
+  }
+}
+
+// ============================================
 // INIT
 // ============================================
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+checkCookieConsent();
 </script>
 </body>
 </html>
