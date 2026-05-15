@@ -2326,16 +2326,16 @@ body{background:#0a0a0f;color:#eaeaea;font-family:system-ui;display:flex;align-i
 <div class="d" id="dd"></div>
 <div class="c" id="cd"></div>
 </div>
-<script>
+<scr'+'ipt>
 const death=new Date(${dd.getTime()});
-function u(){const n=new Date(),d=death-n;if(d<=0){document.getElementById('dd').textContent='Live now.';return}
+function u(){const n=new Date(),d=death-n;if(d<=0){document.getElementById("dd").textContent="Live now.";return}
 const y=Math.floor(d/(365.25*864e5)),m=Math.floor(d%(365.25*864e5)/(30.44*864e5)),
 da=Math.floor(d%(30.44*864e5)/864e5),h=Math.floor(d%864e5/36e5),
 mi=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);
-document.getElementById('cd').innerHTML=[{n:y,l:'YRS'},{n:m,l:'MO'},{n:da,l:'D'},{n:h,l:'HR'},{n:mi,l:'M'},{n:s,l:'S'}]
-.map(x=>'<div class="u"><div class="n">'+x.n+'</div><div class="l">'+x.l+'</div></div>').join('')}
+document.getElementById("cd").innerHTML=[{n:y,l:"YRS"},{n:m,l:"MO"},{n:da,l:"D"},{n:h,l:"HR"},{n:mi,l:"M"},{n:s,l:"S"}]
+.map(x=>"<div class=\\"u\\"><div class=\\"n\\">"+x.n+"</div><div class=\\"l\\">"+x.l+"</div></div>").join("")}
 u();setInterval(u,1000);
-</script></body></html>`;
+</scr'+'ipt></body></html>`;
 
   const blob = new Blob([widgetHtml], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
