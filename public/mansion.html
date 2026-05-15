@@ -69,7 +69,11 @@
         <h2 id="mansionGroupName" style="margin-bottom:4px;">The Haunted Mansion</h2>
         <p style="color:var(--text2); font-size:0.85rem;" id="mansionMemberCount">0 ghosts haunt these halls</p>
       </div>
-      <div style="display:flex; gap:8px;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div id="coinBalanceDisplay" style="display:flex; align-items:center; gap:4px; background:var(--surface); border:1px solid var(--gold); border-radius:20px; padding:4px 12px; cursor:pointer;" onclick="showBuyCoinsModal()">
+          <span style="font-size:1.1rem;">🪙</span>
+          <span id="coinCount" style="font-weight:700; color:var(--gold); font-size:0.85rem;">0</span>
+        </div>
         <button class="btn-secondary btn-sm" onclick="showInviteModal()">Invite Friends</button>
         <button class="btn-secondary btn-sm" onclick="showPage('groups')">My Groups</button>
       </div>
@@ -99,6 +103,17 @@
         <button class="btn-primary btn-sm" onclick="postWallMessage()">Scrawl</button>
       </div>
       <div id="graffitiWall" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:10px;">
+      </div>
+    </div>
+
+    <!-- Ghost Challenges -->
+    <div style="margin-top:24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>⚔️ Ghost Challenges</h3>
+        <span style="font-size:0.75rem; color:var(--text3);">Dare your friends. Bet coins. Win glory.</span>
+      </div>
+      <div id="challengesList" style="display:grid; gap:12px;">
+        <p style="color:var(--text3); font-style:italic;">No active challenges yet. Click a ghost and challenge them!</p>
       </div>
     </div>
   </div>
@@ -159,6 +174,7 @@
 <script src="/shared/social.js"></script>
 <script src="/shared/deathy.js"></script>
 <script src="/shared/interactions.js"></script>
+<script src="/shared/challenges.js"></script>
 <script>
 
 function pageInit() {
@@ -168,6 +184,8 @@ function pageInit() {
   setTimeout(() => {
     loadActivityFeed();
     renderGraffitiWall();
+    loadChallenges();
+    updateCoinDisplay();
   }, 1500);
 }
 

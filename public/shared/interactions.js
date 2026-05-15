@@ -207,6 +207,11 @@ function showGhostActionMenu(targetId, targetName, targetColor, targetEyes, targ
     + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
     + '⚔️ Challenge to Battle! <span style="color:var(--text3); font-size:0.75rem;">+25xp</span></button>';
 
+  html += '<button onclick="showCreateChallengeModal(\'' + targetId + '\', \'' + escHtml(targetName) + '\')" '
+    + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--gold); font-size:0.9rem; cursor:pointer; border-radius:8px; font-weight:700; transition:background 0.2s;" '
+    + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
+    + '🪙 Dare Challenge <span style="color:var(--text3); font-size:0.75rem;">bet coins</span></button>';
+
   menu.innerHTML = html;
   document.body.appendChild(menu);
 
