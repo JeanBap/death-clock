@@ -757,16 +757,19 @@ footer p { margin-bottom: 8px; }
   </div>
 </nav>
 <div class="deathy-timer-bar" id="deathyTimerBar">
-  <div style="display:flex; align-items:center; gap:8px;">
+  <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
     <div class="deathy-walking" id="deathyWalker"></div>
-    <div>
+    <div id="deathySpeechBubble" style="font-size:0.7rem; color:var(--text2); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; font-style:italic;"></div>
+  </div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div style="text-align:center;">
       <div class="timer-label">Time remaining</div>
       <div class="timer-text" id="navTimer">--:--:--:--</div>
     </div>
-  </div>
-  <div style="text-align:right;">
-    <div class="timer-label">Ghost health</div>
-    <div id="navGhostHealth" style="font-size:0.8rem; font-weight:700;">--</div>
+    <div style="text-align:right;">
+      <div class="timer-label">Ghost</div>
+      <div id="navGhostHealth" style="font-size:0.8rem; font-weight:700;">--</div>
+    </div>
   </div>
 </div>
 
@@ -775,6 +778,7 @@ footer p { margin-bottom: 8px; }
   <div class="container">
     <h1>When Will You Die?</h1>
     <p>The internet's most brutally honest life expectancy calculator. Spoiler: it's sooner than you think. But we'll show you how to run from the Reaper.</p>
+    <div id="welcomeBackBanner" style="display:none; margin-bottom:16px; padding:12px 20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); font-size:0.9rem; color:var(--green);"></div>
     <button class="btn-primary" onclick="showPage('quiz')" style="font-size:1.2rem; padding:16px 40px;">Find Out Your Death Date</button>
     <div style="margin-top:16px;">
       <button class="btn-secondary btn-sm" onclick="showPage('about')" style="font-size:0.85rem;">How does this work?</button>
@@ -888,6 +892,7 @@ footer p { margin-bottom: 8px; }
       <button class="tab-btn" onclick="showTab('bucketlist')">Bucket List</button>
       <button class="tab-btn" onclick="showTab('myplan')">My Plan</button>
       <button class="tab-btn" onclick="showTab('tips')">Tips</button>
+      <button class="tab-btn" onclick="showTab('performance')">My Performance</button>
       <button class="tab-btn" onclick="showTab('products')">Recommendations</button>
     </div>
     <div id="tabContent"></div>
@@ -2918,6 +2923,19 @@ function renderDashboard() {
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">+${state.longevityGoal ? state.longevityGoal.totalDaysAdded.toFixed(1) : '0'}</div><div class="stat-label">Days Added</div></div>
   `;
   showTab(state.currentTab);
+  // Update dashboard stats with performance data
+  const g2 = state.longevityGoal;
+  if (g2) {
+    const { streak: s2 } = getStreakInfo();
+    const ds = document.getElementById('dashStats');
+    if (ds) {
+      const statsHtml = '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">' + r.remainingYears + '</div><div class="stat-label">Years Left</div></div>' +
+        '<div class="stat-card"><div class="stat-num" style="color:' + scoreColor + '">' + r.lifeScore + '</div><div class="stat-label">Life Score</div></div>' +
+        '<div class="stat-card"><div class="stat-num" style="color:var(--green)">+' + g2.totalDaysAdded.toFixed(1) + '</div><div class="stat-label">Days Added</div></div>' +
+        '<div class="stat-card"><div class="stat-num" style="color:var(--gold)">' + s2 + '</div><div class="stat-label">Day Streak</div></div>';
+      ds.innerHTML = statsHtml;
+    }
+  }
 }
 
 function showTab(tab) {
@@ -2930,6 +2948,7 @@ function showTab(tab) {
   else if (tab === 'bucketlist') renderBucketTab(el);
   else if (tab === 'myplan') renderMyPlanTab(el);
   else if (tab === 'tips') renderTipsTab(el);
+  else if (tab === 'performance') renderPerformanceTab(el);
   else if (tab === 'products') renderProductsTab(el);
 }
 
@@ -3494,10 +3513,10 @@ function showPaywall(feature) {
 function startStripeCheckout(tier) {
   // Stripe Payment Links - replace with your actual Stripe payment link IDs
   const links = {
-    premium: 'https://buy.stripe.com/test_PLACEHOLDER_PREMIUM',
+    premium: 'https://buy.stripe.com/aFa14m1Fd02Q1eLfSqgMw01',
     pro_plus: 'https://buy.stripe.com/test_PLACEHOLDER_PRO',
     deep_dive: 'https://buy.stripe.com/test_PLACEHOLDER_DEEP',
-    lifetime: 'https://buy.stripe.com/test_PLACEHOLDER_LIFETIME',
+    lifetime: 'https://buy.stripe.com/dRm7sKerZ6re0aH49IgMw03',
     death_pool: 'https://buy.stripe.com/test_PLACEHOLDER_POOL'
   };
   const url = links[tier];
@@ -3838,12 +3857,14 @@ function renderMyPlanTab(el) {
       '</div>';
     }).join('')}
 
-    ${state.userTier === 'free' && g.plan.length > 1 ? `
+    ${state.userTier === 'free' && g.plan.length > 3 ? `
     <div style="text-align:center; margin:16px 0; padding:20px; background:linear-gradient(135deg, rgba(233,69,96,0.1), rgba(240,192,64,0.1)); border:1px solid var(--gold); border-radius:var(--radius);">
-      <div style="font-size:1.2rem; margin-bottom:4px;">&#x1F512; ${g.plan.length - 1} more habits locked</div>
-      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:12px;">Your free plan shows 1 habit. Unlock your full Cheat Death Plan with all ${g.plan.length} personalised habits.</p>
-      <button class="btn-gold" onclick="showPage('pricing')" style="font-size:1rem; padding:12px 28px;">Unlock Full Plan - Premium</button>
+      <div style="font-size:1.2rem; margin-bottom:4px;">&#x1F512; ${g.plan.length - 3} more habits locked</div>
+      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:12px;">Free plan shows 3 habits. Unlock all ${g.plan.length} personalised reversal habits with Premium.</p>
+      <button class="btn-gold" onclick="startStripeCheckout('premium')" style="font-size:1rem; padding:12px 28px;">Unlock All Habits - $4.99/mo</button>
     </div>` : ''}
+
+    ${renderGoalTrackersSection()}
 
     <div style="margin-top:24px;">
       <div style="font-weight:600; margin-bottom:8px;">Death Date Shift</div>
@@ -5328,18 +5349,17 @@ function exportProfileData() {
 
 // Auto-load saved profile
 if (loadProfile()) {
-  // Show welcome back message on home page
-  const heroP = document.querySelector('.hero p');
-  if (heroP) {
+  // Show welcome back message above CTA button
+  const banner = document.getElementById('welcomeBackBanner');
+  if (banner) {
     const savedAt = localStorage.getItem('deathclock_profile');
     if (savedAt) {
       try {
         const profile = JSON.parse(savedAt);
         const savedDate = new Date(profile.savedAt).toLocaleDateString();
-        heroP.insertAdjacentHTML('afterend',
-          '<div style="margin:-16px auto 24px; padding:12px 20px; background:var(--surface); border-radius:var(--radius); display:inline-block; font-size:0.9rem; color:var(--green);">' +
-          'Welcome back! Your profile from ' + savedDate + ' is loaded. ' +
-          '<a href="#" onclick="showPage(\'dashboard\');return false;" style="color:var(--gold);">View Dashboard</a></div>');
+        banner.style.display = 'inline-block';
+        banner.innerHTML = 'Welcome back! Your profile from ' + savedDate + ' is loaded. ' +
+          '<a href="#" onclick="showPage(\'dashboard\');return false;" style="color:var(--gold); font-weight:600;">View Dashboard</a>';
       } catch(e) {}
     }
   }
@@ -5347,6 +5367,361 @@ if (loadProfile()) {
 
 
 
+
+
+// ============================================
+// EXPANDED RESEARCH-BACKED HABITS DATABASE
+// ============================================
+const ALL_REVERSAL_HABITS = [
+  // EXERCISE
+  {id:'h_walk_30',name:'Walk 30 minutes',icon:'🚶',difficulty:'Easy',dailyImpact:0.015,category:'exercise',trigger:'exercise_none,exercise_1-2x'},
+  {id:'h_walk_10k',name:'Hit 10,000 steps',icon:'👟',difficulty:'Medium',dailyImpact:0.02,category:'exercise',trigger:'exercise_none,exercise_1-2x'},
+  {id:'h_strength',name:'Strength training (20 min)',icon:'🏋️',difficulty:'Medium',dailyImpact:0.018,category:'exercise',trigger:'exercise_none,exercise_1-2x,exercise_3-4x'},
+  {id:'h_hiit',name:'HIIT session (15 min)',icon:'⚡',difficulty:'Hard',dailyImpact:0.022,category:'exercise',trigger:'exercise_none,exercise_1-2x'},
+  {id:'h_stretch',name:'Stretch or yoga (15 min)',icon:'🧘',difficulty:'Easy',dailyImpact:0.008,category:'exercise',trigger:'all'},
+  {id:'h_stairs',name:'Take stairs instead of lift',icon:'🪜',difficulty:'Easy',dailyImpact:0.005,category:'exercise',trigger:'exercise_none,exercise_1-2x'},
+  {id:'h_swim',name:'Swimming (30 min)',icon:'🏊',difficulty:'Medium',dailyImpact:0.02,category:'exercise',trigger:'exercise_none,exercise_1-2x'},
+  {id:'h_cycle',name:'Cycling (30 min)',icon:'🚴',difficulty:'Medium',dailyImpact:0.018,category:'exercise',trigger:'exercise_none,exercise_1-2x'},
+  // DIET
+  {id:'h_5veg',name:'Eat 5+ servings of vegetables',icon:'🥦',difficulty:'Medium',dailyImpact:0.016,category:'diet',trigger:'diet_poor,diet_average'},
+  {id:'h_no_processed',name:'Avoid processed food today',icon:'🚫',difficulty:'Medium',dailyImpact:0.014,category:'diet',trigger:'processed_food_daily,processed_food_frequently'},
+  {id:'h_fruit',name:'Eat 2+ servings of fruit',icon:'🍎',difficulty:'Easy',dailyImpact:0.01,category:'diet',trigger:'diet_poor,diet_average'},
+  {id:'h_water',name:'Drink 8 glasses of water',icon:'💧',difficulty:'Easy',dailyImpact:0.006,category:'diet',trigger:'all'},
+  {id:'h_no_sugar',name:'No added sugar today',icon:'🍬',difficulty:'Hard',dailyImpact:0.015,category:'diet',trigger:'diet_poor,diet_average'},
+  {id:'h_fish',name:'Eat oily fish (omega-3)',icon:'🐟',difficulty:'Medium',dailyImpact:0.012,category:'diet',trigger:'diet_poor,diet_average'},
+  {id:'h_fibre',name:'30g+ fibre intake',icon:'🌾',difficulty:'Medium',dailyImpact:0.011,category:'diet',trigger:'diet_poor,diet_average'},
+  {id:'h_nuts',name:'Handful of nuts',icon:'🥜',difficulty:'Easy',dailyImpact:0.008,category:'diet',trigger:'diet_poor,diet_average'},
+  {id:'h_no_alcohol',name:'Zero alcohol today',icon:'🍺',difficulty:'Medium',dailyImpact:0.013,category:'alcohol',trigger:'alcohol_heavy,alcohol_moderate'},
+  {id:'h_meal_prep',name:'Cook a home meal',icon:'🍳',difficulty:'Medium',dailyImpact:0.009,category:'diet',trigger:'diet_poor'},
+  // SLEEP
+  {id:'h_sleep_7',name:'Sleep 7-9 hours',icon:'😴',difficulty:'Medium',dailyImpact:0.018,category:'sleep',trigger:'sleep_short,sleep_moderate_short'},
+  {id:'h_no_screen',name:'No screens 1hr before bed',icon:'📱',difficulty:'Medium',dailyImpact:0.008,category:'sleep',trigger:'sleep_short,sleep_moderate_short'},
+  {id:'h_sleep_schedule',name:'Same bedtime every night',icon:'⏰',difficulty:'Medium',dailyImpact:0.01,category:'sleep',trigger:'sleep_short'},
+  {id:'h_no_caffeine_pm',name:'No caffeine after 2pm',icon:'☕',difficulty:'Easy',dailyImpact:0.006,category:'sleep',trigger:'sleep_short,sleep_moderate_short'},
+  // STRESS
+  {id:'h_meditate',name:'Meditate (10 min)',icon:'🧘',difficulty:'Easy',dailyImpact:0.012,category:'stress',trigger:'stress_high,stress_very_high'},
+  {id:'h_breathwork',name:'Deep breathing exercises (5 min)',icon:'🌬️',difficulty:'Easy',dailyImpact:0.008,category:'stress',trigger:'stress_high,stress_very_high'},
+  {id:'h_journal',name:'Gratitude journal (3 things)',icon:'📓',difficulty:'Easy',dailyImpact:0.007,category:'stress',trigger:'stress_high,stress_very_high,mental_health_yes'},
+  {id:'h_nature',name:'Spend 20 min in nature',icon:'🌳',difficulty:'Easy',dailyImpact:0.01,category:'stress',trigger:'stress_high,stress_very_high'},
+  {id:'h_digital_detox',name:'1 hour digital detox',icon:'📵',difficulty:'Medium',dailyImpact:0.006,category:'stress',trigger:'stress_high,stress_very_high'},
+  // SMOKING
+  {id:'h_no_smoke',name:'Zero cigarettes today',icon:'🚬',difficulty:'Hard',dailyImpact:0.035,category:'smoking',trigger:'smoking_current_heavy,smoking_current_light'},
+  {id:'h_nrt',name:'Use nicotine replacement',icon:'💊',difficulty:'Medium',dailyImpact:0.025,category:'smoking',trigger:'smoking_current_heavy,smoking_current_light'},
+  {id:'h_smoke_delay',name:'Delay first cigarette by 1hr',icon:'⏳',difficulty:'Medium',dailyImpact:0.015,category:'smoking',trigger:'smoking_current_heavy'},
+  // SOCIAL
+  {id:'h_call_friend',name:'Call or text a friend',icon:'📞',difficulty:'Easy',dailyImpact:0.01,category:'social',trigger:'social_few,social_isolated'},
+  {id:'h_social_plan',name:'Make a social plan this week',icon:'📅',difficulty:'Easy',dailyImpact:0.008,category:'social',trigger:'social_few,social_isolated'},
+  {id:'h_volunteer',name:'Volunteer or help someone',icon:'❤️',difficulty:'Medium',dailyImpact:0.009,category:'social',trigger:'social_few,social_isolated'},
+  {id:'h_hug',name:'Physical affection (hug someone)',icon:'🤗',difficulty:'Easy',dailyImpact:0.005,category:'social',trigger:'social_few,social_isolated'},
+  // WEIGHT
+  {id:'h_portion',name:'Mindful portion control',icon:'🍽️',difficulty:'Medium',dailyImpact:0.012,category:'weight',trigger:'bmi_overweight,bmi_obese,bmi_severely_obese'},
+  {id:'h_no_snack',name:'No snacking after 8pm',icon:'🌙',difficulty:'Medium',dailyImpact:0.008,category:'weight',trigger:'bmi_overweight,bmi_obese'},
+  {id:'h_weigh_in',name:'Weigh yourself (track trend)',icon:'⚖️',difficulty:'Easy',dailyImpact:0.004,category:'weight',trigger:'bmi_overweight,bmi_obese,bmi_severely_obese'},
+  // SUBSTANCE
+  {id:'h_no_drugs',name:'No recreational substances today',icon:'🚨',difficulty:'Hard',dailyImpact:0.03,category:'drugs',trigger:'drugs_recreational,drugs_opioids'},
+  {id:'h_limit_cannabis',name:'Limit cannabis use',icon:'🌿',difficulty:'Medium',dailyImpact:0.012,category:'drugs',trigger:'drugs_cannabis'},
+  // PREVENTIVE
+  {id:'h_sunscreen',name:'Apply sunscreen',icon:'☀️',difficulty:'Easy',dailyImpact:0.005,category:'preventive',trigger:'all'},
+  {id:'h_floss',name:'Floss teeth',icon:'🪷',difficulty:'Easy',dailyImpact:0.006,category:'preventive',trigger:'all'},
+  {id:'h_posture',name:'Posture check (stand tall 5 min)',icon:'🧍',difficulty:'Easy',dailyImpact:0.004,category:'preventive',trigger:'all'},
+  {id:'h_cold_shower',name:'Cold shower (2 min)',icon:'🪣',difficulty:'Hard',dailyImpact:0.008,category:'preventive',trigger:'all'},
+  // CONDITIONS
+  {id:'h_blood_sugar',name:'Monitor blood sugar',icon:'🩸',difficulty:'Medium',dailyImpact:0.015,category:'conditions',trigger:'conditions_diabetes'},
+  {id:'h_bp_check',name:'Check blood pressure',icon:'❤️',difficulty:'Easy',dailyImpact:0.01,category:'conditions',trigger:'conditions_hypertension,conditions_heart_disease'},
+  {id:'h_take_meds',name:'Take prescribed medications',icon:'💊',difficulty:'Easy',dailyImpact:0.02,category:'conditions',trigger:'conditions_diabetes,conditions_heart_disease,conditions_hypertension'},
+  {id:'h_low_sodium',name:'Low sodium meals today',icon:'🧂',difficulty:'Medium',dailyImpact:0.01,category:'conditions',trigger:'conditions_hypertension'},
+  // MENTAL HEALTH
+  {id:'h_therapy_work',name:'Practice therapy techniques',icon:'🧠',difficulty:'Medium',dailyImpact:0.01,category:'mental',trigger:'mental_health_yes'},
+  {id:'h_positive_self',name:'Positive self-talk exercise',icon:'💬',difficulty:'Easy',dailyImpact:0.006,category:'mental',trigger:'mental_health_yes,stress_very_high'},
+  {id:'h_creative',name:'Do something creative (15 min)',icon:'🎨',difficulty:'Easy',dailyImpact:0.005,category:'mental',trigger:'stress_high,stress_very_high'},
+];
+
+function getPersonalisedHabits() {
+  const a = state.answers || {};
+  const matched = [];
+  
+  ALL_REVERSAL_HABITS.forEach(h => {
+    const triggers = h.trigger.split(',');
+    let shouldAdd = false;
+    
+    triggers.forEach(t => {
+      if (t === 'all') { shouldAdd = true; return; }
+      const parts = t.split('_');
+      const key = parts[0];
+      const val = parts.slice(1).join('_');
+      
+      // Match against user answers
+      if (key === 'exercise' && a.exercise === val) shouldAdd = true;
+      if (key === 'diet' && a.diet === val) shouldAdd = true;
+      if (key === 'processed' && a.processed_food === val.replace('food_','')) shouldAdd = true;
+      if (key === 'alcohol' && a.alcohol === val) shouldAdd = true;
+      if (key === 'sleep' && a.sleep === val) shouldAdd = true;
+      if (key === 'stress' && a.stress === val) shouldAdd = true;
+      if (key === 'smoking' && a.smoking === val) shouldAdd = true;
+      if (key === 'social' && a.social_connections === val) shouldAdd = true;
+      if (key === 'drugs' && a.drug_use === val) shouldAdd = true;
+      if (key === 'mental' && a.mental_health === 'yes') shouldAdd = true;
+      if (key === 'bmi') {
+        if (a.height_cm && a.weight_kg) {
+          const bmiVal = a.weight_kg / ((a.height_cm/100)**2);
+          if (val === 'overweight' && bmiVal >= 25 && bmiVal < 30) shouldAdd = true;
+          if (val === 'obese' && bmiVal >= 30 && bmiVal < 40) shouldAdd = true;
+          if (val === 'severely_obese' && bmiVal >= 40) shouldAdd = true;
+        }
+      }
+      if (key === 'conditions' && (a.conditions || []).includes(val)) shouldAdd = true;
+    });
+    
+    if (shouldAdd) matched.push({...h});
+  });
+  
+  // Sort by impact descending
+  matched.sort((a,b) => b.dailyImpact - a.dailyImpact);
+  return matched;
+}
+
+// ============================================
+// WEEKLY / MONTHLY / ANNUAL GOAL TRACKERS
+// ============================================
+function getGoalTrackers() {
+  try { return JSON.parse(localStorage.getItem('dc_goal_trackers') || '[]'); } catch(e) { return []; }
+}
+function saveGoalTrackers(trackers) {
+  localStorage.setItem('dc_goal_trackers', JSON.stringify(trackers));
+}
+
+function addGoalTracker(name, cadence, target) {
+  const trackers = getGoalTrackers();
+  trackers.push({
+    id: 'gt_' + Date.now(),
+    name, cadence, target: parseInt(target),
+    startedAt: new Date().toISOString(),
+    completions: [] // array of ISO date strings
+  });
+  saveGoalTrackers(trackers);
+  if (state.currentTab === 'myplan') showTab('myplan');
+}
+
+function logGoalTracker(id) {
+  const trackers = getGoalTrackers();
+  const t = trackers.find(x => x.id === id);
+  if (!t) return;
+  const today = new Date().toISOString().split('T')[0];
+  if (!t.completions.includes(today)) {
+    t.completions.push(today);
+    saveGoalTrackers(trackers);
+    showToast('Goal logged!');
+    if (state.currentTab === 'myplan') showTab('myplan');
+    else if (state.currentTab === 'performance') showTab('performance');
+  }
+}
+
+function deleteGoalTracker(id) {
+  const trackers = getGoalTrackers().filter(x => x.id !== id);
+  saveGoalTrackers(trackers);
+  if (state.currentTab === 'myplan') showTab('myplan');
+}
+
+function getTrackerProgress(tracker) {
+  const now = new Date();
+  const start = new Date(tracker.startedAt);
+  let periodStart, periodEnd;
+  
+  if (tracker.cadence === 'weekly') {
+    const dayOfWeek = now.getDay();
+    periodStart = new Date(now);
+    periodStart.setDate(now.getDate() - dayOfWeek);
+    periodStart.setHours(0,0,0,0);
+    periodEnd = new Date(periodStart);
+    periodEnd.setDate(periodStart.getDate() + 7);
+  } else if (tracker.cadence === 'monthly') {
+    periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  } else {
+    periodStart = new Date(now.getFullYear(), 0, 1);
+    periodEnd = new Date(now.getFullYear() + 1, 0, 1);
+  }
+  
+  const periodCompletions = tracker.completions.filter(d => {
+    const date = new Date(d);
+    return date >= periodStart && date < periodEnd;
+  });
+  
+  return { done: periodCompletions.length, target: tracker.target, pct: Math.min(100, (periodCompletions.length / tracker.target) * 100) };
+}
+
+function renderGoalTrackersSection() {
+  const trackers = getGoalTrackers();
+  let html = '<div style="margin-top:24px; border-top:1px solid var(--border); padding-top:20px;">';
+  html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">';
+  html += '<div style="font-weight:700; font-size:1.1rem;">Goal Trackers</div>';
+  html += '<button class="btn-primary btn-sm" onclick="showAddTrackerModal()">+ Add Goal</button></div>';
+  
+  if (trackers.length === 0) {
+    html += '<div style="text-align:center; padding:24px; color:var(--text3);">No goal trackers yet. Set weekly, monthly, or annual targets.</div>';
+  } else {
+    trackers.forEach(t => {
+      const p = getTrackerProgress(t);
+      const cadenceLabel = t.cadence.charAt(0).toUpperCase() + t.cadence.slice(1);
+      const barColor = p.pct >= 100 ? 'var(--green)' : p.pct >= 50 ? 'var(--gold)' : 'var(--accent)';
+      html += '<div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:8px;">';
+      html += '<div style="display:flex; justify-content:space-between; align-items:center;">';
+      html += '<div><div style="font-weight:600; color:var(--text);">' + t.name + '</div>';
+      html += '<div style="font-size:0.75rem; color:var(--text3);">' + cadenceLabel + ' target: ' + t.target + 'x</div></div>';
+      html += '<div style="display:flex; gap:6px;">';
+      html += '<button class="btn-sm btn-green" onclick="logGoalTracker(\'' + t.id + '\')" style="padding:4px 12px;">Log</button>';
+      html += '<button class="btn-sm" onclick="deleteGoalTracker(\'' + t.id + '\')" style="padding:4px 8px; background:none; border:1px solid var(--border); color:var(--text3);">x</button>';
+      html += '</div></div>';
+      html += '<div style="margin-top:8px; background:var(--bg); border-radius:6px; height:6px; overflow:hidden;">';
+      html += '<div style="width:' + p.pct + '%; height:100%; background:' + barColor + '; border-radius:6px; transition:width 0.3s;"></div></div>';
+      html += '<div style="font-size:0.75rem; color:var(--text3); margin-top:4px;">' + p.done + '/' + t.target + ' this ' + t.cadence.replace('ly','').replace('annual','year') + '</div>';
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+  return html;
+}
+
+function showAddTrackerModal() {
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modalContent').innerHTML = 
+    '<h3 style="color:var(--gold); margin-bottom:16px;">Add Goal Tracker</h3>' +
+    '<div style="margin-bottom:12px;"><label style="display:block; font-size:0.85rem; color:var(--text2); margin-bottom:4px;">Goal Name</label>' +
+    '<input type="text" id="trackerName" placeholder="e.g. Run 5km, Meditate, No alcohol day" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text);"></div>' +
+    '<div style="margin-bottom:12px;"><label style="display:block; font-size:0.85rem; color:var(--text2); margin-bottom:4px;">Cadence</label>' +
+    '<select id="trackerCadence" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text);">' +
+    '<option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="annually">Annually</option></select></div>' +
+    '<div style="margin-bottom:16px;"><label style="display:block; font-size:0.85rem; color:var(--text2); margin-bottom:4px;">Target (times per period)</label>' +
+    '<input type="number" id="trackerTarget" value="3" min="1" max="365" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text);"></div>' +
+    '<div class="form-actions"><button class="btn-secondary" onclick="closeModal()">Cancel</button>' +
+    '<button class="btn-gold" onclick="addGoalTracker(document.getElementById(\'trackerName\').value, document.getElementById(\'trackerCadence\').value, document.getElementById(\'trackerTarget\').value); closeModal();">Add Goal</button></div>';
+}
+
+// ============================================
+// MY PERFORMANCE TAB
+// ============================================
+function renderPerformanceTab(el) {
+  const g = state.longevityGoal;
+  if (!g) { el.innerHTML = '<p style="color:var(--text3); text-align:center; padding:40px;">Complete the calculator and set up your plan first.</p>'; return; }
+  
+  const { streak, multiplier } = getStreakInfo();
+  const totalDays = Object.keys(g.logs).length;
+  const totalHabitsLogged = Object.values(g.logs).reduce((sum, arr) => sum + arr.length, 0);
+  const avgPerDay = totalDays > 0 ? (totalHabitsLogged / totalDays).toFixed(1) : 0;
+  
+  // Best streak calculation
+  let bestStreak = 0, currentRun = 0;
+  const sortedDays = Object.keys(g.logs).sort();
+  for (let i = 0; i < sortedDays.length; i++) {
+    if (i === 0 || (new Date(sortedDays[i]) - new Date(sortedDays[i-1])) <= 86400000 * 1.5) {
+      currentRun++;
+    } else {
+      currentRun = 1;
+    }
+    if (currentRun > bestStreak) bestStreak = currentRun;
+  }
+  
+  // Weekly summary (last 7 days)
+  const last7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = d.toISOString().split('T')[0];
+    const dayLog = g.logs[k] || [];
+    last7.push({ day: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()], count: dayLog.length, total: g.plan.length });
+  }
+  
+  // Monthly summary
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const monthDays = Object.keys(g.logs).filter(k => k.startsWith(thisMonth));
+  const monthHabits = monthDays.reduce((s, k) => s + g.logs[k].length, 0);
+  const monthPerfect = monthDays.filter(k => g.logs[k].length >= g.plan.length).length;
+  
+  // Habit completion rates
+  const habitStats = g.plan.map(h => {
+    const logged = Object.values(g.logs).filter(arr => arr.includes(h.id)).length;
+    return { name: h.name, icon: h.icon, rate: totalDays > 0 ? Math.round((logged/totalDays)*100) : 0, count: logged };
+  }).sort((a,b) => b.rate - a.rate);
+  
+  // Goal trackers summary
+  const trackers = getGoalTrackers();
+  
+  el.innerHTML = `
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin-bottom:20px;">
+      <div style="background:var(--surface); border-radius:var(--radius); padding:14px; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:800; color:var(--green);">${streak}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Current Streak</div>
+      </div>
+      <div style="background:var(--surface); border-radius:var(--radius); padding:14px; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:800; color:var(--gold);">${bestStreak}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Best Streak</div>
+      </div>
+      <div style="background:var(--surface); border-radius:var(--radius); padding:14px; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:800; color:var(--accent);">${totalHabitsLogged}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Total Logged</div>
+      </div>
+      <div style="background:var(--surface); border-radius:var(--radius); padding:14px; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:800; color:var(--text);">${avgPerDay}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Avg/Day</div>
+      </div>
+      <div style="background:var(--surface); border-radius:var(--radius); padding:14px; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:800; color:var(--green);">+${g.totalDaysAdded.toFixed(1)}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Days Added</div>
+      </div>
+      <div style="background:var(--surface); border-radius:var(--radius); padding:14px; text-align:center;">
+        <div style="font-size:1.4rem; font-weight:800; color:var(--gold);">${multiplier}x</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Multiplier</div>
+      </div>
+    </div>
+
+    <div style="font-weight:700; margin-bottom:8px;">This Week</div>
+    <div style="display:flex; gap:4px; margin-bottom:20px;">
+      ${last7.map(d => {
+        const pct = d.total > 0 ? (d.count / d.total) * 100 : 0;
+        const color = pct >= 100 ? 'var(--green)' : pct > 0 ? 'var(--gold)' : 'var(--border)';
+        return '<div style="flex:1; text-align:center;">' +
+          '<div style="height:60px; background:var(--bg); border-radius:6px; position:relative; overflow:hidden;">' +
+          '<div style="position:absolute; bottom:0; width:100%; height:' + pct + '%; background:' + color + '; border-radius:0 0 6px 6px; transition:height 0.3s;"></div></div>' +
+          '<div style="font-size:0.65rem; color:var(--text3); margin-top:4px;">' + d.day + '</div></div>';
+      }).join('')}
+    </div>
+
+    <div style="font-weight:700; margin-bottom:8px;">This Month</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+      <div style="background:var(--surface); padding:12px; border-radius:var(--radius); text-align:center;">
+        <div style="font-size:1.2rem; font-weight:700; color:var(--green);">${monthDays.length}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Active Days</div>
+      </div>
+      <div style="background:var(--surface); padding:12px; border-radius:var(--radius); text-align:center;">
+        <div style="font-size:1.2rem; font-weight:700; color:var(--gold);">${monthHabits}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Habits Done</div>
+      </div>
+      <div style="background:var(--surface); padding:12px; border-radius:var(--radius); text-align:center;">
+        <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">${monthPerfect}</div>
+        <div style="font-size:0.7rem; color:var(--text3);">Perfect Days</div>
+      </div>
+    </div>
+
+    <div style="font-weight:700; margin-bottom:8px;">Habit Completion Rates</div>
+    ${habitStats.slice(0, 10).map(h => {
+      const barColor = h.rate >= 80 ? 'var(--green)' : h.rate >= 40 ? 'var(--gold)' : 'var(--accent)';
+      return '<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">' +
+        '<div style="width:24px; text-align:center;">' + (h.icon || '') + '</div>' +
+        '<div style="flex:1; min-width:0;">' +
+        '<div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span style="color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + h.name + '</span><span style="color:var(--text3);">' + h.rate + '%</span></div>' +
+        '<div style="height:4px; background:var(--bg); border-radius:2px; margin-top:2px;"><div style="width:' + h.rate + '%; height:100%; background:' + barColor + '; border-radius:2px;"></div></div></div></div>';
+    }).join('')}
+
+    ${trackers.length > 0 ? '<div style="font-weight:700; margin:20px 0 8px;">Goal Trackers</div>' +
+      trackers.map(t => {
+        const p = getTrackerProgress(t);
+        const barColor = p.pct >= 100 ? 'var(--green)' : p.pct >= 50 ? 'var(--gold)' : 'var(--accent)';
+        return '<div style="background:var(--surface); padding:10px 14px; border-radius:var(--radius); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between;">' +
+          '<div><div style="font-size:0.85rem; font-weight:600;">' + t.name + '</div>' +
+          '<div style="font-size:0.7rem; color:var(--text3);">' + p.done + '/' + t.target + ' (' + t.cadence + ')</div></div>' +
+          '<div style="width:60px; height:60px; border-radius:50%; border:3px solid ' + barColor + '; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; color:' + barColor + ';">' + Math.round(p.pct) + '%</div></div>';
+      }).join('') : ''}
+  `;
+}
 
 // ============================================
 // LONGEVITY CLINIC QUOTE
@@ -5498,9 +5873,64 @@ function updateNavTimer() {
     walker.style.animationDuration = walkDur;
   }
 }
+
+const DEATHY_TIMER_PHRASES = {
+  healthy: [
+    "Keep it up, I'm practically glowing!",
+    "At this rate I'll outlive the sun.",
+    "My ghost glow-up is real.",
+    "Other ghosts are jealous of me.",
+    "You're making death look good.",
+    "I'm the healthiest ghost in town.",
+    "Even the Reaper's impressed."
+  ],
+  ok: [
+    "Not bad... but not great either.",
+    "I've seen worse. I've seen better.",
+    "Room for improvement, human.",
+    "Meh. Could be glowier.",
+    "You're a solid C+. Aim higher.",
+    "I'm fading just a little bit.",
+    "One more salad wouldn't kill you."
+  ],
+  bad: [
+    "I can see my own bones. Help.",
+    "This is fine. Everything's fine.",
+    "My ghost insurance just went up.",
+    "The Reaper keeps texting me.",
+    "I'm decomposing in real-time.",
+    "Please. Literally anything healthy."
+  ]
+};
+
+let deathyPhraseIdx = 0;
+let deathyPhraseTimer = 0;
+
+function rotateDeathyPhrase() {
+  const bubble = document.getElementById('deathySpeechBubble');
+  if (!bubble || !state.result) return;
+  const params = getDeathyParams();
+  const hScore = calcDeathyHealth(params);
+  const g = state.longevityGoal;
+  const totalScore = Math.min(100, hScore + Math.min(20, ((g && g.totalDaysAdded)||0)*0.5));
+  const bucket = totalScore >= 70 ? 'healthy' : totalScore >= 40 ? 'ok' : 'bad';
+  const phrases = DEATHY_TIMER_PHRASES[bucket];
+  deathyPhraseIdx = (deathyPhraseIdx + 1) % phrases.length;
+  bubble.style.opacity = '0';
+  setTimeout(() => {
+    bubble.textContent = phrases[deathyPhraseIdx];
+    bubble.style.opacity = '0.8';
+    bubble.style.transition = 'opacity 0.5s';
+  }, 300);
+}
+
 setInterval(updateNavTimer, 1000);
+setInterval(rotateDeathyPhrase, 8000);
 // Run once immediately if result exists
-if (state.result) setTimeout(updateNavTimer, 100);
+if (state.result) {
+  setTimeout(updateNavTimer, 100);
+  setTimeout(rotateDeathyPhrase, 500);
+}
 
 </script>
 </body>
