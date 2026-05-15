@@ -4076,7 +4076,7 @@ function startStripeCheckout(tier) {
     // Add client reference for webhook matching
     const email = localStorage.getItem('dc_user_email') || '';
     const sep = url.includes('?') ? '&' : '?';
-    window.open(url + sep + 'prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + (localStorage.getItem('dc_invite_code') || 'none'), '_blank');
+    window.location.href = url + sep + 'prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + (localStorage.getItem('dc_invite_code') || 'none');
   } else {
     // Fallback: demo mode until Stripe links are configured
     upgradeTier(tier);
@@ -7336,6 +7336,28 @@ async function processPendingJoin() {
   document.getElementById('joinCodeInput').value = code;
   await joinGroupByCode();
 }
+
+// Handle Stripe payment return
+(function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+    // Upgrade user
+    if (!state.userTier || state.userTier === 'free') {
+      state.userTier = 'premium';
+      try { localStorage.setItem('deathclock_tier', 'premium'); } catch(e) {}
+    }
+    // Show success toast
+    setTimeout(() => {
+      const toast = document.createElement('div');
+      toast.className = 'motivation-toast great';
+      toast.innerHTML = '<strong>Payment successful!</strong> Welcome to Premium. All features unlocked.';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }, 500);
+  }
+})();
 
 // Init social on page load
 (function initSocial() {
