@@ -1460,15 +1460,12 @@ const state = {
 // ============================================
 // SUPABASE CLIENT
 // ============================================
-const SUPABASE_URL = 'https://myizauhtpcnkwguralwc.supabase.co';
-// Social features Supabase (upsideshare project)
-const SOCIAL_SUPABASE_URL = 'https://tosyulolriavzgkpwzrn.supabase.co';
-const SOCIAL_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvc3l1bG9scmlhdnpna3B3enJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzE0NzIsImV4cCI6MjA5NDM0NzQ3Mn0.LVxiplL8DGVB481AXiEDVGWplfXprMPK_zR8A__6j7M';
-let socialClient = null;
-try { socialClient = supabase.createClient(SOCIAL_SUPABASE_URL, SOCIAL_SUPABASE_ANON); } catch(e) { console.warn('Social Supabase init failed:', e); }
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15aXphdWh0cGNua3dndXJhbHdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTY2MzQsImV4cCI6MjA5MDAzMjYzNH0.8ApElblHWaZo5knum86q6fPk7qu5D0dU-aNSZPRoA0U';
+const SUPABASE_URL = 'https://tosyulolriavzgkpwzrn.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvc3l1bG9scmlhdnpna3B3enJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzE0NzIsImV4cCI6MjA5NDM0NzQ3Mn0.LVxiplL8DGVB481AXiEDVGWplfXprMPK_zR8A__6j7M';
 let supaClient = null;
 try { supaClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e) { console.warn('Supabase init failed:', e); }
+// Single project: all Death Clock data lives on upsideshare (tosyulolriavzgkpwzrn)
+const socialClient = supaClient;
 
 // ============================================
 // DATA PERSISTENCE LAYER
