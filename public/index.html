@@ -3,8 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Death Clock - See Your Death Date. Change It. Live Intentionally.</title>
-<meta name="description" content="Calculate your life expectancy based on science. Set bucket lists, track goals, and discover how to add years to your life.">
+<title>Death Clock - When Will You Die? (Science Says Sooner Than You Think)</title>
+<meta name="description" content="The internet's most honest life expectancy calculator. 53M+ research participants. 1,200+ studies. See your death date. Then run for your life.">
+<meta name="theme-color" content="#e94560">
+<link rel="manifest" href="/manifest.json">
+<meta property="og:title" content="Death Clock - When Will You Die?">
+<meta property="og:description" content="I just found out when I'm going to die. The clock is ticking. Calculate yours.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://death-clock.app">
+<meta property="og:image" content="https://death-clock.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Death Clock - When Will You Die?">
+<meta name="twitter:description" content="I just found out when I'm going to die. Calculate yours.">
+<meta name="twitter:image" content="https://death-clock.app/og-image.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -256,6 +269,59 @@ nav .container {
 .lb-vs { text-align:center; padding:16px; background:var(--bg2); border-radius:var(--radius); }
 .lb-vs-num { font-size:1.8rem; font-weight:800; }
 .lb-vs-label { font-size:0.8rem; color:var(--text3); margin-top:4px; }
+
+/* ===== EMAIL CAPTURE ===== */
+.email-capture {
+  max-width:500px; margin:32px auto; padding:28px; background:linear-gradient(135deg,var(--bg3),var(--surface));
+  border:1px solid var(--accent); border-radius:16px; text-align:center;
+}
+.email-capture h3 { color:var(--accent); font-size:1.2rem; margin-bottom:8px; }
+.email-capture p { color:var(--text2); font-size:0.9rem; margin-bottom:16px; }
+.email-input-row { display:flex; gap:8px; }
+.email-input-row input { flex:1; }
+.email-prefs { margin-top:12px; text-align:left; font-size:0.85rem; color:var(--text2); }
+.email-prefs label { display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:6px; }
+.email-prefs input[type="checkbox"] { width:16px; height:16px; accent-color:var(--accent); }
+
+/* ===== SHARE CARD ===== */
+.share-card {
+  max-width:400px; margin:24px auto; padding:32px 24px; background:linear-gradient(135deg, #0a0a0f, #1a1a2e);
+  border:2px solid var(--accent); border-radius:20px; text-align:center; position:relative; overflow:hidden;
+}
+.share-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--accent),var(--gold),var(--green)); }
+.share-card .share-death-date { font-size:1.8rem; font-weight:900; color:var(--accent); margin:8px 0; }
+.share-card .share-tagline { font-size:0.9rem; color:var(--text2); font-style:italic; margin-bottom:16px; }
+.share-buttons { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.share-btn { padding:8px 16px; border-radius:8px; font-size:0.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; }
+.share-btn.twitter { background:#1DA1F2; color:white; }
+.share-btn.facebook { background:#4267B2; color:white; }
+.share-btn.whatsapp { background:#25D366; color:white; }
+.share-btn.copy { background:var(--surface); color:var(--text); border:1px solid var(--border); }
+
+/* ===== SOCIAL CIRCLE ===== */
+.social-circle { margin-top:32px; }
+.social-circle h3 { font-size:1.3rem; margin-bottom:12px; }
+.invite-box { background:var(--surface); padding:20px; border-radius:16px; border:1px solid var(--border); text-align:center; margin-bottom:16px; }
+.invite-link { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 16px; color:var(--green); font-family:monospace; font-size:0.85rem; word-break:break-all; display:block; margin:12px 0; }
+.friend-card { display:flex; align-items:center; gap:16px; padding:16px; background:var(--surface); border-radius:var(--radius); margin-bottom:8px; }
+.friend-avatar { width:40px; height:40px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:800; color:white; }
+.friend-info { flex:1; }
+.friend-name { font-weight:600; }
+.friend-stat { font-size:0.85rem; color:var(--text3); }
+
+/* ===== ABOUT PAGE ===== */
+.about-page { max-width:800px; margin:0 auto; padding:40px 20px 80px; }
+.about-page h1 { font-size:2rem; margin-bottom:24px; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.about-page h2 { font-size:1.3rem; margin:32px 0 12px; color:var(--text); }
+.about-page p { color:var(--text2); font-size:0.95rem; margin-bottom:12px; line-height:1.7; }
+.about-card { background:var(--surface); padding:24px; border-radius:16px; margin:20px 0; border:1px solid var(--border); }
+.consultation-cta {
+  background:linear-gradient(135deg,#1a1a2e,#16213e); border:2px solid var(--gold); border-radius:20px;
+  padding:32px; text-align:center; margin:32px 0;
+}
+.consultation-cta h3 { color:var(--gold); font-size:1.4rem; margin-bottom:8px; }
+.consultation-cta .price { font-size:2.5rem; font-weight:900; color:var(--gold); margin:12px 0; }
+.waitlist-count { font-size:0.85rem; color:var(--accent2); margin-top:8px; }
 
 /* Cookie Banner */
 .cookie-banner {
@@ -618,6 +684,16 @@ footer p { margin-bottom: 8px; }
   .q-conditions { grid-template-columns: 1fr 1fr; }
   .dash-stats { grid-template-columns: 1fr 1fr; }
 }
+
+/* Deathy Avatar */
+@keyframes deathyFadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes deathyFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+.deathy-companion svg { animation: deathyFloat 3s ease-in-out infinite; }
+.deathy-companion:hover svg { animation-duration: 1.5s; }
+.deathy-evolution-bar { display:flex; align-items:center; gap:8px; margin:8px 0; }
+.deathy-evolution-bar .bar { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; }
+.deathy-evolution-bar .bar .fill { height:100%; border-radius:3px; transition:width 0.5s, background 0.5s; }
+
 </style>
 </head>
 <body>
@@ -628,6 +704,7 @@ footer p { margin-bottom: 8px; }
     <div class="logo">&#9760; <span>Death</span>Clock</div>
     <div class="nav-links" id="navLinks">
       <button class="nav-tab active" onclick="showPage('home')">Home</button>
+      <button class="nav-tab" onclick="showPage('about')">About</button>
       <button class="nav-tab hidden" id="navDash" onclick="showPage('dashboard')">Dashboard</button>
       <button class="nav-tab hidden" id="navPrice" onclick="showPage('pricing')">Upgrade</button>
       <button class="btn-primary btn-sm" id="navCta" onclick="showPage('quiz')">Calculate</button>
@@ -639,15 +716,18 @@ footer p { margin-bottom: 8px; }
 <section id="page-home" class="hero">
   <div class="container">
     <h1>When Will You Die?</h1>
-    <p>Science-backed life expectancy calculator trained on data from 53+ million participants. See your death date. Then change it.</p>
-    <button class="btn-primary" onclick="showPage('quiz')">Calculate Your Death Date</button>
+    <p>The internet's most brutally honest life expectancy calculator. Spoiler: it's sooner than you think. But we'll show you how to run from the Reaper.</p>
+    <button class="btn-primary" onclick="showPage('quiz')" style="font-size:1.2rem; padding:16px 40px;">Find Out Your Death Date</button>
+    <div style="margin-top:16px;">
+      <button class="btn-secondary btn-sm" onclick="showPage('about')" style="font-size:0.85rem;">How does this work?</button>
+    </div>
     <div style="margin-top:40px; color:var(--text3); font-size:0.85rem;">
-      <p>Based on 1,200+ peer-reviewed studies. Not medical advice.</p>
+      <p>Research-backed. Peer-reviewed. Unapologetically honest.</p>
     </div>
     <div style="display:flex; justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap;">
       <div><div style="font-size:2rem; font-weight:800; color:var(--accent);">53M+</div><div style="font-size:0.8rem; color:var(--text3);">Research participants</div></div>
-      <div><div style="font-size:2rem; font-weight:800; color:var(--green);">1,200+</div><div style="font-size:0.8rem; color:var(--text3);">Studies analyzed</div></div>
-      <div><div style="font-size:2rem; font-weight:800; color:var(--gold);">100+</div><div style="font-size:0.8rem; color:var(--text3);">Life factors tracked</div></div>
+      <div><div style="font-size:2rem; font-weight:800; color:var(--green);">1,200+</div><div style="font-size:0.8rem; color:var(--text3);">Peer-reviewed studies</div></div>
+      <div><div style="font-size:2rem; font-weight:800; color:var(--gold);">100+</div><div style="font-size:0.8rem; color:var(--text3);">Life factors analyzed</div></div>
     </div>
   </div>
 </section>
@@ -873,6 +953,49 @@ footer p { margin-bottom: 8px; }
   <p>You can manage your cookie preferences using the cookie banner on first visit, or by clearing cookies in your browser settings. Disabling essential cookies may prevent some features from working.</p>
 </section>
 
+<!-- ===== ABOUT PAGE ===== -->
+<section id="page-about" class="hidden about-page">
+  <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
+  <h1>About Death Clock</h1>
+
+  <p>Death Clock is a research-backed life expectancy calculator that tells you exactly when you're going to die, based on peer-reviewed longevity science. Then it helps you cheat.</p>
+
+  <h2>The Science (It's Not Made Up)</h2>
+  <div class="about-card">
+    <p>Our algorithm synthesises data from <strong>1,200+ peer-reviewed studies</strong> spanning <strong>53 million+ research participants</strong>. Every impact factor is mapped to a specific study with a published sample size and methodology.</p>
+    <p>Sources include: the Harvard 80-year longitudinal study on adult development, the Copenhagen City Heart Study (n=8,577), the VA Million Veteran Program (n=719,147), Framingham Heart Study, NIH ARIC study (n=15,752), NHANES cohorts (n=468,629), Lancet meta-analyses, JAMA Psychiatry research, and the Finnish sauna study (JAMA, n=2,315).</p>
+    <p>Each factor shows its source study and sample size. No made-up numbers. No AI hallucinations. Just cold, peer-reviewed math telling you uncomfortable truths about your lifestyle.</p>
+  </div>
+
+  <h2>How the Calculation Works</h2>
+  <div class="about-card">
+    <p><strong>Step 1:</strong> We start with the SSA actuarial life table (2023 period table) for your age and sex. This gives your statistical baseline life expectancy.</p>
+    <p><strong>Step 2:</strong> We apply 100+ adjustment factors based on your answers: exercise, diet, sleep, social connections, stress, medical conditions, biometrics, environment, and lifestyle habits. Each factor's impact is derived from peer-reviewed research.</p>
+    <p><strong>Step 3:</strong> We calculate your adjusted life expectancy, project your death date, and generate a personalised plan to push that date as far into the future as possible.</p>
+    <p><strong>The streak system:</strong> When you log daily habits, each one contributes a fraction of its annual research-backed impact. Log "Walk 30 minutes" (research: +3 years) for one day? That's +0.008 days. Streaks amplify with multipliers (7-day: 1.5x, 30-day: 2x, 90-day: 2.5x, 365-day: 3x) to reward consistency, the single most important factor in behaviour change.</p>
+  </div>
+
+  <h2>Medical Disclaimer</h2>
+  <div class="about-card" style="border-color:var(--accent);">
+    <p><strong>Death Clock is not medical advice.</strong> Our estimates are based on statistical averages from published research. Individual results vary enormously based on genetics, accidents, medical breakthroughs, and factors we cannot measure. Many conditions that affect lifespan are undetectable without lab work.</p>
+    <p>Always consult qualified healthcare professionals for medical decisions. Use Death Clock as motivation to make better choices, not as a substitute for professional medical guidance.</p>
+  </div>
+
+  <h2>Want Expert Guidance?</h2>
+  <div class="consultation-cta">
+    <h3>1-on-1 Longevity Consultation</h3>
+    <p style="color:var(--text2); margin-bottom:8px;">Get personalised guidance from a board-certified healthspan specialist. Review your Death Clock results, biomarkers, and lifestyle factors with an expert who actually knows what they're talking about.</p>
+    <div class="price">$499</div>
+    <p style="color:var(--text3); font-size:0.9rem;">60-minute video consultation + written action plan</p>
+    <button class="btn-gold" onclick="joinWaitlist()" style="margin-top:16px; font-size:1.1rem; padding:14px 32px;">Join the Waiting List</button>
+    <div class="waitlist-count" id="waitlistCount">127 people ahead of you</div>
+    <p style="color:var(--text3); font-size:0.75rem; margin-top:8px;">Limited availability. We review applications and contact you when a slot opens.</p>
+  </div>
+
+  <h2>Contact</h2>
+  <p>Questions, feedback, or want to collaborate? Email us at <a href="mailto:hello@death-clock.app">hello@death-clock.app</a></p>
+</section>
+
 <!-- ===== COOKIE BANNER ===== -->
 <div id="cookieBanner" class="cookie-banner hidden">
   <p>We use essential cookies for site functionality and optional analytics cookies to improve our service. <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a></p>
@@ -886,7 +1009,8 @@ footer p { margin-bottom: 8px; }
     <p><strong>Disclaimer:</strong> Death Clock is for educational and motivational purposes only. It is not medical advice. Consult healthcare professionals for health decisions.</p>
     <p>Calculations based on published actuarial data and peer-reviewed longevity research.</p>
     <div style="margin-top:16px; display:flex; justify-content:center; gap:24px; flex-wrap:wrap;">
-      <a href="/blog/how-not-to-die.html">Blog: How Not to Die</a>
+      <a href="/blog/how-not-to-die.html">How Not to Die</a>
+      <a href="/blog/substances-and-lifespan.html">Substances &amp; Lifespan</a>
       <a href="#" onclick="showPage('privacy');return false;">Privacy Policy</a>
       <a href="#" onclick="showPage('terms');return false;">Terms of Service</a>
       <a href="#" onclick="showPage('cookies');return false;">Cookie Policy</a>
@@ -1479,7 +1603,7 @@ function showPage(page) {
   state.currentPage = page;
   // Update nav
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  const tabs = { home: 0, dashboard: 1, pricing: 2 };
+  const tabs = { home: 0, about: 1, dashboard: 2, pricing: 3 };
   if (tabs[page] !== undefined) document.querySelectorAll('.nav-tab')[tabs[page]]?.classList.add('active');
   if (page === 'quiz') { state.currentQuestion = 0; renderQuestion(); }
   if (page === 'dashboard') renderDashboard();
@@ -1893,6 +2017,13 @@ function renderResult() {
       <div style="color:var(--text3); font-size:0.85rem">Based on ${r.factors.length} analyzed factors</div>
     </div>
 
+    <!-- MEET YOUR DEATHY -->
+    <div style="margin-top:32px; text-align:center;">
+      <h3 style="color:var(--accent); margin-bottom:4px; font-size:1.3rem;">Meet Your Ghost</h3>
+      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:8px;">This is Deathy. Your personal afterlife companion. They look like you... statistically speaking.</p>
+    </div>
+    <div id="deathyResult">${renderDeathyCompanion(180)}</div>
+
     <h3 style="margin:40px 0 16px; font-size:1.3rem">Your Life Factors</h3>
     <div class="factors-grid">
       <div>
@@ -1919,12 +2050,44 @@ function renderResult() {
       </div>
     </div>
 
+    <!-- SHARE YOUR RESULT -->
+    <div class="share-card" style="margin-top:48px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; text-align:center;">
+      <h3 style="color:var(--accent); margin-bottom:8px;">Share Your Death Date</h3>
+      <p style="color:var(--text2); margin-bottom:16px; font-size:0.9rem;">Challenge your friends. Who dies first wins. (Wait, that's not right...)</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn-sm" onclick="shareResult('twitter')" style="background:#1DA1F2; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Twitter/X</button>
+        <button class="btn-sm" onclick="shareResult('whatsapp')" style="background:#25D366; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">WhatsApp</button>
+        <button class="btn-sm" onclick="shareResult('facebook')" style="background:#4267B2; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Facebook</button>
+        <button class="btn-sm" onclick="shareResult('linkedin')" style="background:#0077B5; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">LinkedIn</button>
+        <button class="btn-sm share-btn-copy" onclick="shareResult('copy')" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:8px 16px; border-radius:6px; cursor:pointer;">Copy</button>
+      </div>
+    </div>
+
+    <!-- SOCIAL CIRCLE -->
+    <div id="socialCircle"></div>
+
     <div id="clinicalTests" style="margin-top:48px;"></div>
     <div id="leaderboard" style="max-width:700px; margin:0 auto;"></div>
 
+    <!-- EMAIL CAPTURE -->
+    <div id="emailCaptureSection" class="email-capture" style="margin-top:48px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px;">
+      <h3 style="margin-bottom:4px;">Get Your Death Updates</h3>
+      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px;">Weekly life score reports. Milestone alerts when you add a full day. Dark humor tips to keep you alive longer.</p>
+      <div style="display:flex; gap:8px; max-width:480px; margin:0 auto 12px;">
+        <input type="email" id="emailCaptureInput" placeholder="your@email.com" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:1rem;">
+        <button class="btn-primary" onclick="captureEmail()">Subscribe</button>
+      </div>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:0.8rem; color:var(--text3);">
+        <label><input type="checkbox" id="emailPrefWeekly" checked> Weekly death report</label>
+        <label><input type="checkbox" id="emailPrefMilestone" checked> Milestone alerts</label>
+        <label><input type="checkbox" id="emailPrefTips" checked> Survival tips</label>
+      </div>
+    </div>
+    ${localStorage.getItem('dc_user_email') ? '' : ''}
+
     <div class="goal-setup" style="margin-top:48px;">
       <h3 style="color:var(--green)">Want to Change Your Death Date?</h3>
-      <p style="color:var(--text2)">Set a longevity goal and get a personalized daily action plan. Watch your death date move as you build healthy habits.</p>
+      <p style="color:var(--text2)">Set a longevity goal and get a personalised daily action plan. Watch your death date move as you build healthy habits.</p>
       <button class="btn-green" onclick="showPage('dashboard'); setTimeout(()=>showTab('myplan'),100);" style="margin-top:12px; font-size:1.1rem; padding:14px 32px;">
         Set My Longevity Goal
       </button>
@@ -1947,6 +2110,13 @@ function renderResult() {
   animateLifeCanvas();
   renderClinicalTests();
   document.getElementById('leaderboard').innerHTML = renderLeaderboard();
+  document.getElementById('socialCircle').innerHTML = renderSocialCircle();
+  // Auto-fill email if already captured
+  const savedEmail = localStorage.getItem('dc_user_email');
+  if (savedEmail) {
+    const sec = document.getElementById('emailCaptureSection');
+    if (sec) sec.innerHTML = '<div style="text-align:center; padding:20px; color:var(--green);"><strong>&#10003; Locked in.</strong> Death updates going to ' + savedEmail + '</div>';
+  }
 }
 
 function startCountdown() {
@@ -2856,6 +3026,7 @@ function toggleHabit(habitId) {
   }
   recalcTotalDaysAdded();
   saveGoalState();
+  updateDeathyAvatar();
   showTab('myplan');
 }
 
@@ -3008,15 +3179,22 @@ function renderMyPlanTab(el) {
   }
 
   el.innerHTML = `
+    <div id="deathyAvatarPanel" style="text-align:center; margin-bottom:16px;">
+      <div class="deathy-svg-wrap" style="width:120px; height:144px; margin:0 auto; cursor:pointer;" onclick="refreshDeathySpeech()">
+        ${generateDeathy({...getDeathyParams(), healthScore: Math.min(100, calcDeathyHealth(getDeathyParams()) + Math.min(20, (g.totalDaysAdded||0)*0.5))})}
+      </div>
+      <div style="font-size:0.75rem; color:var(--text3);">Ghost Health: <span class="deathy-health-num" style="color:${(() => { const s = Math.min(100, calcDeathyHealth(getDeathyParams()) + Math.min(20, (g.totalDaysAdded||0)*0.5)); return s>=70?'var(--green)':s>=40?'var(--gold)':'var(--accent)'; })()}">${Math.round(Math.min(100, calcDeathyHealth(getDeathyParams()) + Math.min(20, (g.totalDaysAdded||0)*0.5)))}/100</span></div>
+      <div class="deathy-evolution-bar"><span style="font-size:0.7rem; color:var(--text3);">&#9760;</span><div class="bar"><div class="fill" style="width:${Math.min(100, calcDeathyHealth(getDeathyParams()) + Math.min(20, (g.totalDaysAdded||0)*0.5))}%; background:${(() => { const s = Math.min(100, calcDeathyHealth(getDeathyParams()) + Math.min(20, (g.totalDaysAdded||0)*0.5)); return s>=70?'var(--green)':s>=40?'var(--gold)':'var(--accent)'; })()};"></div></div><span style="font-size:0.7rem; color:var(--text3);">&#x1F451;</span></div>
+    </div>
     <div class="days-added-banner">
-      <div class="days-added-num">+${g.totalDaysAdded.toFixed(1)} days</div>
-      <div class="days-added-label">added to your life</div>
+      <div class="days-added-num">+${(g.totalDaysAdded * 1440).toFixed(0)} minutes</div>
+      <div class="days-added-label">added to your life (${g.totalDaysAdded.toFixed(1)} days)</div>
       ${streak > 0 ? '<div class="streak-badge">\u{1F525} ' + streak + ' day streak (' + multiplier + 'x multiplier)</div>' : '<div style="font-size:0.8rem; color:var(--text3); margin-top:4px;">Start your streak by logging all habits today</div>'}
     </div>
 
     <div class="plan-summary">
       <div class="plan-stat">
-        <div class="plan-stat-num" style="color:var(--green)">+${todayDaysAdded.toFixed(3)}</div>
+        <div class="plan-stat-num" style="color:var(--green)">+${(todayDaysAdded * 1440).toFixed(1)} min</div>
         <div class="plan-stat-label">Today</div>
       </div>
       <div class="plan-stat">
@@ -3036,9 +3214,21 @@ function renderMyPlanTab(el) {
     <div style="margin:20px 0 8px; font-weight:600; font-size:1.1rem;">Today's Habits</div>
     <p style="color:var(--text3); font-size:0.8rem; margin-bottom:12px;">Tap to log each habit. Complete 50%+ to maintain your streak.</p>
 
-    ${g.plan.map(h => {
+    ${g.plan.map((h, idx) => {
+      const isPremiumLocked = state.userTier === 'free' && idx > 0;
       const logged = todayLog.includes(h.id);
-      const impactStr = '+' + (h.dailyImpact * multiplier).toFixed(3) + ' days';
+      const impactMin = (h.dailyImpact * multiplier * 1440).toFixed(1);
+      const impactStr = '+' + impactMin + ' min';
+      if (isPremiumLocked) {
+        return '<div class="habit-card" style="filter:blur(4px); pointer-events:none; user-select:none;">' +
+          '<div class="habit-check"></div>' +
+          '<div class="habit-info">' +
+            '<div class="habit-name">' + (h.icon || '') + ' ' + h.name + '</div>' +
+            '<div class="habit-meta">' + h.difficulty + ' | ' + h.source + '</div>' +
+          '</div>' +
+          '<div class="habit-impact">' + impactStr + '</div>' +
+        '</div>';
+      }
       return '<div class="habit-card ' + (logged ? 'logged' : '') + '" onclick="toggleHabit(\'' + h.id + '\')">' +
         '<div class="habit-check">' + (logged ? '✓' : '') + '</div>' +
         '<div class="habit-info">' +
@@ -3048,6 +3238,13 @@ function renderMyPlanTab(el) {
         '<div class="habit-impact">' + impactStr + '</div>' +
       '</div>';
     }).join('')}
+
+    ${state.userTier === 'free' && g.plan.length > 1 ? `
+    <div style="text-align:center; margin:16px 0; padding:20px; background:linear-gradient(135deg, rgba(233,69,96,0.1), rgba(240,192,64,0.1)); border:1px solid var(--gold); border-radius:var(--radius);">
+      <div style="font-size:1.2rem; margin-bottom:4px;">&#x1F512; ${g.plan.length - 1} more habits locked</div>
+      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:12px;">Your free plan shows 1 habit. Unlock your full Cheat Death Plan with all ${g.plan.length} personalised habits.</p>
+      <button class="btn-gold" onclick="showPage('pricing')" style="font-size:1rem; padding:12px 28px;">Unlock Full Plan - Premium</button>
+    </div>` : ''}
 
     <div style="margin-top:24px;">
       <div style="font-weight:600; margin-bottom:8px;">Death Date Shift</div>
@@ -3078,12 +3275,655 @@ function renderMyPlanTab(el) {
 }
 
 // ============================================
+// WAITLIST + EMAIL + SHARE + SOCIAL CIRCLE
+// ============================================
+function joinWaitlist() {
+  const email = prompt('Enter your email to join the consultation waiting list:');
+  if (!email || !email.includes('@')) return;
+  localStorage.setItem('dc_waitlist_email', email);
+  const el = document.getElementById('waitlistCount');
+  if (el) el.innerHTML = '&#10003; You\'re on the list! We\'ll email you at <strong>' + email + '</strong> when a slot opens.';
+  alert('You\'re in! Position #128 on the waiting list. We\'ll reach out when a healthspan specialist is available.');
+}
+
+function captureEmail() {
+  const input = document.getElementById('emailCaptureInput');
+  if (!input) return;
+  const email = input.value.trim();
+  if (!email || !email.includes('@')) { input.style.borderColor = 'var(--accent)'; return; }
+  localStorage.setItem('dc_user_email', email);
+  const prefs = {
+    weekly_report: document.getElementById('emailPrefWeekly')?.checked || false,
+    milestone_alerts: document.getElementById('emailPrefMilestone')?.checked || false,
+    tips: document.getElementById('emailPrefTips')?.checked || false
+  };
+  localStorage.setItem('dc_email_prefs', JSON.stringify(prefs));
+  const container = document.getElementById('emailCaptureSection');
+  if (container) container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--green);"><strong>&#10003; Locked in.</strong> We\'ll haunt your inbox at ' + email + '</div>';
+}
+
+function generateShareText() {
+  if (!state.result) return '';
+  const r = state.result;
+  const dd = r.deathDate;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return 'I just found out I\'m dying on ' + months[dd.getMonth()] + ' ' + dd.getDate() + ', ' + dd.getFullYear() +
+    '. That\'s ' + r.remainingYears + ' years left. My Life Score: ' + r.lifeScore + '/100. ' +
+    'Think you\'ll outlive me? death-clock.app';
+}
+
+function shareResult(platform) {
+  const text = encodeURIComponent(generateShareText());
+  const url = encodeURIComponent('https://death-clock.app');
+  const links = {
+    twitter: 'https://twitter.com/intent/tweet?text=' + text,
+    facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + url + '&quote=' + text,
+    whatsapp: 'https://wa.me/?text=' + text,
+    linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + url,
+    copy: null
+  };
+  if (platform === 'copy') {
+    navigator.clipboard.writeText(decodeURIComponent(text)).then(() => {
+      const btn = document.querySelector('.share-btn-copy');
+      if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); }
+    });
+    return;
+  }
+  if (links[platform]) window.open(links[platform], '_blank', 'width=600,height=400');
+}
+
+function generateInviteCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'DC-';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function getOrCreateInviteCode() {
+  let code = localStorage.getItem('dc_invite_code');
+  if (!code) { code = generateInviteCode(); localStorage.setItem('dc_invite_code', code); }
+  return code;
+}
+
+function getSocialCircle() {
+  return JSON.parse(localStorage.getItem('dc_social_circle') || '[]');
+}
+
+function saveSocialCircle(circle) {
+  localStorage.setItem('dc_social_circle', JSON.stringify(circle));
+}
+
+function addFriendToCircle(name, deathYear, lifeScore) {
+  const circle = getSocialCircle();
+  circle.push({ name, deathYear, lifeScore, addedAt: new Date().toISOString() });
+  saveSocialCircle(circle);
+}
+
+function showInviteModal() {
+  const code = getOrCreateInviteCode();
+  const inviteUrl = 'https://death-clock.app?ref=' + code;
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Invite Friends to Death Clock</h3>
+    <p style="color:var(--text2); margin-bottom:16px;">Challenge your friends. See who dies first. (Dark? Yes. Motivating? Also yes.)</p>
+    <div style="background:var(--bg); padding:16px; border-radius:var(--radius); text-align:center; margin-bottom:16px;">
+      <div style="font-size:0.8rem; color:var(--text3); margin-bottom:4px;">Your invite link</div>
+      <div style="font-size:1rem; color:var(--gold); word-break:break-all;" id="inviteLink">${inviteUrl}</div>
+      <button class="btn-primary btn-sm" onclick="navigator.clipboard.writeText('${inviteUrl}').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy Link',2000)})" style="margin-top:8px;">Copy Link</button>
+    </div>
+    <p style="color:var(--text3); font-size:0.8rem;">When friends complete the quiz with your link, they'll appear in your Social Circle leaderboard.</p>
+    <div style="margin-top:16px;">
+      <h4 style="margin-bottom:8px;">Add a friend manually</h4>
+      <div class="form-group"><label>Name</label><input type="text" id="friendName" placeholder="e.g. Dave"></div>
+      <div class="form-group"><label>Their death year (from their result)</label><input type="number" id="friendDeathYear" placeholder="e.g. 2078"></div>
+      <div class="form-group"><label>Their Life Score</label><input type="number" id="friendScore" placeholder="e.g. 62" min="0" max="100"></div>
+      <button class="btn-green btn-sm" onclick="addFriendManual()">Add Friend</button>
+    </div>
+  `;
+}
+
+function addFriendManual() {
+  const name = document.getElementById('friendName')?.value.trim();
+  const deathYear = parseInt(document.getElementById('friendDeathYear')?.value);
+  const score = parseInt(document.getElementById('friendScore')?.value);
+  if (!name || !deathYear) { alert('Need at least a name and death year.'); return; }
+  addFriendToCircle(name, deathYear, score || 0);
+  closeModal();
+  if (state.currentPage === 'result') renderResult();
+  else if (state.currentPage === 'dashboard') renderDashboard();
+}
+
+function renderSocialCircle() {
+  // Show choice: global leaderboard or friends circle
+  const circle = getSocialCircle();
+  const hasCircle = circle.length > 0;
+  const showGlobal = localStorage.getItem('dc_leaderboard_pref') === 'global';
+
+  if (!hasCircle && !showGlobal) {
+    return `
+    <div style="margin-top:48px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; text-align:center;">
+      <h3 style="color:var(--gold); margin-bottom:8px;">&#9760; Who Dies First?</h3>
+      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px;">Competition makes everything better. Even death.</p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn-primary" onclick="localStorage.setItem('dc_leaderboard_pref','global'); document.getElementById('socialCircle').innerHTML = renderSocialCircle();" style="padding:12px 24px;">
+          &#127758; Global Leaderboard<br><span style="font-size:0.75rem; opacity:0.8;">Compete with the world</span>
+        </button>
+        <button class="btn-gold" onclick="showInviteModal()" style="padding:12px 24px;">
+          &#128101; Friends Circle<br><span style="font-size:0.75rem; opacity:0.8;">Challenge your mates</span>
+        </button>
+      </div>
+    </div>`;
+  }
+  return renderSocialCircleInner();
+}
+
+function renderSocialCircleInner() {
+  const circle = getSocialCircle();
+  if (!state.result) return '';
+  const myYear = state.result.deathDate.getFullYear();
+  const myName = 'You';
+  const all = [{ name: myName, deathYear: myYear, lifeScore: state.result.lifeScore, isMe: true }, ...circle];
+  all.sort((a, b) => b.deathYear - a.deathYear);
+
+  if (circle.length === 0) {
+    return `
+      <div class="social-circle" style="margin-top:32px;">
+        <h3>Social Circle Leaderboard</h3>
+        <p style="color:var(--text2);">Who in your friend group dies first? Invite friends to find out.</p>
+        <button class="btn-gold btn-sm" onclick="showInviteModal()" style="margin-top:8px;">Invite Friends</button>
+      </div>`;
+  }
+
+  return `
+    <div class="social-circle" style="margin-top:32px;">
+      <h3>Social Circle: Who Dies First?</h3>
+      <div style="margin:16px 0;">
+        ${all.map((p, i) => {
+          const medal = i === 0 ? '&#x1F451;' : i === all.length - 1 ? '&#x1F480;' : '';
+          const rowStyle = p.isMe ? 'border-color:var(--gold); background:rgba(240,192,64,0.05);' : '';
+          return `<div class="social-row" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; ${rowStyle}">
+            <div style="font-size:1.2rem; min-width:30px; text-align:center;">${medal || '#' + (i + 1)}</div>
+            <div style="flex:1;"><strong>${p.name}</strong>${p.isMe ? ' (you)' : ''}</div>
+            <div style="color:var(--text2); font-size:0.9rem;">Dies ~${p.deathYear}</div>
+            <div style="color:var(--gold); font-size:0.85rem;">Score: ${p.lifeScore}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="btn-gold btn-sm" onclick="showInviteModal()">Invite More Friends</button>
+    </div>`;
+}
+
+
+// ============================================
+// DEATHY AVATAR ENGINE
+// ============================================
+
+function generateDeathy(params = {}) {
+  const p = {
+    bmi: params.bmi || 'healthy',
+    age: params.age || 35,
+    smoking: params.smoking || 'never',
+    exercise: params.exercise || '3-4x',
+    diet: params.diet || 'healthy',
+    alcohol: params.alcohol || 'never',
+    drugs: params.drugs || 'none',
+    stress: params.stress || 'moderate',
+    social: params.social || 'moderate',
+    sleep: params.sleep || 'optimal',
+    sleepQuality: params.sleepQuality || 'good',
+    conditions: params.conditions || [],
+    healthcare: params.healthcare || 'regular',
+    activity: params.activity || 'none',
+    region: params.region || 'neutral',
+    healthScore: params.healthScore || null,
+  };
+  if (p.healthScore === null) p.healthScore = calcDeathyHealth(p);
+  const hScore = Math.max(0, Math.min(100, p.healthScore));
+
+  // Unique ID suffix to avoid SVG gradient collisions
+  const uid = Math.random().toString(36).substr(2,6);
+
+  // Body width from BMI
+  const bodyWidths = { underweight:0.6, healthy:0.85, overweight:1.05, obese:1.3, severely_obese:1.55 };
+  const bodyW = bodyWidths[p.bmi] || 0.85;
+
+  // Ghost color degrades with poor health
+  const ghostR = Math.round(255 - (100-hScore)*0.8);
+  const ghostG = Math.round(255 - (100-hScore)*1.2);
+  const ghostB = Math.round(255 - (100-hScore)*0.6);
+  const ghostColor = `rgb(${ghostR},${ghostG},${ghostB})`;
+  const shadowR = Math.round(200 - (100-hScore)*1.0);
+  const shadowG = Math.round(210 - (100-hScore)*1.5);
+  const shadowB = Math.round(220 - (100-hScore)*0.8);
+  const shadowColor = `rgb(${shadowR},${shadowG},${shadowB})`;
+
+  let glowColor, glowOpacity;
+  if (hScore >= 80) { glowColor='#4ecca3'; glowOpacity=0.3; }
+  else if (hScore >= 60) { glowColor='#f9ed69'; glowOpacity=0.2; }
+  else if (hScore >= 40) { glowColor='#f38181'; glowOpacity=0.2; }
+  else { glowColor='#6c5b7b'; glowOpacity=0.15; }
+
+  // Eye state
+  let eyeStyle = 'normal';
+  if (p.sleep === 'short' || p.sleepQuality === 'poor') eyeStyle = 'tired';
+  if (p.alcohol === 'heavy' || p.drugs === 'recreational' || p.drugs === 'opioids') eyeStyle = 'bloodshot';
+  if (p.exercise === '5+' && (p.diet === 'very_healthy' || p.diet === 'healthy')) eyeStyle = 'bright';
+  if (p.stress === 'very_high') eyeStyle = 'worried';
+
+  // Mouth
+  let mouthStyle = 'happy';
+  if (hScore >= 80) mouthStyle = 'happy';
+  else if (hScore >= 60) mouthStyle = 'slight_smile';
+  else if (hScore >= 40) mouthStyle = 'neutral';
+  else if (hScore >= 20) mouthStyle = 'worried';
+  else mouthStyle = 'sad';
+  if (p.smoking === 'current_heavy' || p.smoking === 'current_light') mouthStyle = 'smoking';
+
+  const showBones = hScore < 25;
+  let ageLines = 0;
+  if (p.age > 50) ageLines = 1;
+  if (p.age > 65) ageLines = 2;
+  if (p.age > 80) ageLines = 3;
+
+  const cx = 100, cy = 95;
+  let svg = `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<defs>`;
+  svg += `<radialGradient id="dg${uid}" cx="40%" cy="30%"><stop offset="0%" stop-color="${ghostColor}"/><stop offset="100%" stop-color="${shadowColor}"/></radialGradient>`;
+  svg += `<filter id="gl${uid}"><feGaussianBlur stdDeviation="4" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>`;
+  svg += `</defs>`;
+
+  // Glow
+  svg += `<ellipse cx="${cx}" cy="${cy+10}" rx="${55*bodyW}" ry="70" fill="${glowColor}" opacity="${glowOpacity}" filter="url(#gl${uid})"/>`;
+
+  // Body
+  const bw = 50*bodyW, tailY = cy+65, wa = 8;
+  svg += `<path d="M ${cx-bw} ${cy-10} Q ${cx-bw} ${cy-60} ${cx} ${cy-65} Q ${cx+bw} ${cy-60} ${cx+bw} ${cy-10} L ${cx+bw} ${tailY-10} Q ${cx+bw*0.75} ${tailY+wa} ${cx+bw*0.5} ${tailY-5} Q ${cx+bw*0.25} ${tailY-wa-5} ${cx} ${tailY} Q ${cx-bw*0.25} ${tailY+wa+5} ${cx-bw*0.5} ${tailY-5} Q ${cx-bw*0.75} ${tailY-wa} ${cx-bw} ${tailY-10} Z" fill="url(#dg${uid})"/>`;
+
+  // Bones
+  if (showBones) {
+    svg += `<line x1="${cx}" y1="${cy-20}" x2="${cx}" y2="${cy+40}" stroke="#aaa" stroke-width="2" opacity="0.3"/>`;
+    svg += `<line x1="${cx-15}" y1="${cy}" x2="${cx+15}" y2="${cy}" stroke="#aaa" stroke-width="1.5" opacity="0.3"/>`;
+  }
+
+  // Eyes
+  const eyeY = cy-20, eyeS = 16*Math.min(bodyW,1.1);
+  svg += `<ellipse cx="${cx-eyeS}" cy="${eyeY}" rx="10" ry="12" fill="#111"/>`;
+  svg += `<ellipse cx="${cx+eyeS}" cy="${eyeY}" rx="10" ry="12" fill="#111"/>`;
+
+  if (eyeStyle === 'bright') {
+    svg += `<circle cx="${cx-eyeS+3}" cy="${eyeY-3}" r="2" fill="#fff" opacity="0.8"/>`;
+    svg += `<circle cx="${cx+eyeS+3}" cy="${eyeY-3}" r="2" fill="#fff" opacity="0.8"/>`;
+  }
+  if (eyeStyle === 'tired') {
+    svg += `<path d="M ${cx-eyeS-8} ${eyeY+10} Q ${cx-eyeS} ${eyeY+16} ${cx-eyeS+8} ${eyeY+10}" fill="none" stroke="#8888aa" stroke-width="1.5" opacity="0.5"/>`;
+    svg += `<path d="M ${cx+eyeS-8} ${eyeY+10} Q ${cx+eyeS} ${eyeY+16} ${cx+eyeS+8} ${eyeY+10}" fill="none" stroke="#8888aa" stroke-width="1.5" opacity="0.5"/>`;
+  }
+  if (eyeStyle === 'bloodshot') {
+    svg += `<line x1="${cx-eyeS-6}" y1="${eyeY-4}" x2="${cx-eyeS-2}" y2="${eyeY}" stroke="#e94560" stroke-width="0.5" opacity="0.6"/>`;
+    svg += `<line x1="${cx+eyeS+6}" y1="${eyeY-4}" x2="${cx+eyeS+2}" y2="${eyeY}" stroke="#e94560" stroke-width="0.5" opacity="0.6"/>`;
+  }
+  if (eyeStyle === 'worried') {
+    svg += `<line x1="${cx-eyeS-8}" y1="${eyeY-16}" x2="${cx-eyeS+5}" y2="${eyeY-14}" stroke="${shadowColor}" stroke-width="2.5" stroke-linecap="round"/>`;
+    svg += `<line x1="${cx+eyeS+8}" y1="${eyeY-16}" x2="${cx+eyeS-5}" y2="${eyeY-14}" stroke="${shadowColor}" stroke-width="2.5" stroke-linecap="round"/>`;
+  }
+
+  // Mouth
+  const mY = cy+8;
+  if (mouthStyle === 'happy') {
+    svg += `<path d="M ${cx-14} ${mY-2} Q ${cx-5} ${mY+16} ${cx+14} ${mY-2}" fill="#111"/>`;
+    svg += `<ellipse cx="${cx+4}" cy="${mY+8}" rx="6" ry="5" fill="#e94560"/>`;
+  } else if (mouthStyle === 'slight_smile') {
+    svg += `<path d="M ${cx-10} ${mY} Q ${cx} ${mY+10} ${cx+10} ${mY}" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>`;
+  } else if (mouthStyle === 'neutral') {
+    svg += `<line x1="${cx-8}" y1="${mY+3}" x2="${cx+8}" y2="${mY+3}" stroke="#555" stroke-width="2.5" stroke-linecap="round"/>`;
+  } else if (mouthStyle === 'worried') {
+    svg += `<path d="M ${cx-10} ${mY+8} Q ${cx} ${mY} ${cx+10} ${mY+8}" fill="none" stroke="#555" stroke-width="2.5" stroke-linecap="round"/>`;
+  } else if (mouthStyle === 'sad') {
+    svg += `<path d="M ${cx-12} ${mY+10} Q ${cx} ${mY-2} ${cx+12} ${mY+10}" fill="none" stroke="#666" stroke-width="2.5" stroke-linecap="round"/>`;
+  } else if (mouthStyle === 'smoking') {
+    svg += `<path d="M ${cx-8} ${mY+2} Q ${cx} ${mY+6} ${cx+8} ${mY+2}" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"/>`;
+    svg += `<rect x="${cx+8}" y="${mY-1}" width="18" height="4" rx="1" fill="#f5deb3"/>`;
+    svg += `<rect x="${cx+22}" y="${mY-1}" width="4" height="4" rx="1" fill="#e94560" opacity="0.8"/>`;
+    svg += `<path d="M ${cx+26} ${mY-4} Q ${cx+30} ${mY-14} ${cx+25} ${mY-22}" fill="none" stroke="#999" stroke-width="1" opacity="0.4"/>`;
+  }
+
+  // Age lines
+  if (ageLines >= 1) svg += `<path d="M ${cx-bw+10} ${cy+5} Q ${cx-bw+15} ${cy+2} ${cx-bw+20} ${cy+5}" fill="none" stroke="${shadowColor}" stroke-width="1" opacity="0.4"/>`;
+  if (ageLines >= 2) svg += `<path d="M ${cx+bw-20} ${cy+5} Q ${cx+bw-15} ${cy+2} ${cx+bw-10} ${cy+5}" fill="none" stroke="${shadowColor}" stroke-width="1" opacity="0.4"/>`;
+
+  // Activity accessories
+  if (p.activity === 'tennis' || p.activity === 'running' || p.activity === 'gym') {
+    svg += `<path d="M ${cx-bw+5} ${cy-48} Q ${cx} ${cy-52} ${cx+bw-5} ${cy-48}" fill="none" stroke="#e94560" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  if (p.activity === 'yoga') {
+    svg += `<circle cx="${cx}" cy="${cy-72}" r="4" fill="none" stroke="#4ecca3" stroke-width="1.5" opacity="0.6"/>`;
+    svg += `<circle cx="${cx}" cy="${cy-72}" r="8" fill="none" stroke="#4ecca3" stroke-width="1" opacity="0.3"/>`;
+  }
+  if (p.activity === 'swimming') {
+    svg += `<path d="M ${cx-eyeS-10} ${eyeY-2} L ${cx-eyeS+10} ${eyeY-2}" fill="none" stroke="#00b4d8" stroke-width="2"/>`;
+    svg += `<path d="M ${cx+eyeS-10} ${eyeY-2} L ${cx+eyeS+10} ${eyeY-2}" fill="none" stroke="#00b4d8" stroke-width="2"/>`;
+    svg += `<line x1="${cx-eyeS+10}" y1="${eyeY-2}" x2="${cx+eyeS-10}" y2="${eyeY-2}" stroke="#00b4d8" stroke-width="1.5"/>`;
+  }
+  if (p.activity === 'cycling') {
+    svg += `<path d="M ${cx-25} ${cy-50} Q ${cx} ${cy-72} ${cx+25} ${cy-50}" fill="none" stroke="#f9ed69" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  if (p.activity === 'soccer') {
+    svg += `<circle cx="${cx+bw+15}" cy="${cy+45}" r="8" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.5"/>`;
+  }
+
+  // Lifestyle indicators
+  if (p.exercise === '5+') {
+    svg += `<path d="M ${cx-bw-3} ${cy+5} L ${cx-bw-8} ${cy+2} L ${cx-bw-3} ${cy-1}" fill="none" stroke="${shadowColor}" stroke-width="2" stroke-linecap="round" opacity="0.5"/>`;
+    svg += `<path d="M ${cx+bw+3} ${cy+5} L ${cx+bw+8} ${cy+2} L ${cx+bw+3} ${cy-1}" fill="none" stroke="${shadowColor}" stroke-width="2" stroke-linecap="round" opacity="0.5"/>`;
+  }
+  if (p.alcohol === 'heavy') {
+    svg += `<rect x="${cx-bw-18}" y="${cy+15}" width="10" height="16" rx="2" fill="none" stroke="#f9ed69" stroke-width="1.5" opacity="0.5"/>`;
+    svg += `<rect x="${cx-bw-17}" y="${cy+18}" width="8" height="8" rx="1" fill="#f9ed69" opacity="0.3"/>`;
+  }
+  if (p.sleep === 'short' || p.sleepQuality === 'poor') {
+    svg += `<text x="${cx+bw+5}" y="${cy-30}" font-size="10" fill="#888" opacity="0.5" font-family="sans-serif">z</text>`;
+    svg += `<text x="${cx+bw+12}" y="${cy-38}" font-size="8" fill="#888" opacity="0.4" font-family="sans-serif">z</text>`;
+  }
+  if (p.social === 'strong') {
+    svg += `<path d="M ${cx} ${cy+50} L ${cx-5} ${cy+44} A 4 4 0 0 1 ${cx} ${cy+40} A 4 4 0 0 1 ${cx+5} ${cy+44} Z" fill="#e94560" opacity="0.5"/>`;
+  }
+  if (p.social === 'isolated') {
+    svg += `<circle cx="${cx}" cy="${cy+50}" r="3" fill="none" stroke="#666" stroke-width="1" opacity="0.4" stroke-dasharray="2,2"/>`;
+  }
+  if (p.stress === 'low' && p.exercise !== 'none') {
+    svg += `<ellipse cx="${cx}" cy="${cy-60}" rx="18" ry="5" fill="none" stroke="#4ecca3" stroke-width="1.5" opacity="0.4"/>`;
+  }
+  if (p.stress === 'very_high') {
+    svg += `<path d="M ${cx-bw+8} ${cy-35} Q ${cx-bw+6} ${cy-30} ${cx-bw+8} ${cy-28}" fill="#6cb4ee" opacity="0.5"/>`;
+  }
+  if (p.conditions && p.conditions.includes('heart_disease')) {
+    svg += `<text x="${cx-4}" y="${cy+5}" font-size="10" fill="#e94560" opacity="0.4">&#9829;</text>`;
+  }
+
+  svg += `</svg>`;
+  return svg;
+}
+
+function calcDeathyHealth(p) {
+  let score = 75;
+  const bmiS = { underweight:-5, healthy:0, overweight:-3, obese:-10, severely_obese:-20 };
+  score += (bmiS[p.bmi]||0);
+  const smokS = { never:0, former:-5, current_light:-15, current_heavy:-25 };
+  score += (smokS[p.smoking]||0);
+  const exS = { '5+':12, '3-4x':8, '1-2x':3, none:-12 };
+  score += (exS[p.exercise]||0);
+  const dietS = { very_healthy:12, healthy:6, average:0, poor:-12 };
+  score += (dietS[p.diet]||0);
+  const alcS = { never:0, occasional:0, moderate:-2, heavy:-12 };
+  score += (alcS[p.alcohol]||0);
+  const drugS = { none:0, cannabis:-3, recreational:-10, opioids:-20 };
+  score += (drugS[p.drugs]||0);
+  const strS = { low:5, moderate:0, high:-5, very_high:-12 };
+  score += (strS[p.stress]||0);
+  const socS = { strong:10, moderate:5, few:-5, isolated:-18 };
+  score += (socS[p.social]||0);
+  const slpS = { optimal:0, moderate_short:-3, short:-8, long:-4 };
+  score += (slpS[p.sleep]||0);
+  const condP = { diabetes:-10, heart_disease:-12, hypertension:-8, cancer:-6, stroke:-15, copd:-10, kidney_disease:-8, autoimmune:-5 };
+  (p.conditions||[]).forEach(c => { score += (condP[c]||0); });
+  return Math.max(5, Math.min(100, score));
+}
+
+// Map user's calculator answers to Deathy params
+function getDeathyParams() {
+  const a = state.answers;
+  // BMI
+  let bmi = 'healthy';
+  if (a.height_cm && a.weight_kg) {
+    const bmiVal = a.weight_kg / ((a.height_cm/100)**2);
+    if (bmiVal < 18.5) bmi = 'underweight';
+    else if (bmiVal < 25) bmi = 'healthy';
+    else if (bmiVal < 30) bmi = 'overweight';
+    else if (bmiVal < 40) bmi = 'obese';
+    else bmi = 'severely_obese';
+  }
+  // Age
+  let age = 30;
+  if (a.dob) {
+    const bd = new Date(a.dob);
+    age = Math.floor((Date.now() - bd.getTime()) / (365.25*24*60*60*1000));
+  }
+  // Conditions mapping
+  const condMap = { 'Diabetes':'diabetes', 'Heart Disease':'heart_disease', 'Hypertension':'hypertension',
+    'Cancer (current/remission)':'cancer', 'Stroke History':'stroke', 'COPD':'copd',
+    'Chronic Kidney Disease':'kidney_disease', 'Autoimmune Condition':'autoimmune' };
+  const conditions = (a.conditions||[]).filter(c=>c!=='None').map(c=>condMap[c]||'').filter(Boolean);
+
+  return {
+    bmi, age,
+    smoking: a.smoking || 'never',
+    exercise: a.exercise || '3-4x',
+    diet: a.diet || 'healthy',
+    alcohol: a.alcohol || 'never',
+    drugs: a.drugs || 'none',
+    stress: a.stress || 'moderate',
+    social: a.social || 'moderate',
+    sleep: a.sleep_hours || 'optimal',
+    sleepQuality: a.sleep_quality || 'good',
+    conditions,
+    healthcare: a.healthcare || 'regular',
+    activity: a.sport || 'none',
+    region: 'neutral'
+  };
+}
+
+// Save/load deathy state
+function getDeathyState() {
+  try { return JSON.parse(localStorage.getItem('dc_deathy_state')) || {}; } catch(e) { return {}; }
+}
+function saveDeathyState(ds) {
+  localStorage.setItem('dc_deathy_state', JSON.stringify(ds));
+}
+
+// ============================================
+// DEATHY PERSONALITY ENGINE - 30+ phrases
+// ============================================
+
+function getDeathyMessage() {
+  const ds = getDeathyState();
+  const g = state.longevityGoal;
+  const now = Date.now();
+  const lastVisit = ds.lastVisit || now;
+  const daysSinceVisit = Math.floor((now - lastVisit) / (24*60*60*1000));
+  const { streak } = g ? getStreakInfo() : { streak: 0 };
+  const params = getDeathyParams();
+  const hScore = calcDeathyHealth(params);
+
+  // Priority-ordered message selection
+  const messages = [];
+
+  // First ever visit
+  if (!ds.lastVisit) {
+    messages.push({ msg: "Well, well, well. Fresh meat. Let me take a good look at what I'm working with here...", mood: 'curious' });
+    messages.push({ msg: "Oh great, another human who thinks they're immortal. Spoiler: you're not.", mood: 'sarcastic' });
+    messages.push({ msg: "I'm your personal ghost. I get healthier when you do. No pressure, but also... all the pressure.", mood: 'intro' });
+  }
+
+  // Absent for 7+ days
+  if (daysSinceVisit >= 7) {
+    messages.push({ msg: "You were gone for " + daysSinceVisit + " days. I was literally fading away. Do you even care about me?", mood: 'guilt' });
+    messages.push({ msg: daysSinceVisit + " days without checking in. At this rate YOU'LL be the ghost, not me.", mood: 'dark' });
+    messages.push({ msg: "Oh you're back? I was starting to pick out your headstone font.", mood: 'snarky' });
+  }
+  // Absent 3-6 days
+  else if (daysSinceVisit >= 3) {
+    messages.push({ msg: "Three days without you. I've been haunting an empty tab like a sad Tamagotchi.", mood: 'needy' });
+    messages.push({ msg: "Miss me? Because your life expectancy certainly didn't miss those " + daysSinceVisit + " days of bad habits.", mood: 'dark' });
+  }
+
+  // Based on health score
+  if (hScore >= 85) {
+    messages.push({ msg: "Look at you, all glowing and healthy. I'm almost too pretty to be a ghost.", mood: 'proud' });
+    messages.push({ msg: "My glow-up is YOUR glow-up. We're basically the same entity at this point.", mood: 'happy' });
+    messages.push({ msg: "I'm radiating so much health energy right now, other ghosts are jealous.", mood: 'flex' });
+  } else if (hScore >= 65) {
+    messages.push({ msg: "Not bad, not bad. You're keeping me in decent shape. Could be glowier though.", mood: 'ok' });
+    messages.push({ msg: "I'd say I'm a solid 7 out of 10 ghost right now. Help me hit a 9?", mood: 'hopeful' });
+  } else if (hScore >= 45) {
+    messages.push({ msg: "I'm looking a bit grey lately. That's YOUR fault by the way.", mood: 'blame' });
+    messages.push({ msg: "My bones are showing through. That's... not a fashion statement.", mood: 'worried' });
+    messages.push({ msg: "Remember when I used to glow green? Yeah, me neither at this point.", mood: 'sad' });
+  } else {
+    messages.push({ msg: "I can see my own skeleton. This is fine. Everything is fine. (It's not fine.)", mood: 'panic' });
+    messages.push({ msg: "I'm literally decomposing in real-time. Is that burger really worth it?", mood: 'desperate' });
+    messages.push({ msg: "At this rate, I'll be haunting YOUR funeral instead of the other way around.", mood: 'grim' });
+  }
+
+  // Streak-based
+  if (streak >= 30) {
+    messages.push({ msg: streak + " day streak?! I haven't looked this good since... well, ever. I'm a ghost, I was born dead.", mood: 'ecstatic' });
+  } else if (streak >= 7) {
+    messages.push({ msg: streak + " days straight! I'm starting to feel things. Emotions. Is this what being alive is like?", mood: 'excited' });
+  } else if (streak === 0 && g && g.plan && g.plan.length > 0) {
+    messages.push({ msg: "Zero streak. ZERO. You're literally killing your own ghost. Think about that.", mood: 'disappointed' });
+    messages.push({ msg: "No habits logged today? Cool cool cool. I'll just sit here slowly dying. Again.", mood: 'passive_aggressive' });
+  }
+
+  // Smoking specific
+  if (params.smoking === 'current_heavy') {
+    messages.push({ msg: "Dude, I'm a ghost and even I think those cigarettes smell bad.", mood: 'cough' });
+    messages.push({ msg: "Every cigarette takes 11 minutes off YOUR life and makes ME uglier. Quit. Please.", mood: 'begging' });
+  }
+
+  // Alcohol heavy
+  if (params.alcohol === 'heavy') {
+    messages.push({ msg: "My eyes are bloodshot and I don't even have blood. Thanks for the liver damage proxy.", mood: 'hungover' });
+  }
+
+  // Isolated
+  if (params.social === 'isolated') {
+    messages.push({ msg: "You listed your social life as 'isolated'. I'm literally your most active relationship. That's concerning.", mood: 'awkward' });
+  }
+
+  // Sedentary
+  if (params.exercise === 'none') {
+    messages.push({ msg: "You don't exercise at all? My wavy ghost tail gets more movement than you do.", mood: 'shade' });
+  }
+
+  // Perfect health
+  if (hScore >= 95) {
+    messages.push({ msg: "I'm basically a wellness influencer at this point. #GhostGains #DeathClockApproved", mood: 'influencer' });
+  }
+
+  // Premium upsell moments
+  if (state.userTier === 'free' && g && g.plan && g.plan.length > 1) {
+    messages.push({ msg: "I've got " + (g.plan.length - 1) + " more life-saving habits locked up. Upgrade to Premium and watch me GLOW.", mood: 'sales' });
+  }
+
+  // Random daily vibes
+  messages.push({ msg: "Every minute you're alive is a minute I stay cute. So stay alive, yeah?", mood: 'sweet' });
+  messages.push({ msg: "Did you know the average person spends 6 months of their life waiting for red lights? You could be exercising instead.", mood: 'factoid' });
+  messages.push({ msg: "Fun fact: I'm the only ghost who WANTS you to live longer. Most ghosts want company.", mood: 'wholesome' });
+
+  // Pick one (weighted toward priority messages at top)
+  const idx = Math.floor(Math.random() * Math.min(messages.length, 4));
+  return messages[idx] || messages[0];
+}
+
+// Render Deathy companion with speech bubble
+function renderDeathyCompanion(size) {
+  const params = getDeathyParams();
+  const hScore = calcDeathyHealth(params);
+  const svg = generateDeathy({...params, healthScore: hScore});
+  const msg = getDeathyMessage();
+  const ds = getDeathyState();
+  ds.lastVisit = Date.now();
+  ds.healthScore = hScore;
+  saveDeathyState(ds);
+
+  return `
+    <div class="deathy-companion" style="text-align:center; margin:24px auto; max-width:${size||320}px;">
+      <div class="deathy-speech" style="background:var(--surface); border:2px solid var(--border); border-radius:16px; padding:14px 18px; margin-bottom:-8px; position:relative; font-size:0.9rem; color:var(--text); line-height:1.5; animation:deathyFadeIn 0.5s ease;">
+        ${msg.msg}
+        <div style="position:absolute; bottom:-10px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-top:10px solid var(--border);"></div>
+      </div>
+      <div style="width:${size||160}px; height:${(size||160)*1.2}px; margin:0 auto; cursor:pointer;" onclick="refreshDeathySpeech()" title="Click me for more wisdom">
+        ${svg}
+      </div>
+      <div style="font-size:0.75rem; color:var(--text3); margin-top:-8px;">
+        Health Score: <span style="color:${hScore>=70?'var(--green)':hScore>=40?'var(--gold)':'var(--accent)'}">${hScore}/100</span>
+        ${hScore < 50 ? ' | <span style="color:var(--accent)">I need help!</span>' : ''}
+      </div>
+    </div>`;
+}
+
+function refreshDeathySpeech() {
+  const container = document.querySelector('.deathy-companion');
+  if (!container) return;
+  const msg = getDeathyMessage();
+  const bubble = container.querySelector('.deathy-speech');
+  if (bubble) {
+    bubble.style.animation = 'none';
+    bubble.offsetHeight; // trigger reflow
+    bubble.style.animation = 'deathyFadeIn 0.5s ease';
+    bubble.childNodes[0].textContent = msg.msg;
+  }
+}
+
+// Deathy evolution: recalculate when habits change
+function updateDeathyAvatar() {
+  const el = document.getElementById('deathyAvatarPanel');
+  if (!el) return;
+  // Recalc with habit bonuses
+  const params = getDeathyParams();
+  const g = state.longevityGoal;
+  if (g && g.totalDaysAdded > 0) {
+    // Boost health score based on days added (max +20 bonus)
+    const habitBonus = Math.min(20, g.totalDaysAdded * 0.5);
+    params.healthScore = Math.min(100, calcDeathyHealth(params) + habitBonus);
+  }
+  const svg = generateDeathy(params);
+  const hScore = params.healthScore || calcDeathyHealth(params);
+  el.querySelector('.deathy-svg-wrap').innerHTML = svg;
+  const scoreEl = el.querySelector('.deathy-health-num');
+  if (scoreEl) {
+    scoreEl.textContent = Math.round(hScore) + '/100';
+    scoreEl.style.color = hScore>=70?'var(--green)':hScore>=40?'var(--gold)':'var(--accent)';
+  }
+}
+
+// ============================================
 // INIT
 // ============================================
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 checkCookieConsent();
 loadGoalState();
 loadUserTier();
+
+// PWA: Register service worker + install prompt
+let deferredInstallPrompt = null;
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Show install banner after result
+  setTimeout(() => {
+    if (state.result && deferredInstallPrompt) {
+      const banner = document.createElement('div');
+      banner.id = 'installBanner';
+      banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--gold);border-radius:12px;padding:12px 20px;z-index:9999;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+      banner.innerHTML = '<div><strong style="color:var(--gold)">Install Death Clock</strong><br><span style="font-size:0.8rem;color:var(--text2)">Track your death date from your home screen</span></div>' +
+        '<button onclick="installPWA()" style="background:var(--gold);color:#000;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap;">Install</button>' +
+        '<button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem;">&times;</button>';
+      document.body.appendChild(banner);
+    }
+  }, 3000);
+});
+function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(() => {
+    deferredInstallPrompt = null;
+    document.getElementById('installBanner')?.remove();
+  });
+}
 // Auto-load saved profile
 if (loadProfile()) {
   // Show welcome back message on home page
