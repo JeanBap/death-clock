@@ -708,6 +708,36 @@ footer p { margin-bottom: 8px; }
 .deathy-evolution-bar .bar { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; }
 .deathy-evolution-bar .bar .fill { height:100%; border-radius:3px; transition:width 0.5s, background 0.5s; }
 
+
+/* Deathy Timer Bar */
+.deathy-timer-bar {
+  display:none; position:sticky; top:60px; z-index:999;
+  background:linear-gradient(90deg,#0d0d1a,#1a1a2e);
+  border-bottom:1px solid var(--border);
+  padding:6px 16px; overflow:hidden;
+}
+.deathy-timer-bar.active { display:flex; align-items:center; justify-content:space-between; }
+.deathy-timer-bar .timer-text {
+  font-family:var(--mono,'Courier New',monospace); font-size:0.85rem; color:var(--accent); font-weight:700; letter-spacing:1px;
+}
+.deathy-timer-bar .timer-label { font-size:0.7rem; color:var(--text3); }
+.deathy-walking {
+  width:36px; height:36px; position:relative;
+  animation: deathyWalk 6s linear infinite alternate;
+}
+@keyframes deathyWalk {
+  0% { transform: translateX(-20px) scaleX(1); }
+  49% { transform: translateX(20px) scaleX(1); }
+  50% { transform: translateX(20px) scaleX(-1); }
+  100% { transform: translateX(-20px) scaleX(-1); }
+}
+.deathy-walking svg { animation: deathyBob 0.6s ease-in-out infinite alternate; }
+@keyframes deathyBob { 0%{transform:translateY(0)} 100%{transform:translateY(-3px)} }
+@media(max-width:480px) {
+  .deathy-timer-bar { padding:4px 10px; top:56px; }
+  .deathy-timer-bar .timer-text { font-size:0.75rem; }
+  .deathy-walking { width:28px; height:28px; }
+}
 </style>
 </head>
 <body>
@@ -726,6 +756,19 @@ footer p { margin-bottom: 8px; }
     </div>
   </div>
 </nav>
+<div class="deathy-timer-bar" id="deathyTimerBar">
+  <div style="display:flex; align-items:center; gap:8px;">
+    <div class="deathy-walking" id="deathyWalker"></div>
+    <div>
+      <div class="timer-label">Time remaining</div>
+      <div class="timer-text" id="navTimer">--:--:--:--</div>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div class="timer-label">Ghost health</div>
+    <div id="navGhostHealth" style="font-size:0.8rem; font-weight:700;">--</div>
+  </div>
+</div>
 
 <!-- ===== HOME PAGE ===== -->
 <section id="page-home" class="hero">
@@ -926,9 +969,67 @@ footer p { margin-bottom: 8px; }
           <div class="price-feature">1-on-1 video consultation (30 min)</div>
           <div class="price-feature">Custom supplement protocol</div>
         </div>
-        <button class="btn-primary price-cta" style="background:linear-gradient(135deg,var(--accent),#ff6b6b);">Get Your Deep Dive</button>
+        <button class="btn-primary price-cta" style="background:linear-gradient(135deg,var(--accent),#ff6b6b);" onclick="startStripeCheckout('deep_dive')">Get Your Deep Dive</button>
       </div>
     </div>
+
+    <!-- LONGEVITY CLINIC QUOTE -->
+    <div style="margin-top:48px; background:linear-gradient(135deg,#0d1b2a,#1b2838); border:2px solid var(--gold); border-radius:16px; padding:32px; text-align:center; max-width:700px; margin-left:auto; margin-right:auto;">
+      <div style="font-size:2rem; margin-bottom:8px;">&#x1F3E5;</div>
+      <h3 style="color:var(--gold); font-size:1.4rem; margin-bottom:8px;">Get a Quote from a Longevity Clinic</h3>
+      <p style="color:var(--text2); font-size:0.95rem; margin-bottom:24px; max-width:500px; margin-left:auto; margin-right:auto;">
+        Ready to take it further? We partner with world-class longevity clinics. Tell us where you are and where you'd travel - we'll match you with the right clinic and get you a personalised quote.
+      </p>
+      <div id="clinicQuoteForm" style="text-align:left; max-width:420px; margin:0 auto;">
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Your Name</label>
+        <input type="text" id="clinicName" placeholder="Full name" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Email</label>
+        <input type="email" id="clinicEmail" placeholder="your@email.com" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Your Country</label>
+        <input type="text" id="clinicCountry" placeholder="e.g. United Kingdom" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Where are you willing to travel? (select all that apply)</label>
+        <div id="clinicDestinations" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:16px;">
+        </div>
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">What are you most interested in?</label>
+        <select id="clinicInterest" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:0.9rem;">
+          <option value="">Select...</option>
+          <option value="full_panel">Full Longevity Panel & Biomarkers</option>
+          <option value="genetic">Genetic Testing & Risk Assessment</option>
+          <option value="stem_cell">Stem Cell Therapy</option>
+          <option value="hormone">Hormone Optimisation (HRT/TRT)</option>
+          <option value="iv_nad">IV Therapy / NAD+</option>
+          <option value="cryo">Cryotherapy & Recovery</option>
+          <option value="dental">Dental Longevity (full restoration)</option>
+          <option value="executive">Executive Health Check-up</option>
+          <option value="weight">Medical Weight Management</option>
+          <option value="all">Everything - Full Longevity Overhaul</option>
+        </select>
+
+        <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:var(--text2);">Budget Range</label>
+        <select id="clinicBudget" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:16px; font-size:0.9rem;">
+          <option value="">Select...</option>
+          <option value="under_1k">Under $1,000</option>
+          <option value="1k_5k">$1,000 - $5,000</option>
+          <option value="5k_15k">$5,000 - $15,000</option>
+          <option value="15k_50k">$15,000 - $50,000</option>
+          <option value="50k_plus">$50,000+</option>
+          <option value="flexible">Flexible - show me options</option>
+        </select>
+
+        <button class="btn-gold" onclick="submitClinicQuote()" style="width:100%; padding:14px; font-size:1rem; font-weight:700;">Get My Personalised Quote</button>
+        <p style="font-size:0.7rem; color:var(--text3); margin-top:8px; text-align:center;">We'll match you with vetted clinics in your preferred destinations. No spam, no obligation.</p>
+      </div>
+      <div id="clinicQuoteSuccess" class="hidden" style="padding:32px; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:12px;">&#10003;</div>
+        <h4 style="color:var(--green); margin-bottom:8px;">Quote Request Submitted!</h4>
+        <p style="color:var(--text2);">We're matching you with clinics in your preferred destinations. Expect an email within 48 hours with personalised options and pricing.</p>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -2479,7 +2580,7 @@ function renderResult() {
       <div class="death-date">${dateStr}</div>
       <div style="color:var(--text2)">That is approximately <strong>${r.remainingYears} years</strong> from today</div>
       <div class="countdown" id="countdown"></div>
-      <canvas id="lifeCanvas" width="300" height="200" style="margin:20px auto; display:block; border-radius:var(--radius);"></canvas>
+      <div id="lifeVisContainer" style="margin:24px auto; max-width:400px;"></div>
       <div style="margin-top:12px;">
         <button class="btn-secondary btn-sm" onclick="saveTimerWidget()" style="font-size:0.8rem;">Save Timer as Widget</button>
       </div>
@@ -2608,6 +2709,7 @@ function renderResult() {
   showPage('result');
   startCountdown();
   animateLifeCanvas();
+  creditReferrer();
   renderClinicalTests();
   document.getElementById('leaderboard').innerHTML = renderLeaderboard();
   document.getElementById('socialCircle').innerHTML = renderSocialCircle();
@@ -2713,65 +2815,49 @@ function renderClinicalTests() {
 }
 
 function animateLifeCanvas() {
-  const canvas = document.getElementById('lifeCanvas');
-  if (!canvas || !state.result) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  const particles = [];
+  const el = document.getElementById('lifeVisContainer');
+  if (!el || !state.result) return;
   const totalLife = state.result.expectedAge;
   const lived = state.result.ageNow || 30;
-  const pctLived = lived / totalLife;
+  const remaining = Math.max(0, totalLife - lived);
+  const pctLived = Math.round((lived / totalLife) * 100);
+  const pctRemain = 100 - pctLived;
 
-  // Create sand particles
-  for (let i = 0; i < 200; i++) {
-    const isLived = i < 200 * pctLived;
-    particles.push({
-      x: isLived ? Math.random() * w : w/2 + (Math.random()-0.5) * 60,
-      y: isLived ? h - Math.random() * (h * 0.4) : Math.random() * (h * 0.3),
-      r: 1.5 + Math.random() * 1.5,
-      speed: 0.2 + Math.random() * 0.5,
-      color: isLived ? '#e94560' : '#4ecca3',
-      lived: isLived
-    });
-  }
+  const yearsLived = Math.round(lived);
+  const yearsLeft = Math.round(remaining);
+  const daysLeft = Math.round(remaining * 365.25);
+  const hoursLeft = daysLeft * 24;
 
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-    // Hourglass outline
-    ctx.strokeStyle = '#2a2a3e';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(w*0.2, 0); ctx.lineTo(w*0.8, 0);
-    ctx.lineTo(w*0.52, h*0.48); ctx.lineTo(w*0.8, h);
-    ctx.lineTo(w*0.2, h); ctx.lineTo(w*0.48, h*0.48);
-    ctx.closePath();
-    ctx.stroke();
-
-    // Particles
-    particles.forEach(p => {
-      if (!p.lived && p.y < h * 0.45) {
-        p.y += p.speed;
-        p.x += (Math.random() - 0.5) * 0.5;
-      }
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.fill();
-    });
-
-    // Labels
-    ctx.fillStyle = '#a0a0b0';
-    ctx.font = '11px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('Time remaining', w/2, h*0.15);
-    ctx.fillText('Time lived', w/2, h*0.9);
-    ctx.fillStyle = '#eaeaea';
-    ctx.font = 'bold 14px system-ui';
-    ctx.fillText(Math.round(pctLived*100) + '% lived', w/2, h*0.55);
-
-    requestAnimationFrame(draw);
-  }
-  draw();
+  el.innerHTML = `
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; text-align:center;">
+      <div style="font-size:0.85rem; color:var(--text3); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">Your Life Timeline</div>
+      <div style="display:flex; align-items:center; gap:4px; height:32px; border-radius:16px; overflow:hidden; background:var(--bg); margin-bottom:16px;">
+        <div style="height:100%; width:${pctLived}%; background:linear-gradient(90deg,var(--accent),#ff6b6b); display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; color:#fff; min-width:${pctLived > 5 ? '0' : '40px'}; border-radius:16px 0 0 16px; transition:width 1s;">${pctLived}%</div>
+        <div style="height:100%; width:${pctRemain}%; background:linear-gradient(90deg,#4ecca3,#2d8a6e); display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; color:#fff; min-width:${pctRemain > 5 ? '0' : '40px'}; border-radius:0 16px 16px 0; transition:width 1s;">${pctRemain}%</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div style="background:rgba(233,69,96,0.1); border:1px solid rgba(233,69,96,0.3); border-radius:10px; padding:14px;">
+          <div style="font-size:1.6rem; font-weight:800; color:var(--accent);">${yearsLived}</div>
+          <div style="font-size:0.75rem; color:var(--text3);">Years Lived</div>
+        </div>
+        <div style="background:rgba(78,204,163,0.1); border:1px solid rgba(78,204,163,0.3); border-radius:10px; padding:14px;">
+          <div style="font-size:1.6rem; font-weight:800; color:var(--green);">${yearsLeft}</div>
+          <div style="font-size:0.75rem; color:var(--text3);">Years Left</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div style="background:var(--bg2); border-radius:8px; padding:10px;">
+          <div style="font-size:1.1rem; font-weight:700; color:var(--gold);">${daysLeft.toLocaleString()}</div>
+          <div style="font-size:0.7rem; color:var(--text3);">Days Remaining</div>
+        </div>
+        <div style="background:var(--bg2); border-radius:8px; padding:10px;">
+          <div style="font-size:1.1rem; font-weight:700; color:var(--gold);">${hoursLeft.toLocaleString()}</div>
+          <div style="font-size:0.7rem; color:var(--text3);">Hours Remaining</div>
+        </div>
+      </div>
+      <div style="margin-top:14px; font-size:0.8rem; color:var(--text3);">Every habit you build adds more green to the bar above.</div>
+    </div>
+  `;
 }
 
 function saveTimerWidget() {
@@ -3328,11 +3414,15 @@ function loadGoalState() {
 
 function saveProfile() {
   if (!state.result) { showToast('Complete the calculator first.'); return; }
+  if (state.userTier === 'free') {
+    showPaywall('save');
+    return;
+  }
   DataStore.save().then(mode => {
     if (mode === 'cloud') {
       showToast('Profile synced to the cloud! Your ghost follows you everywhere now.');
     } else {
-      showToast('Profile saved to this browser. Upgrade to sync across devices.');
+      showToast('Profile saved locally. Sign in to sync across devices.');
     }
   }).catch(() => showToast('Save failed. Try again.'));
 }
@@ -3382,19 +3472,44 @@ function showPaywall(feature) {
     <div style="background:var(--bg2); padding:20px; border-radius:var(--radius); margin-bottom:20px; border:1px solid var(--gold);">
       <div style="font-size:1.5rem; font-weight:800; color:var(--gold);">$4.99<span style="font-size:0.85rem; color:var(--text3);">/month</span></div>
       <ul style="text-align:left; margin-top:12px; color:var(--text2); font-size:0.9rem; list-style:none; padding:0;">
-        <li style="margin-bottom:6px;">&#10003; Save & reload your profile</li>
+        <li style="margin-bottom:6px;">&#10003; Save & reload your profile across devices</li>
         <li style="margin-bottom:6px;">&#10003; Unlimited habit tracking</li>
         <li style="margin-bottom:6px;">&#10003; Unlimited bucket list items</li>
         <li style="margin-bottom:6px;">&#10003; Clinical test recommendations</li>
-        <li style="margin-bottom:6px;">&#10003; Export your full report</li>
+        <li style="margin-bottom:6px;">&#10003; Export your full longevity report</li>
+        <li style="margin-bottom:6px;">&#10003; Ghost evolution & personalised Deathy</li>
       </ul>
     </div>
-    <div class="form-actions">
-      <button class="btn-secondary" onclick="closeModal()">Maybe Later</button>
-      <button class="btn-gold" onclick="upgradeTier('premium')">Upgrade Now</button>
+    <div class="form-actions" style="flex-direction:column; gap:8px;">
+      <button class="btn-gold" onclick="startStripeCheckout('premium')" style="width:100%; padding:14px; font-size:1rem;">Pay $4.99/mo with Stripe</button>
+      <button class="btn-secondary" onclick="closeModal()" style="width:100%;">Maybe Later</button>
     </div>
-    <p style="font-size:0.75rem; color:var(--text3); margin-top:12px;">For demo purposes, clicking Upgrade activates Premium locally.</p>
+    <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:16px;">
+      <img src="https://cdn.brandfetch.io/idxAg10C0L/theme/dark/symbol.svg" alt="Stripe" style="height:20px; opacity:0.6;">
+      <span style="font-size:0.7rem; color:var(--text3);">Secured by Stripe. Cancel anytime.</span>
+    </div>
   `;
+}
+
+function startStripeCheckout(tier) {
+  // Stripe Payment Links - replace with your actual Stripe payment link IDs
+  const links = {
+    premium: 'https://buy.stripe.com/test_PLACEHOLDER_PREMIUM',
+    pro_plus: 'https://buy.stripe.com/test_PLACEHOLDER_PRO',
+    deep_dive: 'https://buy.stripe.com/test_PLACEHOLDER_DEEP',
+    lifetime: 'https://buy.stripe.com/test_PLACEHOLDER_LIFETIME',
+    death_pool: 'https://buy.stripe.com/test_PLACEHOLDER_POOL'
+  };
+  const url = links[tier];
+  if (url && !url.includes('PLACEHOLDER')) {
+    // Add client reference for webhook matching
+    const email = localStorage.getItem('dc_user_email') || '';
+    const sep = url.includes('?') ? '&' : '?';
+    window.open(url + sep + 'prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + (localStorage.getItem('dc_invite_code') || 'none'), '_blank');
+  } else {
+    // Fallback: demo mode until Stripe links are configured
+    upgradeTier(tier);
+  }
 }
 
 function upgradeTier(tier) {
@@ -3874,6 +3989,7 @@ function addFriendManual() {
   addFriendToCircle(name, deathYear, score || 0);
   closeModal();
   if (state.currentPage === 'result') renderResult();
+  if (state.result) updateNavTimer();
   else if (state.currentPage === 'dashboard') renderDashboard();
 }
 
@@ -5012,6 +5128,31 @@ function renderReferralCard() {
 // INIT
 // ============================================
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+function creditReferrer() {
+  const referredBy = localStorage.getItem('dc_referred_by');
+  if (!referredBy || localStorage.getItem('dc_referral_credited')) return;
+  // Log referral to Supabase if available
+  if (supaClient) {
+    supaClient.from('dc_profiles').select('id, referral_count').eq('invite_code', referredBy).single()
+      .then(({ data }) => {
+        if (data) {
+          const newCount = (data.referral_count || 0) + 1;
+          supaClient.from('dc_profiles').update({ referral_count: newCount }).eq('id', data.id).then(() => {
+            console.log('Referral credited to:', referredBy, 'count:', newCount);
+          });
+        }
+      }).catch(() => {});
+  }
+  // Also track locally for the referrer when they next load
+  localStorage.setItem('dc_referral_credited', 'true');
+  // Store in a shared referral log (localStorage based for demo)
+  try {
+    const log = JSON.parse(localStorage.getItem('dc_referral_log') || '[]');
+    log.push({ code: referredBy, at: new Date().toISOString() });
+    localStorage.setItem('dc_referral_log', JSON.stringify(log));
+  } catch(e) {}
+}
+
 // Check referral code from URL
   const urlParams = new URLSearchParams(window.location.search);
   const refCode = urlParams.get('ref');
@@ -5203,6 +5344,164 @@ if (loadProfile()) {
     }
   }
 }
+
+
+
+
+// ============================================
+// LONGEVITY CLINIC QUOTE
+// ============================================
+const CLINIC_DESTINATIONS = [
+  { code: 'switzerland', label: 'Switzerland', flag: '🇨🇭', note: 'Clinique La Prairie, Paracelsus' },
+  { code: 'germany', label: 'Germany', flag: '🇩🇪', note: 'Buchinger, Lanserhof' },
+  { code: 'thailand', label: 'Thailand', flag: '🇹🇭', note: 'Bumrungrad, RAKxa' },
+  { code: 'turkey', label: 'Turkey', flag: '🇹🇷', note: 'Acibadem, Memorial' },
+  { code: 'mexico', label: 'Mexico', flag: '🇲🇽', note: 'BioCenter, Immunity Therapy' },
+  { code: 'spain', label: 'Spain', flag: '🇪🇸', note: 'SHA Wellness, Sha Clinic' },
+  { code: 'uk', label: 'United Kingdom', flag: '🇬🇧', note: 'The London Clinic, Longevity' },
+  { code: 'singapore', label: 'Singapore', flag: '🇸🇬', note: 'Raffles, Mount Elizabeth' },
+  { code: 'south_korea', label: 'South Korea', flag: '🇰🇷', note: 'Samsung Medical, Asan' },
+  { code: 'japan', label: 'Japan', flag: '🇯🇵', note: 'Midorino, IMS Group' },
+  { code: 'austria', label: 'Austria', flag: '🇦🇹', note: 'Mayr Clinic, Lanserhof Lans' },
+  { code: 'portugal', label: 'Portugal', flag: '🇵🇹', note: 'Longevity Algarve' },
+  { code: 'costa_rica', label: 'Costa Rica', flag: '🇨🇷', note: 'Stem Cell Institute' },
+  { code: 'uae', label: 'UAE (Dubai)', flag: '🇦🇪', note: 'Aster, Cleveland Abu Dhabi' },
+  { code: 'india', label: 'India', flag: '🇮🇳', note: 'Apollo, Fortis, Ananda' },
+  { code: 'china', label: 'China', flag: '🇨🇳', note: 'Peking Union, Bumrungrad affiliate' },
+  { code: 'canada', label: 'Canada', flag: '🇨🇦', note: 'Medcan, True North' },
+  { code: 'usa', label: 'United States', flag: '🇺🇸', note: 'Mayo, Cleveland, Fountain Life' },
+  { code: 'greece', label: 'Greece', flag: '🇬🇷', note: 'Metropolitan, Hygeia' },
+  { code: 'italy', label: 'Italy', flag: '🇮🇹', note: 'Humanitas, Palazzo Fiuggi' }
+];
+
+function renderClinicDestinations() {
+  const el = document.getElementById('clinicDestinations');
+  if (!el) return;
+  el.innerHTML = CLINIC_DESTINATIONS.map(d => `
+    <label style="display:flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:0.8rem; color:var(--text2); transition:border-color 0.2s;" onclick="this.style.borderColor = this.querySelector('input').checked ? 'var(--gold)' : 'var(--border)'">
+      <input type="checkbox" value="${d.code}" style="accent-color:var(--gold);">
+      <span>${d.flag} ${d.label}</span>
+    </label>
+  `).join('');
+}
+
+function submitClinicQuote() {
+  const name = document.getElementById('clinicName').value.trim();
+  const email = document.getElementById('clinicEmail').value.trim();
+  const country = document.getElementById('clinicCountry').value.trim();
+  const interest = document.getElementById('clinicInterest').value;
+  const budget = document.getElementById('clinicBudget').value;
+  const destinations = [...document.querySelectorAll('#clinicDestinations input:checked')].map(i => i.value);
+
+  if (!name || !email || !country) {
+    showToast('Please fill in your name, email and country.');
+    return;
+  }
+  if (!email.includes('@')) {
+    showToast('Please enter a valid email address.');
+    return;
+  }
+  if (destinations.length === 0) {
+    showToast('Please select at least one destination you would travel to.');
+    return;
+  }
+
+  const quoteData = {
+    name, email, country, interest, budget, destinations,
+    lifeScore: state.result ? state.result.lifeScore : null,
+    remainingYears: state.result ? state.result.remainingYears : null,
+    submittedAt: new Date().toISOString()
+  };
+
+  // Store to Supabase if available
+  if (supaClient) {
+    supaClient.from('dc_clinic_quotes').insert([quoteData]).then(() => {
+      console.log('Clinic quote saved to Supabase');
+    }).catch(() => {
+      // Fallback: store locally
+      const quotes = JSON.parse(localStorage.getItem('dc_clinic_quotes') || '[]');
+      quotes.push(quoteData);
+      localStorage.setItem('dc_clinic_quotes', JSON.stringify(quotes));
+    });
+  } else {
+    const quotes = JSON.parse(localStorage.getItem('dc_clinic_quotes') || '[]');
+    quotes.push(quoteData);
+    localStorage.setItem('dc_clinic_quotes', JSON.stringify(quotes));
+  }
+
+  // Show success
+  document.getElementById('clinicQuoteForm').classList.add('hidden');
+  document.getElementById('clinicQuoteSuccess').classList.remove('hidden');
+  showToast('Quote request submitted! Check your email in 48 hours.');
+}
+
+// Render destinations when pricing page is shown
+const origShowPage = showPage;
+showPage = function(page) {
+  origShowPage(page);
+  if (page === 'pricing') {
+    setTimeout(renderClinicDestinations, 50);
+  }
+};
+// ============================================
+// PERSISTENT DEATHY TIMER BAR
+// ============================================
+function updateNavTimer() {
+  if (!state.result) return;
+  const bar = document.getElementById('deathyTimerBar');
+  if (!bar) return;
+  bar.classList.add('active');
+
+  const now = new Date();
+  const diff = state.result.deathDate - now;
+  if (diff <= 0) {
+    document.getElementById('navTimer').textContent = 'TIME IS UP';
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('navTimer').textContent =
+    d.toLocaleString() + 'd ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+  // Ghost health display
+  const params = getDeathyParams();
+  const hScore = calcDeathyHealth(params);
+  const g = state.longevityGoal;
+  const totalScore = Math.min(100, hScore + Math.min(20, ((g && g.totalDaysAdded)||0)*0.5));
+  const healthEl = document.getElementById('navGhostHealth');
+  if (healthEl) {
+    const color = totalScore >= 70 ? 'var(--green)' : totalScore >= 40 ? 'var(--gold)' : 'var(--accent)';
+    healthEl.style.color = color;
+    healthEl.textContent = Math.round(totalScore) + '/100';
+  }
+
+  // Walking Deathy mini ghost - changes based on health
+  const walker = document.getElementById('deathyWalker');
+  if (walker && !walker.hasChildNodes()) {
+    const ghostColor = totalScore >= 70 ? '#4ecca3' : totalScore >= 40 ? '#f0c040' : '#e94560';
+    const eyeStyle = totalScore >= 70 ? 'happy' : totalScore >= 40 ? 'neutral' : 'sad';
+    walker.innerHTML = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="90" rx="22" ry="4" fill="rgba(255,255,255,0.05)"/>
+      <path d="M25,55 Q25,15 50,15 Q75,15 75,55 L75,75 Q70,70 65,75 Q60,70 55,75 Q50,70 45,75 Q40,70 35,75 Q30,70 25,75 Z" fill="${ghostColor}" opacity="0.9"/>
+      ${eyeStyle === 'happy' ?
+        '<circle cx="38" cy="42" r="4" fill="#0a0a0f"/><circle cx="62" cy="42" r="4" fill="#0a0a0f"/><path d="M38,52 Q50,62 62,52" stroke="#0a0a0f" stroke-width="2.5" fill="none" stroke-linecap="round"/>' :
+        eyeStyle === 'neutral' ?
+        '<circle cx="38" cy="42" r="4" fill="#0a0a0f"/><circle cx="62" cy="42" r="4" fill="#0a0a0f"/><line x1="40" y1="55" x2="60" y2="55" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round"/>' :
+        '<circle cx="38" cy="44" r="4" fill="#0a0a0f"/><circle cx="62" cy="44" r="4" fill="#0a0a0f"/><path d="M38,58 Q50,50 62,58" stroke="#0a0a0f" stroke-width="2.5" fill="none" stroke-linecap="round"/>'}
+      <circle cx="40" cy="40" r="1.5" fill="rgba(255,255,255,0.7)"/>
+    </svg>`;
+
+    // Adjust walk speed based on health (healthy = faster bounce)
+    const walkDur = totalScore >= 70 ? '4s' : totalScore >= 40 ? '6s' : '8s';
+    walker.style.animationDuration = walkDur;
+  }
+}
+setInterval(updateNavTimer, 1000);
+// Run once immediately if result exists
+if (state.result) setTimeout(updateNavTimer, 100);
+
 </script>
 </body>
 </html>
