@@ -82,6 +82,25 @@
       <div id="mansionDecor"></div>
     </div>
     <div id="mansionGhostInfo" style="margin-top:16px; display:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px;"></div>
+
+    <!-- Activity Feed -->
+    <div style="margin-top:24px;">
+      <h3 style="margin-bottom:12px;">👻 Haunting Activity</h3>
+      <div id="activityFeed" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; max-height:300px; overflow-y:auto;">
+        <p style="color:var(--text3); font-style:italic;">Loading activity...</p>
+      </div>
+    </div>
+
+    <!-- Graffiti Wall -->
+    <div style="margin-top:24px;">
+      <h3 style="margin-bottom:12px;">🖊️ Mansion Wall (Ghost Graffiti)</h3>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <input type="text" id="wallMessageInput" placeholder="Scratch a message into the wall..." maxlength="140" class="username-input" style="flex:1;">
+        <button class="btn-primary btn-sm" onclick="postWallMessage()">Scrawl</button>
+      </div>
+      <div id="graffitiWall" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:10px;">
+      </div>
+    </div>
   </div>
 </section>
 <div id="inviteModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="inviteTitle" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;" onkeydown="if(event.key==='Escape')hideModal('inviteModal')">
@@ -139,11 +158,17 @@
 <script src="/shared/core.js"></script>
 <script src="/shared/social.js"></script>
 <script src="/shared/deathy.js"></script>
+<script src="/shared/interactions.js"></script>
 <script>
 
 function pageInit() {
   loadProfile();
   renderMansion();
+  // Load interactions after short delay to let mansion render first
+  setTimeout(() => {
+    loadActivityFeed();
+    renderGraffitiWall();
+  }, 1500);
 }
 
 </script>
