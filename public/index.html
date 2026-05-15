@@ -8,22 +8,22 @@
 <meta name="theme-color" content="#e94560">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src https://js.stripe.com;">
 <link rel="manifest" href="/manifest.json">
-<link rel="canonical" href="https://www.death-clock.app/">
+<link rel="canonical" href="https://death-clock.app">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Death Clock","url":"https://www.death-clock.app/","description":"The internet's most honest life expectancy calculator based on 53M+ research participants and 1,200+ studies.","applicationCategory":"HealthApplication","operatingSystem":"Web","offers":{"@type":"AggregateOffer","lowPrice":"0","highPrice":"29.99","priceCurrency":"USD"},"author":{"@type":"Organization","name":"Death Clock","url":"https://www.death-clock.app/"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","ratingCount":"2847"}}
+{"@context":"https://schema.org","@type":"WebApplication","name":"Death Clock","url":"https://death-clock.app","description":"The internet's most honest life expectancy calculator based on 53M+ research participants and 1,200+ studies.","applicationCategory":"HealthApplication","operatingSystem":"Web","offers":{"@type":"AggregateOffer","lowPrice":"0","highPrice":"29.99","priceCurrency":"USD"},"author":{"@type":"Organization","name":"Death Clock","url":"https://death-clock.app"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","ratingCount":"2847"}}
 </script>
 <meta property="og:title" content="Death Clock - When Will You Die?">
 <meta property="og:description" content="I just found out when I'm going to die. The clock is ticking. Calculate yours.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.death-clock.app/">
-<meta property="og:image" content="https://www.death-clock.app/og-image.png">
+<meta property="og:url" content="https://death-clock.app">
+<meta property="og:image" content="https://death-clock.app/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Death Clock - When Will You Die?">
 <meta name="twitter:description" content="I just found out when I'm going to die. Calculate yours.">
-<meta name="twitter:image" content="https://www.death-clock.app/og-image.png">
+<meta name="twitter:image" content="https://death-clock.app/og-image.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1619,7 +1619,12 @@ if (supaClient) {
   // Check existing session
   supaClient.auth.getSession().then(({ data }) => {
     state.supaUser = data?.session?.user || null;
-    if (state.supaUser) updateProfileUI();
+    state.socialUser = data?.session?.user || null;
+    if (state.supaUser) {
+      updateProfileUI();
+      loadSocialProfile();
+      document.getElementById('navMansion')?.classList.remove('hidden');
+    }
   });
 }
 
@@ -1628,6 +1633,35 @@ function updateProfileUI() {
   if (btn && state.supaUser) {
     btn.textContent = state.supaUser.email?.split('@')[0] || 'Profile';
     btn.classList.remove('hidden');
+  }
+  // Toggle auth sections
+  const loggedOut = document.getElementById('authLoggedOut');
+  const loggedIn = document.getElementById('authLoggedIn');
+  if (state.supaUser) {
+    if (loggedOut) loggedOut.classList.add('hidden');
+    if (loggedIn) loggedIn.classList.remove('hidden');
+    // Populate profile info
+    const name = document.getElementById('profileName');
+    const email = document.getElementById('profileEmail');
+    if (name) name.textContent = state.supaUser.email?.split('@')[0] || 'Ghost';
+    if (email) email.textContent = state.supaUser.email || '';
+    // Populate stats from state
+    const yearsLeft = document.getElementById('profileYearsLeft');
+    const daysAdded = document.getElementById('profileDaysAdded');
+    const score = document.getElementById('profileScore');
+    if (yearsLeft && state.deathAge) yearsLeft.textContent = Math.max(0, Math.round(state.deathAge - (state.age || 30)));
+    if (daysAdded) daysAdded.textContent = state.totalDaysAdded || 0;
+    if (score && state.lifeScore) score.textContent = state.lifeScore;
+    // Sync status
+    const syncStatus = document.getElementById('profileSyncStatus');
+    if (syncStatus) syncStatus.textContent = state.userTier !== 'free' ? 'Cloud sync active' : 'Data saved locally (upgrade for cloud sync)';
+    // Tier badge
+    const tier = document.getElementById('profileTier');
+    if (tier) tier.textContent = (state.userTier || 'free').toUpperCase();
+  } else {
+    if (loggedOut) loggedOut.classList.remove('hidden');
+    if (loggedIn) loggedIn.classList.add('hidden');
+    if (btn) { btn.textContent = 'Profile'; }
   }
 }
 
@@ -5410,7 +5444,7 @@ function showEmbedCode() {
 <div style="color:#e94560;font-weight:bold;font-size:14px;">☠ Death Clock</div>
 <div style="color:#eaeaea;font-size:12px;margin:4px 0;">${name} | Score: ${hScore}/100</div>
 <div style="color:#a0a0b0;font-size:11px;">Estimated death: ${deathYear} (${remaining} years left)</div>
-<a href="https://www.death-clock.app/" style="display:inline-block;margin-top:8px;background:#e94560;color:#fff;padding:6px 16px;border-radius:6px;font-size:11px;text-decoration:none;">Calculate Yours</a>
+<a href="https://death-clock.app" style="display:inline-block;margin-top:8px;background:#e94560;color:#fff;padding:6px 16px;border-radius:6px;font-size:11px;text-decoration:none;">Calculate Yours</a>
 </div>`;
   
   const modal = document.createElement('div');
@@ -5645,7 +5679,7 @@ function showEmailDigestPreview() {
       ` : ''}
       
       <div style="text-align:center; margin-top:16px;">
-        <a href="https://www.death-clock.app/" style="display:inline-block; background:#e94560; color:#fff; padding:10px 24px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">Open Death Clock</a>
+        <a href="https://death-clock.app" style="display:inline-block; background:#e94560; color:#fff; padding:10px 24px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">Open Death Clock</a>
       </div>
       
       <div style="text-align:center; margin-top:16px; font-size:10px; color:#666680;">
