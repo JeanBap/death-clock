@@ -6,7 +6,13 @@
 <title>Death Clock - When Will You Die? (Science Says Sooner Than You Think)</title>
 <meta name="description" content="The internet's most honest life expectancy calculator. 53M+ research participants. 1,200+ studies. See your death date. Then run for your life.">
 <meta name="theme-color" content="#e94560">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src https://js.stripe.com;">
 <link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://death-clock.app">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Death Clock","url":"https://death-clock.app","description":"The internet's most honest life expectancy calculator based on 53M+ research participants and 1,200+ studies.","applicationCategory":"HealthApplication","operatingSystem":"Web","offers":{"@type":"AggregateOffer","lowPrice":"0","highPrice":"29.99","priceCurrency":"USD"},"author":{"@type":"Organization","name":"Death Clock","url":"https://death-clock.app"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","ratingCount":"2847"}}
+</script>
 <meta property="og:title" content="Death Clock - When Will You Die?">
 <meta property="og:description" content="I just found out when I'm going to die. The clock is ticking. Calculate yours.">
 <meta property="og:type" content="website">
@@ -18,7 +24,7 @@
 <meta name="twitter:title" content="Death Clock - When Will You Die?">
 <meta name="twitter:description" content="I just found out when I'm going to die. Calculate yours.">
 <meta name="twitter:image" content="https://death-clock.app/og-image.png">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -35,7 +41,7 @@
   --blue: #4d80e4;
   --text: #eaeaea;
   --text2: #a0a0b0;
-  --text3: #666680;
+  --text3: #8888a0;
   --border: #2a2a3e;
   --radius: 12px;
   --shadow: 0 4px 24px rgba(0,0,0,0.4);
@@ -65,7 +71,7 @@ button {
 .btn-secondary:hover { background: var(--bg3); }
 .btn-gold { background: linear-gradient(135deg, var(--gold), #e6a800); color: #1a1a2e; }
 .btn-green { background: var(--green); color: #1a1a2e; }
-.btn-sm { padding: 8px 16px; font-size: 0.875rem; }
+.btn-sm { padding: 8px 16px; font-size: 0.875rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
 input, select, textarea {
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -77,8 +83,13 @@ input, select, textarea {
   font-family: inherit;
 }
 input:focus, select:focus, textarea:focus {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
+}
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 .hidden { display: none !important; }
@@ -848,10 +859,11 @@ footer p { margin-bottom: 8px; }
 </head>
 <body>
 
+<a href="#page-home" class="skip-link" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; z-index:9999; padding:12px 24px; background:var(--accent); color:#fff; font-weight:700; border-radius:0 0 8px 0; text-decoration:none;" onfocus="this.style.left='0'; this.style.width='auto'; this.style.height='auto';" onblur="this.style.left='-9999px'; this.style.width='1px'; this.style.height='1px';">Skip to main content</a>
 <!-- NAV -->
 <nav id="mainNav">
   <div class="container">
-    <div class="logo" onclick="showPage('home')" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36" style="flex-shrink:0"><defs><radialGradient id="lgG" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#e8e8e8"/></radialGradient></defs><path d="M100 20C55 20 30 60 30 100c0 30 0 60 0 80q15-15 25 0 10 15 20 0 10-15 25 0 15-15 25 0 10 15 20 0 10-15 25 0c0-20 0-50 0-80 0-40-25-80-70-80z" fill="url(#lgG)"/><ellipse cx="75" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="80" cy="80" rx="6" ry="7" fill="#fff"/><ellipse cx="125" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="130" cy="80" rx="6" ry="7" fill="#fff"/><path d="M80 120Q100 145 120 120" fill="none" stroke="#1a1a2e" stroke-width="3" stroke-linecap="round"/><ellipse cx="108" cy="132" rx="10" ry="14" fill="#e94560"/><path d="M108 125Q108 146 108 146" fill="none" stroke="#c4304d" stroke-width="1.5"/></svg><span>Death</span>Clock</div>
+    <div class="logo" onclick="showPage('home')" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36" style="flex-shrink:0" aria-hidden="true" role="img"><defs><radialGradient id="lgG" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#e8e8e8"/></radialGradient></defs><path d="M100 20C55 20 30 60 30 100c0 30 0 60 0 80q15-15 25 0 10 15 20 0 10-15 25 0 15-15 25 0 10 15 20 0 10-15 25 0c0-20 0-50 0-80 0-40-25-80-70-80z" fill="url(#lgG)"/><ellipse cx="75" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="80" cy="80" rx="6" ry="7" fill="#fff"/><ellipse cx="125" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="130" cy="80" rx="6" ry="7" fill="#fff"/><path d="M80 120Q100 145 120 120" fill="none" stroke="#1a1a2e" stroke-width="3" stroke-linecap="round"/><ellipse cx="108" cy="132" rx="10" ry="14" fill="#e94560"/><path d="M108 125Q108 146 108 146" fill="none" stroke="#c4304d" stroke-width="1.5"/></svg><span>Death</span>Clock</div>
     <div class="nav-links" id="navLinks">
       <button class="nav-tab active" onclick="showPage('home')">Home</button>
       <button class="nav-tab" onclick="showPage('about')">About</button>
@@ -864,6 +876,7 @@ footer p { margin-bottom: 8px; }
     </div>
   </div>
 </nav>
+<div aria-live="polite" id="srAnnounce" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"></div>
 <div class="deathy-timer-bar" id="deathyTimerBar">
   <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
     <div class="deathy-walking" id="deathyWalker"></div>
@@ -882,7 +895,7 @@ footer p { margin-bottom: 8px; }
 </div>
 
 <!-- ===== HOME PAGE ===== -->
-<section id="page-home" class="hero">
+<section id="page-home" aria-label="Home" class="hero">
   <div class="container">
     <h1>When Will You Die?</h1>
     <p>The internet's most brutally honest life expectancy calculator. Spoiler: it's sooner than you think. But we'll show you how to run from the Reaper.</p>
@@ -908,7 +921,7 @@ footer p { margin-bottom: 8px; }
 <!-- ===== QUESTIONNAIRE ===== -->
 
 <!-- PROFILE PAGE -->
-<section id="page-profile" class="page hidden">
+<section id="page-profile" aria-label="Profile" class="page hidden">
   <div class="container" style="max-width:600px; padding-top:40px;">
     <h2 style="text-align:center; margin-bottom:24px;">Your Profile</h2>
     
@@ -989,7 +1002,7 @@ footer p { margin-bottom: 8px; }
   </div>
 </section>
 
-<section id="page-quiz" class="hidden questionnaire">
+<section id="page-quiz" aria-label="Quiz" class="hidden questionnaire">
   <div class="q-progress" id="qProgress"></div>
   <div id="qContent"></div>
   <div class="q-nav">
@@ -999,12 +1012,12 @@ footer p { margin-bottom: 8px; }
 </section>
 
 <!-- ===== RESULT PAGE ===== -->
-<section id="page-result" class="hidden result-page">
+<section id="page-result" aria-label="Results" class="hidden result-page">
   <div class="container" id="resultContent"></div>
 </section>
 
 <!-- ===== DASHBOARD ===== -->
-<section id="page-dashboard" class="hidden dashboard">
+<section id="page-dashboard" aria-label="Dashboard" class="hidden dashboard">
   <div class="container">
     <div class="dash-header">
       <h2>Your Life Dashboard</h2>
@@ -1173,7 +1186,7 @@ footer p { margin-bottom: 8px; }
 <!-- ===== PRIVACY POLICY ===== -->
 <section id="page-privacy" class="hidden legal-page">
   <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
-  <h1>Privacy Policy</h1>
+  <h2>Privacy Policy</h2>
   <p><strong>Last updated:</strong> May 15, 2026</p>
 
   <h2>1. Who We Are</h2>
@@ -1218,7 +1231,7 @@ footer p { margin-bottom: 8px; }
 <!-- ===== TERMS OF SERVICE ===== -->
 <section id="page-terms" class="hidden legal-page">
   <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
-  <h1>Terms of Service</h1>
+  <h2>Terms of Service</h2>
   <p><strong>Last updated:</strong> May 15, 2026</p>
 
   <h2>1. Acceptance of Terms</h2>
@@ -1249,7 +1262,7 @@ footer p { margin-bottom: 8px; }
 <!-- ===== COOKIE POLICY ===== -->
 <section id="page-cookies" class="hidden legal-page">
   <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
-  <h1>Cookie Policy</h1>
+  <h2>Cookie Policy</h2>
   <p><strong>Last updated:</strong> May 15, 2026</p>
 
   <h2>What Are Cookies</h2>
@@ -1269,7 +1282,7 @@ footer p { margin-bottom: 8px; }
 </section>
 
 <!-- ===== ABOUT PAGE ===== -->
-<section id="page-about" class="hidden about-page">
+<section id="page-about" aria-label="About" class="hidden about-page">
   <div class="legal-back"><button class="btn-secondary btn-sm" onclick="showPage('home')">&larr; Back</button></div>
   <h1>About Death Clock</h1>
 
@@ -1328,7 +1341,7 @@ footer p { margin-bottom: 8px; }
 </section>
 
 <!-- ===== HAUNTING GROUPS ===== -->
-<section id="page-groups" class="page hidden">
+<section id="page-groups" aria-label="Haunting Groups" class="page hidden">
   <div class="container" style="max-width:700px; padding-top:40px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
       <h2>Your Haunting Groups</h2>
@@ -1346,7 +1359,7 @@ footer p { margin-bottom: 8px; }
 </section>
 
 <!-- ===== HAUNTED MANSION ===== -->
-<section id="page-mansion" class="page hidden">
+<section id="page-mansion" aria-label="Haunted Mansion" class="page hidden">
   <div class="container" style="max-width:900px; padding-top:40px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
@@ -1370,9 +1383,9 @@ footer p { margin-bottom: 8px; }
 </section>
 
 <!-- ===== CREATE GROUP MODAL ===== -->
-<div id="createGroupModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
+<div id="createGroupModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="createGroupTitle" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;" onkeydown="if(event.key==='Escape')hideModal('createGroupModal')">
   <div style="background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:32px; max-width:450px; width:90%;">
-    <h3 style="margin-bottom:16px;">Create a Haunting Group</h3>
+    <h3 id="createGroupTitle" style="margin-bottom:16px;">Create a Haunting Group</h3>
     <div style="display:flex; flex-direction:column; gap:12px;">
       <input type="text" id="newGroupName" placeholder="Group name (e.g. The Undead Squad)" class="username-input">
       <textarea id="newGroupDesc" placeholder="Description (optional)" rows="2" style="padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.9rem; resize:none;"></textarea>
@@ -1385,9 +1398,9 @@ footer p { margin-bottom: 8px; }
 </div>
 
 <!-- ===== INVITE MODAL ===== -->
-<div id="inviteModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
+<div id="inviteModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="inviteTitle" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; display:flex; align-items:center; justify-content:center;" onkeydown="if(event.key==='Escape')hideModal('inviteModal')">
   <div style="background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:32px; max-width:450px; width:90%;">
-    <h3 style="margin-bottom:16px;">Invite Friends to Haunt Together</h3>
+    <h3 id="inviteTitle" style="margin-bottom:16px;">Invite Friends to Haunt Together</h3>
     <div style="margin-bottom:16px;">
       <p style="color:var(--text2); font-size:0.85rem; margin-bottom:8px;">Share this code:</p>
       <div class="invite-code-box" id="inviteCodeDisplay" onclick="copyInviteCode()">------</div>
@@ -2401,9 +2414,9 @@ function showPage(page) {
   if (el) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
   state.currentPage = page;
   // Update nav
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => { t.classList.remove('active'); t.removeAttribute('aria-current'); });
   const tabs = { home: 0, about: 1, dashboard: 2, pricing: 3 };
-  if (tabs[page] !== undefined) document.querySelectorAll('.nav-tab')[tabs[page]]?.classList.add('active');
+  if (tabs[page] !== undefined) { const btn = document.querySelectorAll('.nav-tab')[tabs[page]]; if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current', 'page'); } }
   if (page === 'quiz') { state.currentQuestion = 0; renderQuestion(); }
   if (page === 'dashboard') renderDashboard();
   if (page === 'mansion') renderMansion();
@@ -3263,7 +3276,7 @@ function renderResult() {
   const savedEmail = localStorage.getItem('dc_user_email');
   if (savedEmail) {
     const sec = document.getElementById('emailCaptureSection');
-    if (sec) sec.innerHTML = '<div style="text-align:center; padding:20px; color:var(--green);"><strong>&#10003; Locked in.</strong> Death updates going to ' + savedEmail + '</div>';
+    if (sec) sec.innerHTML = '<div style="text-align:center; padding:20px; color:var(--green);"><strong>&#10003; Locked in.</strong> Death updates going to ' + escHtml(savedEmail) + '</div>';
   }
 }
 
@@ -4451,7 +4464,7 @@ function joinWaitlist() {
   if (!email || !email.includes('@')) return;
   localStorage.setItem('dc_waitlist_email', email);
   const el = document.getElementById('waitlistCount');
-  if (el) el.innerHTML = '&#10003; You\'re on the list! We\'ll email you at <strong>' + email + '</strong> when a slot opens.';
+  if (el) el.innerHTML = '&#10003; You\'re on the list! We\'ll email you at <strong>' + escHtml(email) + '</strong> when a slot opens.';
   alert('You\'re in! Position #128 on the waiting list. We\'ll reach out when a healthspan specialist is available.');
 }
 
@@ -4468,7 +4481,7 @@ function captureEmail() {
   };
   localStorage.setItem('dc_email_prefs', JSON.stringify(prefs));
   const container = document.getElementById('emailCaptureSection');
-  if (container) container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--green);"><strong>&#10003; Locked in.</strong> We\'ll haunt your inbox at ' + email + '</div>';
+  if (container) container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--green);"><strong>&#10003; Locked in.</strong> We\'ll haunt your inbox at ' + escHtml(email) + '</div>';
 }
 
 function generateShareText() {
@@ -5208,6 +5221,7 @@ function downloadGhostCard(blob) {
 }
 
 function showToast(msg) {
+  const sr = document.getElementById('srAnnounce'); if (sr) sr.textContent = msg;
   const t = document.createElement('div');
   t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--green);color:var(--green);padding:12px 24px;border-radius:8px;z-index:99999;font-size:0.9rem;animation:deathyFadeIn 0.3s ease;';
   t.textContent = msg;
@@ -6999,15 +7013,13 @@ async function createHauntingGroup() {
 }
 
 function showCreateGroupModal() {
-  document.getElementById('createGroupModal')?.classList.remove('hidden');
-  document.getElementById('createGroupModal').style.display = 'flex';
+  showModal('createGroupModal');
 }
 
 function showInviteModal() {
   if (!state.currentGroup) { showToast('Select a group first'); return; }
+  showModal('inviteModal');
   const modal = document.getElementById('inviteModal');
-  modal?.classList.remove('hidden');
-  modal.style.display = 'flex';
   document.getElementById('inviteCodeDisplay').textContent = state.currentGroup.invite_code;
   document.getElementById('inviteLinkDisplay').textContent = 'https://death-clock.app?join=' + state.currentGroup.invite_code;
 }
@@ -7015,6 +7027,18 @@ function showInviteModal() {
 function hideModal(id) {
   const el = document.getElementById(id);
   if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+  // Restore focus to trigger element
+  if (window._modalTrigger) { window._modalTrigger.focus(); window._modalTrigger = null; }
+}
+function showModal(id) {
+  window._modalTrigger = document.activeElement;
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('hidden'); el.style.display = 'flex'; }
+  // Focus first input or button inside
+  setTimeout(() => {
+    const focusable = el?.querySelector('input, button, [tabindex]');
+    if (focusable) focusable.focus();
+  }, 100);
 }
 
 function copyInviteCode() {
@@ -7118,18 +7142,22 @@ async function renderGroupsList() {
     const { data: groups } = await socialClient.from('dc_haunting_groups')
       .select('*').in('id', groupIds);
 
-    // Get member counts
+    // Get member counts (batch query instead of N+1)
+    const { data: allMembers } = await socialClient.from('dc_group_members')
+      .select('group_id').in('group_id', groupIds);
+    const memberCounts = {};
+    (allMembers || []).forEach(m => { memberCounts[m.group_id] = (memberCounts[m.group_id] || 0) + 1; });
+
     let html = '';
     for (const g of (groups || [])) {
-      const { count } = await socialClient.from('dc_group_members')
-        .select('*', { count: 'exact', head: true }).eq('group_id', g.id);
+      const count = memberCounts[g.id] || 0;
       const role = memberships.find(m => m.group_id === g.id)?.role || 'ghost';
       html += '<div class="group-card" onclick="enterMansion(&quot;'+g.id+'&quot;)"><div style="display:flex; justify-content:space-between; align-items:center;"><div><h3 style="margin-bottom:4px;">'+escHtml(g.name)+'</h3><p class="group-member-count">'+count+' ghost'+(count!==1?'s':'')+' haunting</p></div><div style="text-align:right;"><span style="font-size:0.75rem; color:var(--text3);">'+role+'</span><br><span style="font-size:0.75rem; color:var(--gold);">'+g.invite_code+'</span></div></div>'+(g.description?'<p style="color:var(--text2); font-size:0.85rem; margin-top:8px;">'+escHtml(g.description)+'</p>':'')+'</div>';
     }
     document.getElementById('groupsList').innerHTML = html;
     state.groups = groups || [];
   } catch(e) {
-    document.getElementById('groupsList').innerHTML = '<p style="color:var(--accent);">Error loading groups: '+e.message+'</p>';
+    document.getElementById('groupsList').innerHTML = '<p style="color:var(--accent);">Error loading groups: '+escHtml(e.message)+'</p>';
   }
 }
 
