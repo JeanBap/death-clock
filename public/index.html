@@ -7249,20 +7249,25 @@ async function renderMansion() {
         if (group) { state.currentGroup = group; renderMansion(); return; }
       }
     }
-    document.getElementById('mansionHall').innerHTML = '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:10;"><div style="text-align:center; padding:40px;"><p style="font-size:1.2rem; margin-bottom:16px;">No haunting group yet</p><p style="color:var(--text2); margin-bottom:20px;">Create or join a group to see ghosts in the mansion!</p><button class="btn-primary" onclick="showPage(&quot;groups&quot;)">My Groups</button></div></div>';
+    const mHall = document.getElementById('mansionHall');
+    if (mHall) mHall.innerHTML = '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:10;"><div style="text-align:center; padding:40px;"><p style="font-size:1.2rem; margin-bottom:16px;">No haunting group yet</p><p style="color:var(--text2); margin-bottom:20px;">Create or join a group to see ghosts in the mansion!</p><button class="btn-primary" onclick="showPage(&quot;groups&quot;)">My Groups</button></div></div>';
     return;
   }
 
   const group = state.currentGroup;
-  document.getElementById('mansionGroupName').textContent = group.name;
+  const mansionGroupNameEl = document.getElementById('mansionGroupName');
+  if (mansionGroupNameEl) mansionGroupNameEl.textContent = group.name;
 
   try {
     // Fetch all members with profiles
-    const { data: members } = await socialClient.from('dc_group_members')
+    const { data: members, error: membersErr } = await socialClient.from('dc_group_members')
       .select('user_id, role, joined_at').eq('group_id', group.id);
 
+    if (membersErr) throw new Error(membersErr.message);
+
     if (!members || members.length === 0) {
-      document.getElementById('mansionMemberCount').textContent = 'Empty mansion... invite some ghosts!';
+      const mc = document.getElementById('mansionMemberCount');
+      if (mc) mc.textContent = 'Empty mansion... invite some ghosts!';
       return;
     }
 
@@ -7270,14 +7275,17 @@ async function renderMansion() {
     const { data: profiles } = await socialClient.from('dc_profiles')
       .select('*').in('id', userIds);
 
-    document.getElementById('mansionMemberCount').textContent =
+    const memberCountEl = document.getElementById('mansionMemberCount');
+    if (memberCountEl) memberCountEl.textContent =
       members.length + ' ghost' + (members.length !== 1 ? 's' : '') + ' haunt these halls';
 
     // Render chandelier
-    document.getElementById('mansionChandelier').innerHTML = buildChandelierSVG();
+    const chandelierEl = document.getElementById('mansionChandelier');
+    if (chandelierEl) chandelierEl.innerHTML = buildChandelierSVG();
 
     // Render decor (cobwebs, windows, candles)
     const hall = document.getElementById('mansionHall');
+    if (!hall) return;
     const hallW = hall.offsetWidth || 800;
     const hallH = hall.offsetHeight || 500;
 
@@ -7293,7 +7301,8 @@ async function renderMansion() {
       const x = 10 + (i * 25);
       decorHtml += '<div class="mansion-candle" style="bottom:50px; left:'+x+'%;"><svg width="12" height="24"><rect x="3" y="10" width="6" height="14" fill="#8b7355" rx="1"/><ellipse cx="6" cy="10" rx="4" ry="6" fill="#f0c040" opacity="0.9"><animate attributeName="ry" values="5;7;5" dur="'+(0.8+i*0.3)+'s" repeatCount="indefinite"/></ellipse></svg></div>';
     }
-    document.getElementById('mansionDecor').innerHTML = decorHtml;
+    const decorEl = document.getElementById('mansionDecor');
+    if (decorEl) decorEl.innerHTML = decorHtml;
 
     // Render ghosts floating around
     const ghostArea = { x: 60, y: 100, w: hallW - 120, h: hallH - 200 };
@@ -7317,7 +7326,8 @@ async function renderMansion() {
         + '<div class="ghost-label">'+(isMe ? '<span style="color:var(--gold);">'+escHtml(name)+' (You)</span>' : escHtml(name))+'<span class="ghost-le">'+le+' years</span></div></div>';
     });
 
-    document.getElementById('mansionGhosts').innerHTML = ghostsHtml;
+    const ghostsEl = document.getElementById('mansionGhosts');
+    if (ghostsEl) ghostsEl.innerHTML = ghostsHtml;
 
   } catch(e) {
     console.error('Mansion render error:', e);
