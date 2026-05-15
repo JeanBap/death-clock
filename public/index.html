@@ -121,6 +121,18 @@ nav .container {
   border-radius: 8px;
   font-size: 0.9rem;
 }
+
+.tier-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: var(--surface);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
 .nav-tab.active { background: var(--surface); color: var(--text); }
 .nav-tab:hover { color: var(--text); }
 
@@ -709,6 +721,7 @@ footer p { margin-bottom: 8px; }
       <button class="nav-tab" onclick="showPage('about')">About</button>
       <button class="nav-tab hidden" id="navDash" onclick="showPage('dashboard')">Dashboard</button>
       <button class="nav-tab hidden" id="navPrice" onclick="showPage('pricing')">Upgrade</button>
+      <button class="nav-tab hidden" id="profileBtn" onclick="showPage('profile')">Profile</button>
       <button class="btn-primary btn-sm" id="navCta" onclick="showPage('quiz')">Calculate</button>
     </div>
   </div>
@@ -735,6 +748,73 @@ footer p { margin-bottom: 8px; }
 </section>
 
 <!-- ===== QUESTIONNAIRE ===== -->
+
+<!-- PROFILE PAGE -->
+<section id="page-profile" class="page hidden">
+  <div class="container" style="max-width:600px; padding-top:40px;">
+    <h2 style="text-align:center; margin-bottom:24px;">Your Profile</h2>
+    
+    <!-- Auth Section -->
+    <div id="authSection">
+      <div id="authLoggedOut" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; text-align:center;">
+        <h3 style="margin-bottom:8px;">Sign In to Sync Your Data</h3>
+        <p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px;">Free users: data saved in this browser. Paid users: synced across all devices.</p>
+        <div style="display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
+          <input type="email" id="authEmail" placeholder="your@email.com" style="padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:1rem;">
+          <input type="password" id="authPassword" placeholder="Password (min 6 chars)" style="padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:1rem;">
+          <div style="display:flex; gap:8px;">
+            <button class="btn-primary" onclick="authSignIn()" style="flex:1;">Sign In</button>
+            <button class="btn-green" onclick="authSignUp()" style="flex:1;">Sign Up</button>
+          </div>
+          <button class="btn-secondary btn-sm" onclick="authMagicLink()" style="font-size:0.8rem;">Send Magic Link (no password)</button>
+        </div>
+        <div id="authError" style="color:var(--accent); font-size:0.85rem; margin-top:8px; display:none;"></div>
+      </div>
+      
+      <div id="authLoggedIn" class="hidden" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px;">
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+          <div id="profileDeathy" style="width:80px; height:96px;"></div>
+          <div>
+            <div style="font-size:1.2rem; font-weight:700;" id="profileName">-</div>
+            <div style="color:var(--text2); font-size:0.85rem;" id="profileEmail">-</div>
+            <div style="margin-top:4px;"><span class="tier-badge" id="profileTier">FREE</span></div>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <div style="background:var(--bg); padding:12px; border-radius:8px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; color:var(--accent);" id="profileYearsLeft">-</div>
+            <div style="font-size:0.75rem; color:var(--text3);">Years Left</div>
+          </div>
+          <div style="background:var(--bg); padding:12px; border-radius:8px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; color:var(--green);" id="profileDaysAdded">0</div>
+            <div style="font-size:0.75rem; color:var(--text3);">Days Added</div>
+          </div>
+          <div style="background:var(--bg); padding:12px; border-radius:8px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; color:var(--gold);" id="profileScore">-</div>
+            <div style="font-size:0.75rem; color:var(--text3);">Life Score</div>
+          </div>
+          <div style="background:var(--bg); padding:12px; border-radius:8px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; color:var(--text);" id="profileStreak">0</div>
+            <div style="font-size:0.75rem; color:var(--text3);">Day Streak</div>
+          </div>
+        </div>
+        
+        <div style="font-size:0.8rem; color:var(--text3); margin-bottom:12px;" id="profileSyncStatus">Data saved locally</div>
+        
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn-primary btn-sm" onclick="DataStore.save().then(m => showToast(m==='cloud'?'Synced!':'Saved locally'))">Save Now</button>
+          <button class="btn-secondary btn-sm" onclick="exportProfileData()">Export Data</button>
+          <button class="btn-secondary btn-sm" style="color:var(--accent);" onclick="authSignOut()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Data Summary -->
+    <div id="profileDataSummary" style="margin-top:24px;"></div>
+  </div>
+</section>
+
 <section id="page-quiz" class="hidden questionnaire">
   <div class="q-progress" id="qProgress"></div>
   <div id="qContent"></div>
@@ -1036,8 +1116,170 @@ const state = {
   currentTab: 'factors',
   longevityGoal: null,
   userTier: 'free',
-  savedProfile: null
+  savedProfile: null,
+  supaUser: null
 };
+
+// ============================================
+// SUPABASE CLIENT
+// ============================================
+const SUPABASE_URL = 'https://myizauhtpcnkwguralwc.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15aXphdWh0cGNua3dndXJhbHdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTY2MzQsImV4cCI6MjA5MDAzMjYzNH0.8ApElblHWaZo5knum86q6fPk7qu5D0dU-aNSZPRoA0U';
+let supaClient = null;
+try { supaClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e) { console.warn('Supabase init failed:', e); }
+
+// ============================================
+// DATA PERSISTENCE LAYER
+// ============================================
+const DataStore = {
+  // Determine storage mode
+  isCloud() { return state.userTier !== 'free' && supaClient && state.supaUser; },
+
+  // Save all user data
+  async save() {
+    const data = {
+      answers: state.answers,
+      result: state.result ? { ...state.result, deathDate: state.result.deathDate.getTime(), dob: state.result.dob.getTime() } : null,
+      bucketList: state.bucketList,
+      longevityGoal: state.longevityGoal,
+      deathyState: getDeathyState(),
+      socialCircle: JSON.parse(localStorage.getItem('dc_social_circle') || '[]'),
+      inviteCode: localStorage.getItem('dc_invite_code') || '',
+      referralCount: parseInt(localStorage.getItem('dc_referral_count') || '0'),
+      emailPrefs: JSON.parse(localStorage.getItem('dc_email_prefs') || '{}'),
+      notifEnabled: localStorage.getItem('dc_notif_enabled') === 'true',
+      soundOff: localStorage.getItem('dc_sound_off') === 'true',
+      tier: state.userTier,
+      savedAt: new Date().toISOString()
+    };
+
+    // Always save to localStorage (offline fallback)
+    try { localStorage.setItem('deathclock_profile', JSON.stringify(data)); } catch(e) {}
+
+    // If paid + authenticated, also sync to Supabase
+    if (this.isCloud()) {
+      try {
+        const { data: existing } = await supaClient.from('dc_profiles').select('id').eq('user_id', state.supaUser.id).single();
+        const row = {
+          user_id: state.supaUser.id,
+          email: state.supaUser.email,
+          answers: data.answers,
+          result: data.result,
+          bucket_list: data.bucketList,
+          longevity_goal: data.longevityGoal,
+          deathy_state: data.deathyState,
+          social_circle: data.socialCircle,
+          invite_code: data.inviteCode,
+          referral_count: data.referralCount,
+          tier: data.tier,
+          email_prefs: data.emailPrefs,
+          notification_enabled: data.notifEnabled,
+          sound_enabled: !data.soundOff
+        };
+        if (existing) {
+          await supaClient.from('dc_profiles').update(row).eq('user_id', state.supaUser.id);
+        } else {
+          await supaClient.from('dc_profiles').insert(row);
+        }
+        return 'cloud';
+      } catch(e) { console.warn('Cloud save failed, local saved:', e); return 'local'; }
+    }
+    return 'local';
+  },
+
+  // Load user data
+  async load() {
+    // Try cloud first if paid + auth
+    if (this.isCloud()) {
+      try {
+        const { data: profile } = await supaClient.from('dc_profiles').select('*').eq('user_id', state.supaUser.id).single();
+        if (profile) {
+          this._applyProfile(profile, true);
+          return 'cloud';
+        }
+      } catch(e) { console.warn('Cloud load failed:', e); }
+    }
+    // Fallback to localStorage
+    try {
+      const saved = localStorage.getItem('deathclock_profile');
+      if (!saved) return false;
+      const profile = JSON.parse(saved);
+      this._applyProfile(profile, false);
+      return 'local';
+    } catch(e) { return false; }
+  },
+
+  _applyProfile(p, isCloud) {
+    if (isCloud) {
+      state.answers = p.answers || {};
+      state.bucketList = p.bucket_list || [];
+      state.longevityGoal = p.longevity_goal;
+      state.userTier = p.tier || 'free';
+      if (p.result) {
+        state.result = { ...p.result, deathDate: new Date(p.result.deathDate), dob: new Date(p.result.dob) };
+        if (state.result.factors) state.result.factors.sort((a, b) => a.impact - b.impact);
+      }
+      if (p.deathy_state) saveDeathyState(p.deathy_state);
+      if (p.social_circle) localStorage.setItem('dc_social_circle', JSON.stringify(p.social_circle));
+      if (p.invite_code) localStorage.setItem('dc_invite_code', p.invite_code);
+      if (p.referral_count) localStorage.setItem('dc_referral_count', String(p.referral_count));
+      if (p.email_prefs) localStorage.setItem('dc_email_prefs', JSON.stringify(p.email_prefs));
+      if (p.notification_enabled) localStorage.setItem('dc_notif_enabled', 'true');
+      localStorage.setItem('dc_sound_off', p.sound_enabled === false ? 'true' : 'false');
+    } else {
+      state.answers = p.answers || {};
+      state.bucketList = p.bucketList || [];
+      state.longevityGoal = p.longevityGoal;
+      state.userTier = p.tier || state.userTier;
+      if (p.result) {
+        state.result = { ...p.result, deathDate: new Date(p.result.deathDate || p.result.deathDate), dob: new Date(p.result.dob || p.result.dob) };
+        if (state.result.factors) state.result.factors.sort((a, b) => a.impact - b.impact);
+      }
+    }
+    if (state.result) {
+      document.getElementById('navDash')?.classList.remove('hidden');
+      document.getElementById('navPrice')?.classList.remove('hidden');
+      const cta = document.getElementById('navCta');
+      if (cta) cta.textContent = 'Recalculate';
+    }
+  },
+
+  // Log a habit to Supabase (paid only)
+  async logHabit(habitKey, daysAdded) {
+    if (!this.isCloud()) return;
+    try {
+      const { data: profile } = await supaClient.from('dc_profiles').select('id').eq('user_id', state.supaUser.id).single();
+      if (profile) {
+        await supaClient.from('dc_habit_log').insert({ profile_id: profile.id, habit_key: habitKey, days_added: daysAdded });
+      }
+    } catch(e) {}
+  }
+};
+
+// Auth state listener
+if (supaClient) {
+  supaClient.auth.onAuthStateChange((event, session) => {
+    state.supaUser = session?.user || null;
+    if (session?.user) {
+      updateProfileUI();
+      if (state.userTier !== 'free') DataStore.load();
+    }
+  });
+  // Check existing session
+  supaClient.auth.getSession().then(({ data }) => {
+    state.supaUser = data?.session?.user || null;
+    if (state.supaUser) updateProfileUI();
+  });
+}
+
+function updateProfileUI() {
+  const btn = document.getElementById('profileBtn');
+  if (btn && state.supaUser) {
+    btn.textContent = state.supaUser.email?.split('@')[0] || 'Profile';
+    btn.classList.remove('hidden');
+  }
+}
+
 
 // ============================================
 // SSA ACTUARIAL BASE TABLE (2023 period life table, simplified)
@@ -1321,6 +1563,231 @@ const tipsDB = [
   { cat: 'environment', title: 'Use an Air Purifier at Home', content: 'HEPA air purifiers reduce indoor particulate matter by up to 80%, reducing respiratory and cardiovascular risk.', years: 1, difficulty: 'easy' },
   { cat: 'environment', title: 'Take Movement Breaks Every 30 Minutes', content: 'Breaking up sitting time with 2-3 minutes of movement every 30 minutes reduces mortality risk by 17%.', years: 1.5, difficulty: 'easy' }
 ];
+
+
+// ============================================
+// PERSONALISED QUIZ COMMENTS
+// ============================================
+function getQuizComment(questionKey, answerValue) {
+  const comments = {
+    dob: {
+      _default: "Interesting vintage. Let's see how many miles are left on the clock."
+    },
+    sex: {
+      male: "Statistically, you drew the shorter straw. But hey, at least you don't have to give birth.",
+      female: "Biology gave you a head start. Don't waste it."
+    },
+    country: {
+      _default: "Location, location, location. It's not just for real estate - it's for staying alive."
+    },
+    body: {
+      _default: "Your body is a temple. Or a haunted house. Let's find out which."
+    },
+    exercise: {
+      '5+': "You're basically running from Death. Literally. Smart move.",
+      '3-4x': "Decent effort. Death has to jog to keep up with you.",
+      '1-2x': "Weekend warrior vibes. Better than nothing, but Death doesn't take weekends off.",
+      none: "A couch potato in the wild. Death doesn't even have to chase you - you're stationary."
+    },
+    sport: {
+      tennis: "Tennis players live almost a decade longer. That's a lot of extra Grand Slams to watch.",
+      badminton: "Smashing it. Racquet sports are basically anti-death weapons.",
+      soccer: "Team sports keep you alive AND give you someone to blame when you lose.",
+      cycling: "Two wheels, fewer years underground. The math checks out.",
+      swimming: "You float now. You'll float later too, but this kind is the good kind.",
+      running: "Run Forest run! Every kilometre is a middle finger to the Reaper.",
+      gym: "Gains are great, but your ghost doesn't need muscles. Add a social sport.",
+      none: "No sport? Your ghost is already stretching in the warm-up area."
+    },
+    diet: {
+      very_healthy: "Kale smoothies and quinoa bowls? Your ghost will be absolutely disgusted by how long you live.",
+      healthy: "Not bad. You eat your vegetables but also know what joy tastes like.",
+      average: "The 'I'll start Monday' diet. Every Monday. Since 2019.",
+      poor: "Your body is basically a dumpster fire with legs. Delicious, but deadly."
+    },
+    veg_diet: {
+      vegan: "Plants only? Your ghost will be waiting a very, very long time.",
+      vegetarian: "No meat, more heartbeat. The cows appreciate it too.",
+      pescatarian: "Fish brain is real - and it keeps you alive longer.",
+      flexitarian: "Flexible eater, flexible death date. Not bad.",
+      omnivore: "You eat everything. Including your lifespan, apparently."
+    },
+    processed_food: {
+      minimal: "Your kitchen actually gets used for cooking? Revolutionary.",
+      low: "Mostly real food. Your organs send their regards.",
+      moderate: "Half fresh, half factory. Your body is confused but managing.",
+      high: "If it has a barcode, you'll eat it. Your arteries would like a word.",
+      very_high: "You're basically preserved already. Ironic, since that won't preserve you."
+    },
+    alcohol: {
+      never: "Stone cold sober. Your liver wrote you a thank-you card.",
+      occasional: "Social drinker. Death raises a glass to your moderation.",
+      moderate: "Nightly wine 'for the antioxidants'. Sure. The Lancet has opinions about that.",
+      heavy: "Cheers to that! ...said no doctor ever."
+    },
+    smoking: {
+      never: "Your lungs are grateful. They're doing a little celebration dance right now.",
+      former: "You quit! Your body is literally healing as we speak. Well done.",
+      current_light: "Just a few a day? Death appreciates the consistent schedule.",
+      current_heavy: "You're not living on the edge, you're living on a cigarette. Same thing really."
+    },
+    drugs: {
+      none: "Clean as a whistle. Your neurons high-five each other.",
+      cannabis: "Mellow. Your ghost will probably forget to haunt anyone.",
+      recreational: "Party now, pay later. The bill is measured in years.",
+      opioids: "This is the one your ghost is genuinely worried about. Please get help."
+    },
+    stress: {
+      low: "Zen master energy. Your cortisol levels are on vacation.",
+      moderate: "Normal amounts of existential dread. Very relatable.",
+      high: "Your body is running fight-or-flight like it's a marathon. Spoiler: you're fighting yourself.",
+      very_high: "Stress level: watching a horror movie while doing taxes during a breakup. Please, breathe."
+    },
+    stress_mgmt: {
+      yes: "Meditating your way to extra years. Your ghost approves of the namaste.",
+      no: "No stress management? Your body is a pressure cooker without a valve."
+    },
+    social: {
+      strong: "Popular and alive. The Harvard study says you're doing the #1 thing right.",
+      moderate: "Decent circle. A few more dinner parties could literally add years.",
+      few: "Your contact list is... intimate. Loneliness kills as much as 15 cigarettes a day.",
+      isolated: "It's just you and Death at this party. That's... not a great ratio."
+    },
+    relationship: {
+      married: "Locked in. Someone to remind you to take your vitamins AND notice if you stop breathing at night.",
+      partnered: "Love is in the air, and apparently so are extra years.",
+      single: "Solo but not sorry. Just make sure you have a strong friend group.",
+      divorced_widowed: "Life transitions are tough. Your resilience is a survival skill."
+    },
+    sleep_hours: {
+      short: "Less than 6 hours? Your brain is running on fumes and your body is writing its resignation letter.",
+      moderate_short: "Almost there. Those missing hours aren't sleeping in - they're checking out.",
+      optimal: "7-8 hours! The Goldilocks zone. Your body and brain are holding hands.",
+      long: "9+ hours... either you're a teenager or your body is trying to tell you something."
+    },
+    sleep_quality: {
+      poor: "Tossing and turning like a rotisserie chicken. Quality matters as much as quantity.",
+      fair: "Could be better. Your ghost is already sleeping well - don't let it outperform you.",
+      good: "Solid sleeper. Your pillow is proud of you.",
+      excellent: "You sleep like the dead. But, y'know, temporarily."
+    },
+    conditions: {
+      _default: "Medical history logged. Knowledge is power - and apparently, years."
+    },
+    family: {
+      _default: "Your ancestors are either cheering you on or serving as cautionary tales."
+    },
+    healthcare: {
+      regular: "Regular checkups! You actually read the owner's manual for your body.",
+      occasional: "Only when something hurts? Preventive care is cheaper than a coffin.",
+      rarely: "Playing health roulette. Bold strategy.",
+      never: "You haven't seen a doctor in years? There's a reason they call it a check-UP, not a check-DOWN."
+    },
+    blood_pressure: {
+      normal: "Textbook blood pressure. Your arteries are basically doing yoga.",
+      elevated: "Slightly elevated. Your blood is getting a bit too enthusiastic.",
+      high_1: "Stage 1 hypertension. Your heart is working overtime and not getting paid.",
+      high_2: "Stage 2. Your cardiovascular system filed a formal complaint.",
+      unknown: "You don't know? That's like not knowing your phone battery level. Except it's your life battery."
+    },
+    resting_hr: {
+      low: "Athlete heart rate. Death has to sprint to keep up.",
+      normal: "Normal range. Your ticker is doing its job with minimum drama.",
+      elevated: "Elevated resting heart rate. Your heart's running even when you're not.",
+      high: "Over 100 at rest? Your heart thinks every moment is a cardio session.",
+      unknown: "Check your pulse tomorrow morning. It's a free health metric that tells you a LOT."
+    },
+    coffee: {
+      moderate: "2-3 cups is the sweet spot. Science says you're doing coffee perfectly.",
+      light: "One cup? Conservative but beneficial. Your antioxidants are mildly pleased.",
+      heavy: "Espresso IV drip energy. Still beneficial, just... intense.",
+      none: "No coffee? You're missing out on a legal longevity drug."
+    },
+    hydration: {
+      good: "Well hydrated! Your cells are swimming in gratitude. Literally.",
+      moderate: "Adequate. But 'adequate' is the 'C grade' of staying alive.",
+      poor: "Chronically dehydrated. Your blood is basically a smoothie at this point."
+    },
+    dental: {
+      excellent: "Floss champion! Your heart thanks your gums. Weird but scientifically true.",
+      good: "Brushing daily is baseline. Your teeth are neutral about you.",
+      poor: "Gum disease is linked to heart disease. Your mouth is plotting against your heart."
+    },
+    sauna: {
+      frequent: "Finnish sauna vibes! 40% lower mortality. You're literally sweating out death.",
+      moderate: "Regular heat therapy. Your blood vessels are doing happy dances.",
+      rare: "Occasional sauna. Even once a week helps.",
+      never: "No sauna? You're missing the easiest life-extension hack. Just sit there. In heat."
+    },
+    screen_time: {
+      low: "Under 2 hours? You're a digital minimalist. Your eyes and spine celebrate.",
+      moderate: "Average screen time. Your retinas are... coping.",
+      high: "4-6 hours of scrolling. Your spine has developed a question mark shape.",
+      very_high: "6+ hours. At this point, you're more screen than human."
+    },
+    omega3: {
+      high: "Omega-3 champion! Your brain and heart are literally oiled machines.",
+      moderate: "Fish once or twice a week. Your neurons are cautiously optimistic.",
+      low: "No fish, no supplements. Your inflammation levels are writing angry letters."
+    },
+    gratitude: {
+      high: "Gratitude journaling AND meditating? Your ghost is going to be insufferably positive.",
+      moderate: "Generally optimistic. Glass half full keeps you alive longer.",
+      low: "Pessimist? The good news: gratitude is a learnable skill. The bad news: everything else."
+    },
+    nature: {
+      high: "Daily nature immersion! Trees are basically giving you free therapy.",
+      moderate: "Weekly park walks. Your stress hormones drop just reading this.",
+      low: "Concrete jungle resident. Your body craves chlorophyll like a plant vampire."
+    },
+    volunteering: {
+      regular: "Regular volunteer! Purpose + social connection = longevity cheat code.",
+      occasional: "Sometimes. Every hour counts. Literally - 100+ hours/year drops mortality 40%.",
+      none: "Not volunteering? Your ghost will have all the time in the world for community service."
+    },
+    religion: {
+      weekly: "Weekly attendance adds years. The power of community + purpose + routine.",
+      occasional: "Occasional spiritual practice. Your soul is doing the minimum viable product.",
+      none: "Not religious? That's fine. Secular community groups have similar benefits."
+    },
+    pet: {
+      dog: "Dog owner! 24% lower mortality. Your pet is literally keeping you alive.",
+      cat: "Cat person. Lower cardiovascular risk. They're tolerating you AND saving you.",
+      other: "Exotic pet energy. Companionship benefits apply to all species.",
+      none: "No pet? Consider a dog. It's a furry, barking defibrillator."
+    },
+    education: {
+      postgrad: "Advanced degree = advanced lifespan. Knowledge truly is power.",
+      bachelors: "Bachelor's degree. Education builds health literacy. Smart move.",
+      high_school: "High school grad. Every bit of education helps.",
+      less: "Formal education isn't everything, but health literacy is literally life and death."
+    },
+    income: {
+      high: "High income = better healthcare access. Money can't buy time... except it kind of can.",
+      middle: "Middle income. Smart health choices can close the gap with higher earners.",
+      low: "Lower income, but free preventive care and lifestyle changes are powerful equalizers."
+    },
+    air_quality: {
+      good: "Clean air! Your lungs are breathing easy. Literally.",
+      moderate: "Moderate air quality. Consider a HEPA filter for your home.",
+      poor: "Poor air quality. Your lungs are filing a workplace hazard report."
+    },
+    occupation: {
+      sedentary: "Desk job. Your chair is slowly killing you. Stand up. Right now. I'll wait.",
+      moderate: "Mixed work. Some movement built in. Your body appreciates the variety.",
+      active: "Physically active job. Your work IS your workout. Efficient.",
+      hazardous: "Hazardous work. You're brave but please use all the safety gear."
+    }
+  };
+  
+  const questionComments = comments[questionKey];
+  if (!questionComments) return '';
+  
+  if (answerValue && questionComments[answerValue]) {
+    return questionComments[answerValue];
+  }
+  return questionComments._default || '';
+}
 
 // ============================================
 // QUESTIONNAIRE
@@ -1989,6 +2456,9 @@ function calculateResult() {
   document.getElementById('navCta').textContent = 'Recalculate';
 
   renderResult();
+  // Auto-save after calculation
+  DataStore.save();
+  saveInitialDeathy();
 }
 
 function renderResult() {
@@ -2857,57 +3327,37 @@ function loadGoalState() {
 }
 
 function saveProfile() {
-  if (state.userTier === 'free') {
-    showPaywall('save');
-    return;
-  }
-  if (!state.result) { alert('Complete the calculator first.'); return; }
-  const profile = {
-    answers: { ...state.answers },
-    result: {
-      ...state.result,
-      deathDate: state.result.deathDate.getTime(),
-      dob: state.result.dob.getTime()
-    },
-    bucketList: [...state.bucketList],
-    savedAt: new Date().toISOString()
-  };
-  try {
-    localStorage.setItem('deathclock_profile', JSON.stringify(profile));
-    // Show success toast
-    const existing = document.querySelector('.motivation-toast');
-    if (existing) existing.remove();
-    const toast = document.createElement('div');
-    toast.className = 'motivation-toast good';
-    toast.textContent = 'Profile saved! Your data is safe.';
-    document.body.appendChild(toast);
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
-  } catch(e) {
-    alert('Could not save profile. Storage may be full.');
-  }
+  if (!state.result) { showToast('Complete the calculator first.'); return; }
+  DataStore.save().then(mode => {
+    if (mode === 'cloud') {
+      showToast('Profile synced to the cloud! Your ghost follows you everywhere now.');
+    } else {
+      showToast('Profile saved to this browser. Upgrade to sync across devices.');
+    }
+  }).catch(() => showToast('Save failed. Try again.'));
 }
 
 function loadProfile() {
+  // Sync load from localStorage for initial render (async cloud load happens via DataStore)
   try {
     const saved = localStorage.getItem('deathclock_profile');
     if (!saved) return false;
     const profile = JSON.parse(saved);
     state.answers = profile.answers || {};
-    state.bucketList = profile.bucketList || [];
+    state.bucketList = profile.bucketList || profile.bucket_list || [];
+    state.longevityGoal = profile.longevityGoal || profile.longevity_goal || null;
+    state.userTier = profile.tier || state.userTier;
     if (profile.result) {
       state.result = {
         ...profile.result,
         deathDate: new Date(profile.result.deathDate),
         dob: new Date(profile.result.dob)
       };
-      // Re-sort factors
-      if (state.result.factors) {
-        state.result.factors.sort((a, b) => a.impact - b.impact);
-      }
-      // Show dashboard nav items
-      document.getElementById('navDash').classList.remove('hidden');
-      document.getElementById('navPrice').classList.remove('hidden');
-      document.getElementById('navCta').textContent = 'Recalculate';
+      if (state.result.factors) state.result.factors.sort((a, b) => a.impact - b.impact);
+      document.getElementById('navDash')?.classList.remove('hidden');
+      document.getElementById('navPrice')?.classList.remove('hidden');
+      const cta = document.getElementById('navCta');
+      if (cta) cta.textContent = 'Recalculate';
     }
     return true;
   } catch(e) { return false; }
@@ -4602,6 +5052,139 @@ function installPWA() {
     document.getElementById('installBanner')?.remove();
   });
 }
+
+// ============================================
+// AUTH FUNCTIONS
+// ============================================
+async function authSignIn() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if (!email || !password) { showAuthError('Enter email and password'); return; }
+  try {
+    const { data, error } = await supaClient.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    state.supaUser = data.user;
+    showToast('Welcome back from the dead!');
+    renderProfilePage();
+    DataStore.load();
+  } catch(e) { showAuthError(e.message); }
+}
+
+async function authSignUp() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if (!email || password.length < 6) { showAuthError('Need email + 6 char password minimum'); return; }
+  try {
+    const { data, error } = await supaClient.auth.signUp({ email, password });
+    if (error) throw error;
+    state.supaUser = data.user;
+    showToast('Account created! Check email to confirm.');
+    // Save existing data to new account
+    if (state.result) DataStore.save();
+    renderProfilePage();
+  } catch(e) { showAuthError(e.message); }
+}
+
+async function authMagicLink() {
+  const email = document.getElementById('authEmail').value.trim();
+  if (!email) { showAuthError('Enter your email first'); return; }
+  try {
+    const { error } = await supaClient.auth.signInWithOtp({ email });
+    if (error) throw error;
+    showToast('Magic link sent! Check your inbox.');
+  } catch(e) { showAuthError(e.message); }
+}
+
+async function authSignOut() {
+  await supaClient.auth.signOut();
+  state.supaUser = null;
+  document.getElementById('profileBtn')?.classList.add('hidden');
+  renderProfilePage();
+  showToast('Signed out. Your ghost is lonely now.');
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 5000); }
+}
+
+function renderProfilePage() {
+  const loggedIn = !!state.supaUser;
+  document.getElementById('authLoggedOut')?.classList.toggle('hidden', loggedIn);
+  document.getElementById('authLoggedIn')?.classList.toggle('hidden', !loggedIn);
+  document.getElementById('profileBtn')?.classList.toggle('hidden', !loggedIn);
+  
+  if (loggedIn) {
+    const name = generateDeathyName ? generateDeathyName() : 'Ghost';
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileEmail').textContent = state.supaUser.email || '';
+    document.getElementById('profileTier').textContent = state.userTier.toUpperCase().replace('_',' ');
+    document.getElementById('profileTier').style.background = state.userTier === 'free' ? 'var(--surface)' : 'var(--gold)';
+    document.getElementById('profileTier').style.color = state.userTier === 'free' ? 'var(--text2)' : '#000';
+    
+    if (state.result) {
+      document.getElementById('profileYearsLeft').textContent = state.result.remainingYears;
+      document.getElementById('profileScore').textContent = state.result.lifeScore;
+    }
+    const g = state.longevityGoal;
+    if (g) {
+      document.getElementById('profileDaysAdded').textContent = (g.totalDaysAdded || 0).toFixed(1);
+      document.getElementById('profileStreak').textContent = g.currentStreak || 0;
+    }
+    document.getElementById('profileSyncStatus').textContent = 
+      state.userTier !== 'free' ? 'Data synced to cloud' : 'Data saved locally (upgrade to sync)';
+    
+    // Render deathy in profile
+    const deathyEl = document.getElementById('profileDeathy');
+    if (deathyEl && typeof renderDeathyCompanion === 'function') {
+      deathyEl.innerHTML = generateDeathy(getDeathyParams());
+    }
+  }
+  
+  // Data summary
+  const summaryEl = document.getElementById('profileDataSummary');
+  if (summaryEl && state.result) {
+    const a = state.answers;
+    summaryEl.innerHTML = `
+      <h3 style="margin-bottom:12px;">Your Saved Data</h3>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem;">
+          ${a.sex ? `<div><span style="color:var(--text3);">Sex:</span> ${a.sex}</div>` : ''}
+          ${a.country ? `<div><span style="color:var(--text3);">Country:</span> ${a.country}</div>` : ''}
+          ${a.exercise ? `<div><span style="color:var(--text3);">Exercise:</span> ${a.exercise}</div>` : ''}
+          ${a.diet ? `<div><span style="color:var(--text3);">Diet:</span> ${a.diet}</div>` : ''}
+          ${a.smoking ? `<div><span style="color:var(--text3);">Smoking:</span> ${a.smoking}</div>` : ''}
+          ${a.alcohol ? `<div><span style="color:var(--text3);">Alcohol:</span> ${a.alcohol}</div>` : ''}
+          ${a.sleep_hours ? `<div><span style="color:var(--text3);">Sleep:</span> ${a.sleep_hours}</div>` : ''}
+          ${a.social ? `<div><span style="color:var(--text3);">Social:</span> ${a.social}</div>` : ''}
+          ${a.stress ? `<div><span style="color:var(--text3);">Stress:</span> ${a.stress}</div>` : ''}
+          ${a.sport ? `<div><span style="color:var(--text3);">Sport:</span> ${a.sport}</div>` : ''}
+        </div>
+        <div style="margin-top:12px; font-size:0.8rem; color:var(--text3);">
+          Last calculated: ${state.result.deathDate ? new Date().toLocaleDateString() : 'Never'}<br>
+          Death date: ${state.result.deathDate ? state.result.deathDate.toLocaleDateString() : '-'}
+        </div>
+      </div>`;
+  }
+}
+
+function exportProfileData() {
+  const data = {
+    answers: state.answers,
+    result: state.result ? { ...state.result, deathDate: state.result.deathDate?.toISOString(), dob: state.result.dob?.toISOString() } : null,
+    longevityGoal: state.longevityGoal,
+    tier: state.userTier,
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'death-clock-profile.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Profile exported!');
+}
+
 // Auto-load saved profile
 if (loadProfile()) {
   // Show welcome back message on home page
