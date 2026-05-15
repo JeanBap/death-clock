@@ -196,6 +196,67 @@ nav .container {
 }
 .q-condition-impact { font-size: 0.7rem; color: var(--accent2); margin-top: 2px; }
 
+/* ===== LONGEVITY GOAL SYSTEM ===== */
+.goal-setup { max-width:600px; margin:32px auto; padding:32px; background:var(--bg2); border:1px solid var(--border); border-radius:20px; text-align:center; }
+.goal-setup h3 { font-size:1.5rem; margin-bottom:8px; }
+.goal-gap { font-size:1.1rem; color:var(--gold); margin:16px 0; font-weight:600; }
+.goal-feasibility { padding:8px 16px; border-radius:8px; display:inline-block; font-size:0.85rem; font-weight:600; margin:8px 0 16px; }
+.goal-feasibility.green { background:rgba(78,204,163,0.15); color:var(--green); }
+.goal-feasibility.gold { background:rgba(240,192,64,0.15); color:var(--gold); }
+.goal-feasibility.red { background:rgba(233,69,96,0.15); color:var(--accent); }
+.habit-card { display:flex; align-items:center; gap:16px; padding:16px; background:var(--surface); border-radius:var(--radius); margin-bottom:8px; transition:all 0.3s; cursor:pointer; border:2px solid var(--border); }
+.habit-card.logged { border-color:var(--green); background:rgba(78,204,163,0.08); }
+.habit-card:hover { border-color:var(--accent); }
+.habit-check { width:28px; height:28px; border:2px solid var(--border); border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:all 0.2s; }
+.habit-card.logged .habit-check { background:var(--green); border-color:var(--green); color:#1a1a2e; }
+.habit-info { flex:1; text-align:left; }
+.habit-name { font-weight:600; color:var(--text); }
+.habit-meta { font-size:0.8rem; color:var(--text3); margin-top:2px; }
+.habit-impact { font-size:0.85rem; font-weight:700; color:var(--green); white-space:nowrap; }
+.days-added-banner { background:linear-gradient(135deg, var(--bg3), var(--surface)); padding:24px; border-radius:16px; margin-bottom:24px; text-align:center; border:1px solid var(--border); }
+.days-added-num { font-size:3rem; font-weight:900; color:var(--green); }
+.days-added-label { font-size:0.85rem; color:var(--text2); }
+.streak-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(240,192,64,0.15); border-radius:20px; font-size:0.85rem; font-weight:600; color:var(--gold); margin-top:8px; }
+.habit-float { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:2rem; font-weight:900; color:var(--green); pointer-events:none; z-index:999; animation:floatUp 1.5s ease-out forwards; }
+@keyframes floatUp { 0% { opacity:1; transform:translate(-50%,-50%) scale(1); } 100% { opacity:0; transform:translate(-50%,-150%) scale(1.5); } }
+.motivation-toast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  padding:12px 24px; border-radius:12px; font-size:0.95rem; font-weight:600;
+  z-index:200; animation:toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+  max-width:90vw; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+.motivation-toast.good { background:rgba(78,204,163,0.95); color:#0a0a0f; }
+.motivation-toast.neutral { background:rgba(240,192,64,0.95); color:#0a0a0f; }
+.motivation-toast.bad { background:rgba(233,69,96,0.95); color:white; }
+.motivation-toast.great { background:linear-gradient(135deg,#4ecca3,#4d80e4); color:white; }
+@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+.plan-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:16px 0; }
+.plan-stat { background:var(--surface); padding:12px; border-radius:var(--radius); text-align:center; }
+.plan-stat-num { font-size:1.5rem; font-weight:800; }
+.plan-stat-label { font-size:0.75rem; color:var(--text3); margin-top:2px; }
+.heatmap { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; max-width:300px; margin:16px auto; }
+.heatmap-day { width:100%; aspect-ratio:1; border-radius:3px; background:var(--bg); }
+.heatmap-day.full { background:var(--green); }
+.heatmap-day.partial { background:var(--gold); }
+.heatmap-day.missed { background:var(--bg); }
+
+/* ===== LEADERBOARD ===== */
+.leaderboard { margin-top:48px; }
+.leaderboard h3 { font-size:1.3rem; margin-bottom:16px; }
+.lb-card { background:var(--surface); padding:24px; border-radius:16px; margin-bottom:16px; border:1px solid var(--border); }
+.lb-rank { font-size:4rem; font-weight:900; line-height:1; }
+.lb-rank.top { color:var(--green); }
+.lb-rank.mid { color:var(--gold); }
+.lb-rank.low { color:var(--accent); }
+.lb-bar { height:24px; background:var(--bg); border-radius:12px; overflow:hidden; position:relative; margin:12px 0; }
+.lb-bar-fill { height:100%; border-radius:12px; transition:width 1s ease; }
+.lb-bar-marker { position:absolute; top:-4px; width:3px; height:32px; background:var(--text); border-radius:2px; }
+.lb-comparison { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+.lb-vs { text-align:center; padding:16px; background:var(--bg2); border-radius:var(--radius); }
+.lb-vs-num { font-size:1.8rem; font-weight:800; }
+.lb-vs-label { font-size:0.8rem; color:var(--text3); margin-top:4px; }
+
 /* Cookie Banner */
 .cookie-banner {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -586,7 +647,7 @@ footer p { margin-bottom: 8px; }
     <div style="display:flex; justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap;">
       <div><div style="font-size:2rem; font-weight:800; color:var(--accent);">53M+</div><div style="font-size:0.8rem; color:var(--text3);">Research participants</div></div>
       <div><div style="font-size:2rem; font-weight:800; color:var(--green);">1,200+</div><div style="font-size:0.8rem; color:var(--text3);">Studies analyzed</div></div>
-      <div><div style="font-size:2rem; font-weight:800; color:var(--gold);">68+</div><div style="font-size:0.8rem; color:var(--text3);">Life factors tracked</div></div>
+      <div><div style="font-size:2rem; font-weight:800; color:var(--gold);">100+</div><div style="font-size:0.8rem; color:var(--text3);">Life factors tracked</div></div>
     </div>
   </div>
 </section>
@@ -611,13 +672,16 @@ footer p { margin-bottom: 8px; }
   <div class="container">
     <div class="dash-header">
       <h2>Your Life Dashboard</h2>
-      <button class="btn-primary btn-sm" onclick="showPage('quiz')">Recalculate</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-green btn-sm" onclick="saveProfile()">Save Profile</button>
+        <button class="btn-primary btn-sm" onclick="showPage('quiz')">Recalculate</button>
+      </div>
     </div>
     <div class="dash-stats" id="dashStats"></div>
     <div class="tab-bar" id="dashTabs">
       <button class="tab-btn active" onclick="showTab('factors')">Factors</button>
       <button class="tab-btn" onclick="showTab('bucketlist')">Bucket List</button>
-      <button class="tab-btn" onclick="showTab('goals')">Goals</button>
+      <button class="tab-btn" onclick="showTab('myplan')">My Plan</button>
       <button class="tab-btn" onclick="showTab('tips')">Tips</button>
       <button class="tab-btn" onclick="showTab('products')">Recommendations</button>
     </div>
@@ -630,59 +694,77 @@ footer p { margin-bottom: 8px; }
   <div class="container">
     <h2>Unlock Your Full Lifespan Potential</h2>
     <p class="pricing-sub">Choose a plan that fits your journey</p>
-    <div class="pricing-grid">
+    <div class="pricing-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
       <div class="price-card">
         <div class="price-tier">Free</div>
         <div class="price-amount">$0</div>
         <div class="price-period">forever</div>
         <div class="price-features">
           <div class="price-feature">Death date calculation</div>
-          <div class="price-feature">Top 5 factor breakdown</div>
+          <div class="price-feature">100+ factor analysis</div>
           <div class="price-feature">10 bucket list items</div>
           <div class="price-feature">3 personal goals</div>
           <div class="price-feature">Basic tips</div>
+          <div class="price-feature">Downloadable timer widget</div>
         </div>
         <button class="btn-secondary price-cta" onclick="showPage('quiz')">Get Started</button>
       </div>
-      <div class="price-card featured">
+      <div class="price-card">
         <div class="price-tier">Premium</div>
         <div class="price-amount">$4.99</div>
         <div class="price-period">/month</div>
         <div class="price-features">
           <div class="price-feature">Everything in Free</div>
-          <div class="price-feature">Unlimited bucket list</div>
-          <div class="price-feature">Unlimited goals + milestones</div>
+          <div class="price-feature">Unlimited bucket list &amp; goals</div>
           <div class="price-feature">Monthly recalculation</div>
-          <div class="price-feature">Full factor analysis</div>
-          <div class="price-feature">"Years Added" tracker</div>
+          <div class="price-feature">Full factor breakdown</div>
+          <div class="price-feature">"Years Added" progress tracker</div>
+          <div class="price-feature">Clinical test recommendations</div>
         </div>
         <button class="btn-primary price-cta">Subscribe $4.99/mo</button>
       </div>
-      <div class="price-card">
-        <div class="price-tier">Premium Plus</div>
-        <div class="price-amount">$9.99</div>
+      <div class="price-card featured">
+        <div class="price-tier">Pro Plus</div>
+        <div class="price-amount">$29.99</div>
         <div class="price-period">/month</div>
         <div class="price-features">
           <div class="price-feature">Everything in Premium</div>
-          <div class="price-feature">Personalized longevity plan</div>
-          <div class="price-feature">Biomarker tracking</div>
-          <div class="price-feature">Monthly longevity report</div>
-          <div class="price-feature">Exclusive deals</div>
-          <div class="price-feature">Life Score dashboard</div>
+          <div class="price-feature">Dynamic biological age tracking</div>
+          <div class="price-feature">AI longevity coach</div>
+          <div class="price-feature">Lab result integration</div>
+          <div class="price-feature">Personalised supplement &amp; meal plans</div>
+          <div class="price-feature">Challenge library &amp; streaks</div>
+          <div class="price-feature">Advanced analytics dashboard</div>
+          <div class="price-feature">Family Plan (parents/kids)</div>
         </div>
-        <button class="btn-gold price-cta">Subscribe $9.99/mo</button>
+        <button class="btn-gold price-cta">Subscribe $29.99/mo</button>
       </div>
       <div class="price-card">
         <div class="price-tier">Lifetime</div>
         <div class="price-amount">$99</div>
         <div class="price-period">one-time</div>
         <div class="price-features">
-          <div class="price-feature">Everything in Premium Plus</div>
-          <div class="price-feature">Pay once, use forever</div>
+          <div class="price-feature">Everything in Premium</div>
+          <div class="price-feature">Pay once, keep forever</div>
           <div class="price-feature">Early access to features</div>
           <div class="price-feature">Priority support</div>
         </div>
         <button class="btn-green price-cta">Get Lifetime Access</button>
+      </div>
+      <div class="price-card" style="border-color:var(--accent); background:linear-gradient(135deg,#1a1a2e,#16213e);">
+        <div class="price-tier" style="color:var(--accent);">Longevity Deep Dive</div>
+        <div class="price-amount">$499</div>
+        <div class="price-period">one-time report</div>
+        <div class="price-features">
+          <div class="price-feature">Everything in Pro Plus</div>
+          <div class="price-feature">Board-certified longevity physician review</div>
+          <div class="price-feature">Full biomarker analysis &amp; interpretation</div>
+          <div class="price-feature">Personalised 90-day action plan</div>
+          <div class="price-feature">Genetic risk assessment</div>
+          <div class="price-feature">1-on-1 video consultation (30 min)</div>
+          <div class="price-feature">Custom supplement protocol</div>
+        </div>
+        <button class="btn-primary price-cta" style="background:linear-gradient(135deg,var(--accent),#ff6b6b);">Get Your Deep Dive</button>
       </div>
     </div>
   </div>
@@ -824,7 +906,10 @@ const state = {
   result: null,
   bucketList: [],
   goals: [],
-  currentTab: 'factors'
+  currentTab: 'factors',
+  longevityGoal: null,
+  userTier: 'free',
+  savedProfile: null
 };
 
 // ============================================
@@ -981,7 +1066,92 @@ const lifeFactors = {
   sport_swimming: { impact: 3.4, label: 'Swimmer', tip: 'Full-body low-impact exercise. 28% lower all-cause mortality.', cat: 'fitness' },
   sport_running: { impact: 3.2, label: 'Runner/jogger', tip: 'Even slow jogging 1-2.4 hours/week reduces mortality 44%.', cat: 'fitness' },
   sport_gym: { impact: 1.5, label: 'Gym/weights only', tip: 'Resistance training is great but adding social sport amplifies benefits.', cat: 'fitness' },
-  sport_none: { impact: 0, label: 'No specific sport', tip: 'Picking up a social sport is one of the highest-ROI longevity moves.', cat: 'fitness' }
+  sport_none: { impact: 0, label: 'No specific sport', tip: 'Picking up a social sport is one of the highest-ROI longevity moves.', cat: 'fitness' },
+
+  // Biometrics - Blood Pressure (Lancet, n=1.25M)
+  bp_normal: { impact: 0, label: 'Normal blood pressure (<120/80)', tip: 'Optimal range. Maintain through diet and exercise.', cat: 'biometrics' },
+  bp_elevated: { impact: -1, label: 'Elevated (120-129/<80)', tip: 'Pre-hypertension. Lifestyle changes can prevent progression.', cat: 'biometrics' },
+  bp_high_1: { impact: -3, label: 'High Stage 1 (130-139/80-89)', tip: 'Hypertension Stage 1. Medication + lifestyle changes recommended.', cat: 'biometrics' },
+  bp_high_2: { impact: -5, label: 'High Stage 2 (140+/90+)', tip: 'Hypertension Stage 2. Significant mortality risk. Medical treatment essential.', cat: 'biometrics' },
+  bp_unknown: { impact: 0, label: 'Unknown', tip: 'Get your blood pressure checked - it is called the silent killer for a reason.', cat: 'biometrics' },
+
+  // Resting Heart Rate (Copenhagen City Heart Study)
+  rhr_low: { impact: 2, label: 'Low RHR (<60 bpm)', tip: 'Athletic heart rate. Strong cardiovascular fitness indicator.', cat: 'biometrics' },
+  rhr_normal: { impact: 0, label: 'Normal RHR (60-80 bpm)', tip: 'Healthy resting heart rate range.', cat: 'biometrics' },
+  rhr_elevated: { impact: -2, label: 'Elevated RHR (80-100 bpm)', tip: 'Each 10 bpm increase above 80 = 16% higher mortality (Copenhagen study).', cat: 'biometrics' },
+  rhr_high: { impact: -4, label: 'High RHR (100+ bpm)', tip: 'Significantly elevated mortality risk. Cardio exercise and medical review recommended.', cat: 'biometrics' },
+  rhr_unknown: { impact: 0, label: 'Unknown', tip: 'Check your pulse first thing in the morning for 60 seconds.', cat: 'biometrics' },
+
+  // Coffee (NHANES cohort, n=468,629)
+  coffee_moderate: { impact: 2, label: 'Moderate coffee (2-3 cups/day)', tip: '14-27% lower mortality risk (NEJM, n=468,629). Optimal amount.', cat: 'diet' },
+  coffee_light: { impact: 1, label: 'Light coffee (1 cup/day)', tip: 'Some protective benefit from antioxidants and polyphenols.', cat: 'diet' },
+  coffee_heavy: { impact: 0.5, label: 'Heavy coffee (4+ cups/day)', tip: 'Still beneficial but diminishing returns above 3 cups.', cat: 'diet' },
+  coffee_none: { impact: 0, label: 'No coffee', tip: 'No risk, but you miss out on coffees protective antioxidant effects.', cat: 'diet' },
+
+  // Hydration (NIH ARIC study, n=15,752, 25-year follow-up)
+  hydration_good: { impact: 2, label: 'Well hydrated (8+ glasses/day)', tip: 'Good hydration linked to slower biological aging (NIH, n=15,752).', cat: 'body' },
+  hydration_moderate: { impact: 0, label: 'Moderate hydration (4-7 glasses)', tip: 'Adequate but room for improvement.', cat: 'body' },
+  hydration_poor: { impact: -2, label: 'Poor hydration (<4 glasses/day)', tip: 'Chronic dehydration = 50% higher biological aging rate (NIH). Serum sodium above 144 = accelerated aging.', cat: 'body' },
+
+  // Dental Health (Leisure World Cohort, n=5,611)
+  dental_excellent: { impact: 1.5, label: 'Daily flossing + regular dentist', tip: 'Excellent oral health reduces cardiovascular and all-cause mortality 25-30%.', cat: 'body' },
+  dental_good: { impact: 0, label: 'Brush daily, occasional dentist', tip: 'Decent baseline. Adding daily flossing provides additional protection.', cat: 'body' },
+  dental_poor: { impact: -2, label: 'Irregular brushing, rare dentist', tip: 'Never flossing = 30% higher mortality (Leisure World study, n=5,611). Chronic inflammation link.', cat: 'body' },
+
+  // Sauna Use (Finnish study, JAMA, n=2,315, 20-year follow-up)
+  sauna_frequent: { impact: 3, label: 'Frequent sauna (4-7x/week)', tip: '40% lower all-cause mortality (JAMA, Finnish study, n=2,315, 20 years).', cat: 'fitness' },
+  sauna_moderate: { impact: 1.5, label: 'Moderate sauna (2-3x/week)', tip: 'Significant heat shock protein activation. 24% lower mortality.', cat: 'fitness' },
+  sauna_rare: { impact: 0.5, label: 'Occasional sauna (1x/week)', tip: 'Some benefit from heat therapy. Try to increase frequency.', cat: 'fitness' },
+  sauna_never: { impact: 0, label: 'Never use sauna', tip: 'Sauna use is one of the highest-ROI longevity interventions available.', cat: 'fitness' },
+
+  // Green Space / Nature (Lancet Planetary Health, n=4.6M)
+  nature_high: { impact: 2.5, label: 'High nature exposure', tip: 'Living near green space adds ~2.5 years. 35% lower respiratory mortality (Harvard).', cat: 'environment' },
+  nature_moderate: { impact: 1, label: 'Moderate nature access', tip: 'Regular parks and green areas nearby. Try to spend 120+ min/week in nature.', cat: 'environment' },
+  nature_low: { impact: -1, label: 'Low nature exposure', tip: 'Urban concrete environment. Indoor plants and weekend nature trips help compensate.', cat: 'environment' },
+
+  // Screen Time / TV (British Journal of Sports Medicine)
+  screen_low: { impact: 1, label: 'Low screen time (<2 hrs/day)', tip: 'Minimal sedentary screen time. Good for metabolic health.', cat: 'environment' },
+  screen_moderate: { impact: 0, label: 'Moderate screen time (2-4 hrs)', tip: 'Average. Each hour of TV after 25 reduces life by 22 minutes.', cat: 'environment' },
+  screen_high: { impact: -1.5, label: 'High screen time (4-6 hrs/day)', tip: 'Prolonged sitting + screen = 37% higher premature death risk (women).', cat: 'environment' },
+  screen_very_high: { impact: -3, label: 'Very high screen time (6+ hrs)', tip: '6+ hours/day TV = 4.8 years less life expectancy. Get a standing desk.', cat: 'environment', productCat: 'fitness' },
+
+  // Education Level (Lancet Public Health meta-analysis)
+  edu_postgrad: { impact: 4, label: 'Postgraduate degree', tip: 'Each year of education reduces mortality 2-3% (Lancet meta-analysis).', cat: 'social' },
+  edu_bachelors: { impact: 3, label: 'Bachelors degree', tip: '8-year life expectancy gap between degree holders and non-graduates.', cat: 'social' },
+  edu_some_college: { impact: 1.5, label: 'Some college / trade school', tip: 'Education provides health literacy and socioeconomic benefits.', cat: 'social' },
+  edu_high_school: { impact: 0, label: 'High school', tip: 'Baseline. Continued learning and skill development still protective.', cat: 'social' },
+  edu_less: { impact: -2, label: 'Less than high school', tip: 'Education gap accounts for up to 11 years life expectancy difference.', cat: 'social' },
+
+  // Income (Chetty et al., JAMA, n=1.4 billion tax records)
+  income_high: { impact: 3, label: 'High income (top 25%)', tip: 'Income enables healthcare access, nutrition, and stress reduction.', cat: 'social' },
+  income_middle: { impact: 0, label: 'Middle income', tip: 'Baseline. Focus on maximizing free longevity interventions.', cat: 'social' },
+  income_low: { impact: -3, label: 'Low income (bottom 25%)', tip: '14.6-year gap between top 1% and bottom 1% income (Chetty, JAMA). Community resources help.', cat: 'social' },
+
+  // Gratitude / Optimism (Nurses Health Study, JAMA Psychiatry, n=49,275)
+  gratitude_high: { impact: 2, label: 'Regularly practice gratitude', tip: '9% lower all-cause mortality, 15% lower CVD death (JAMA Psychiatry, n=49,275).', cat: 'mental' },
+  gratitude_moderate: { impact: 1, label: 'Sometimes grateful/optimistic', tip: 'Optimists live 11-15% longer than pessimists (Harvard).', cat: 'mental' },
+  gratitude_low: { impact: 0, label: 'Rarely practice gratitude', tip: 'Gratitude journaling 3x/week measurably reduces inflammation and improves sleep.', cat: 'mental' },
+
+  // Volunteering (Health Psychology, multiple cohorts)
+  volunteer_regular: { impact: 2, label: 'Regular volunteering (100+ hrs/yr)', tip: '40% lower mortality in regular volunteers (meta-analysis of multiple cohorts).', cat: 'social' },
+  volunteer_occasional: { impact: 1, label: 'Occasional volunteering', tip: 'Some purpose-driven activity provides mortality protection.', cat: 'social' },
+  volunteer_none: { impact: 0, label: 'No volunteering', tip: 'Volunteering provides purpose + social connection, a longevity double benefit.', cat: 'social' },
+
+  // Religious/Spiritual Practice (Hummer et al., n=22,080)
+  religion_weekly: { impact: 3, label: 'Weekly religious attendance', tip: '+7 years life expectancy for weekly attenders (Hummer, n=22,080). 33% lower mortality (JAMA).', cat: 'social' },
+  religion_occasional: { impact: 1, label: 'Occasional spiritual practice', tip: 'Some community and purpose benefits from periodic involvement.', cat: 'social' },
+  religion_none: { impact: 0, label: 'No religious practice', tip: 'Secular community groups can provide similar social bonding benefits.', cat: 'social' },
+
+  // Omega-3 / Fish Oil (Framingham Offspring Cohort)
+  omega3_high: { impact: 3, label: 'High omega-3 intake (fish/supplements)', tip: '+5 years for highest omega-3 blood levels (Framingham study). 34% lower all-cause mortality.', cat: 'diet' },
+  omega3_moderate: { impact: 1.5, label: 'Moderate omega-3 (fish 1-2x/week)', tip: 'Regular fish consumption provides meaningful cardiovascular protection.', cat: 'diet' },
+  omega3_low: { impact: -1, label: 'Low omega-3 (rarely eat fish)', tip: 'Low omega-3 = same mortality impact as smoking (Framingham). Consider supplements.', cat: 'diet', productCat: 'supplements' },
+
+  // Pet Ownership (AHA meta-analysis, n=3.4M)
+  pet_dog: { impact: 1.5, label: 'Dog owner', tip: '24% lower all-cause mortality for dog owners (AHA, n=3.4M). Built-in exercise + companionship.', cat: 'social' },
+  pet_cat: { impact: 0.5, label: 'Cat owner', tip: 'Reduced cardiovascular event risk. Stress reduction through companionship.', cat: 'social' },
+  pet_other: { impact: 0.5, label: 'Other pet', tip: 'Pets provide routine, companionship, and stress reduction.', cat: 'social' },
+  pet_none: { impact: 0, label: 'No pets', tip: 'Consider a dog - dog owners walk more and have stronger social connections.', cat: 'social' }
 };
 
 // ============================================
@@ -1143,6 +1313,91 @@ const questions = [
     { value: 'rarely', label: 'Rarely', desc: 'Only when very sick', impact: '-1 year' },
     { value: 'never', label: 'Never', desc: 'Have not seen a doctor in years', impact: '-3 years (undiagnosed conditions are silent killers)' }
   ]},
+  { section: 'Biometrics', key: 'blood_pressure', type: 'choice', question: 'What is your blood pressure?', options: [
+    { value: 'normal', label: 'Normal (<120/80)', impact: '0 years (optimal)' },
+    { value: 'elevated', label: 'Elevated (120-129/<80)', impact: '-1 year (pre-hypertension)' },
+    { value: 'high_1', label: 'Stage 1 (130-139/80-89)', impact: '-3 years' },
+    { value: 'high_2', label: 'Stage 2 (140+/90+)', impact: '-5 years (Lancet, n=1.25M)' },
+    { value: 'unknown', label: 'I do not know', impact: '0 years (get it checked!)' }
+  ]},
+  { section: 'Biometrics', key: 'resting_hr', type: 'choice', question: 'What is your resting heart rate?', options: [
+    { value: 'low', label: 'Under 60 bpm', desc: 'Athletic range', impact: '+2 years (strong cardiovascular fitness)' },
+    { value: 'normal', label: '60-80 bpm', desc: 'Normal range', impact: '0 years (healthy baseline)' },
+    { value: 'elevated', label: '80-100 bpm', desc: 'Elevated', impact: '-2 years (each 10 bpm above 80 = 16% higher mortality)' },
+    { value: 'high', label: 'Over 100 bpm', desc: 'Tachycardia range', impact: '-4 years (Copenhagen study)' },
+    { value: 'unknown', label: 'I do not know', impact: '0 years (check your pulse in the morning)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'coffee', type: 'choice', question: 'How much coffee do you drink?', options: [
+    { value: 'moderate', label: '2-3 cups/day', impact: '+2 years (optimal, NEJM n=468,629)' },
+    { value: 'light', label: '1 cup/day', impact: '+1 year' },
+    { value: 'heavy', label: '4+ cups/day', impact: '+0.5 years (still beneficial)' },
+    { value: 'none', label: 'No coffee', impact: '0 years (baseline)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'hydration', type: 'choice', question: 'How much water do you drink daily?', options: [
+    { value: 'good', label: '8+ glasses/day', desc: 'Well hydrated', impact: '+2 years (NIH ARIC study, n=15,752)' },
+    { value: 'moderate', label: '4-7 glasses/day', desc: 'Adequate', impact: '0 years (baseline)' },
+    { value: 'poor', label: 'Less than 4 glasses', desc: 'Often dehydrated', impact: '-2 years (50% faster biological aging)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'dental', type: 'choice', question: 'How is your dental hygiene?', options: [
+    { value: 'excellent', label: 'Daily flossing + regular dentist', impact: '+1.5 years (25-30% lower CVD mortality)' },
+    { value: 'good', label: 'Brush daily, rare dentist', impact: '0 years (baseline)' },
+    { value: 'poor', label: 'Irregular brushing, never floss', impact: '-2 years (Leisure World study, n=5,611)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'sauna', type: 'choice', question: 'Do you use a sauna or heat therapy?', options: [
+    { value: 'frequent', label: '4-7 times/week', impact: '+3 years (40% lower mortality, JAMA Finnish study)' },
+    { value: 'moderate', label: '2-3 times/week', impact: '+1.5 years (24% lower mortality)' },
+    { value: 'rare', label: 'About once/week', impact: '+0.5 years' },
+    { value: 'never', label: 'Never', impact: '0 years (baseline)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'screen_time', type: 'choice', question: 'How many hours of recreational screen time per day?', options: [
+    { value: 'low', label: 'Under 2 hours', impact: '+1 year (minimal sedentary risk)' },
+    { value: 'moderate', label: '2-4 hours', impact: '0 years (average)' },
+    { value: 'high', label: '4-6 hours', impact: '-1.5 years (37% higher premature death)' },
+    { value: 'very_high', label: '6+ hours', impact: '-3 years (4.8 years less life expectancy)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'omega3', type: 'choice', question: 'How often do you eat fish or take omega-3 supplements?', options: [
+    { value: 'high', label: 'Daily fish or supplements', impact: '+3 years (Framingham: 34% lower mortality)' },
+    { value: 'moderate', label: 'Fish 1-2 times/week', impact: '+1.5 years' },
+    { value: 'low', label: 'Rarely eat fish, no supplements', impact: '-1 year (same impact as smoking)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'gratitude', type: 'choice', question: 'Do you practice gratitude or maintain an optimistic outlook?', options: [
+    { value: 'high', label: 'Regular practice (journaling, meditation)', impact: '+2 years (JAMA Psychiatry, n=49,275)' },
+    { value: 'moderate', label: 'Generally optimistic', impact: '+1 year (optimists live 11-15% longer)' },
+    { value: 'low', label: 'Tend toward pessimism', impact: '0 years (gratitude is trainable!)' }
+  ]},
+  { section: 'Lifestyle Habits', key: 'nature', type: 'choice', question: 'How much time do you spend in nature/green spaces?', options: [
+    { value: 'high', label: 'Daily (live near parks/countryside)', impact: '+2.5 years (Lancet, n=4.6M)' },
+    { value: 'moderate', label: 'Weekly walks in parks', impact: '+1 year' },
+    { value: 'low', label: 'Rarely go outside in nature', impact: '-1 year (urban concrete environment)' }
+  ]},
+  { section: 'Social Life', key: 'volunteering', type: 'choice', question: 'Do you volunteer or do community service?', options: [
+    { value: 'regular', label: 'Regularly (100+ hours/year)', impact: '+2 years (40% lower mortality, meta-analysis)' },
+    { value: 'occasional', label: 'Occasionally', impact: '+1 year' },
+    { value: 'none', label: 'No', impact: '0 years (purpose + social = longevity boost)' }
+  ]},
+  { section: 'Social Life', key: 'religion', type: 'choice', question: 'Do you attend religious services or have a spiritual practice?', options: [
+    { value: 'weekly', label: 'Weekly attendance', impact: '+3 years (Hummer et al., n=22,080)' },
+    { value: 'occasional', label: 'Occasionally', impact: '+1 year' },
+    { value: 'none', label: 'No', impact: '0 years (secular community groups also help)' }
+  ]},
+  { section: 'Social Life', key: 'pet', type: 'choice', question: 'Do you own a pet?', options: [
+    { value: 'dog', label: 'Dog', impact: '+1.5 years (AHA, n=3.4M: 24% lower mortality)' },
+    { value: 'cat', label: 'Cat', impact: '+0.5 years (lower CVD risk)' },
+    { value: 'other', label: 'Other pet', impact: '+0.5 years (companionship benefit)' },
+    { value: 'none', label: 'No pets', impact: '0 years (consider getting a dog!)' }
+  ]},
+  { section: 'Socioeconomic', key: 'education', type: 'choice', question: 'What is your highest level of education?', options: [
+    { value: 'postgrad', label: 'Postgraduate degree', impact: '+4 years (Lancet meta-analysis)' },
+    { value: 'bachelors', label: 'Bachelors degree', impact: '+3 years (8-year gap vs non-graduates)' },
+    { value: 'some_college', label: 'Some college / trade school', impact: '+1.5 years' },
+    { value: 'high_school', label: 'High school', impact: '0 years (baseline)' },
+    { value: 'less', label: 'Less than high school', impact: '-2 years' }
+  ]},
+  { section: 'Socioeconomic', key: 'income', type: 'choice', question: 'How would you describe your household income?', options: [
+    { value: 'high', label: 'Above average', desc: 'Top 25% in your country', impact: '+3 years (Chetty, JAMA, n=1.4B tax records)' },
+    { value: 'middle', label: 'Average', impact: '0 years (baseline)' },
+    { value: 'low', label: 'Below average', desc: 'Bottom 25%', impact: '-3 years (14.6-year gap between top and bottom 1%)' }
+  ]},
   { section: 'Environment', key: 'air_quality', type: 'choice', question: 'How is the air quality where you live?', options: [
     { value: 'good', label: 'Good', desc: 'Clean air, low pollution', impact: '0 years (clean environment)' },
     { value: 'moderate', label: 'Moderate', desc: 'Some urban pollution', impact: '-1 year' },
@@ -1160,6 +1415,59 @@ const questions = [
 // COUNTRY LIST
 // ============================================
 const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominican Republic","DR Congo","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Guatemala","Guinea","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Serbia","Sierra Leone","Singapore","Slovakia","Slovenia","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+
+// WHO/UN Life Expectancy by Country and Sex (2023 estimates, years)
+const countryLifeExpectancy = {
+  "Afghanistan":{m:61.0,f:64.5},"Albania":{m:76.0,f:80.2},"Algeria":{m:75.2,f:77.8},"Andorra":{m:81.0,f:86.0},
+  "Angola":{m:59.5,f:64.2},"Argentina":{m:73.5,f:79.8},"Armenia":{m:71.5,f:78.5},"Australia":{m:81.3,f:85.4},
+  "Austria":{m:79.4,f:84.2},"Azerbaijan":{m:70.5,f:76.0},"Bahamas":{m:71.0,f:77.0},"Bahrain":{m:76.5,f:79.0},
+  "Bangladesh":{m:71.0,f:74.5},"Barbados":{m:75.0,f:80.0},"Belarus":{m:68.5,f:79.0},"Belgium":{m:79.5,f:84.0},
+  "Belize":{m:71.0,f:77.0},"Benin":{m:60.0,f:63.5},"Bhutan":{m:71.5,f:73.0},"Bolivia":{m:66.5,f:72.0},
+  "Bosnia and Herzegovina":{m:75.0,f:80.0},"Botswana":{m:62.0,f:68.5},"Brazil":{m:72.0,f:79.5},
+  "Brunei":{m:74.5,f:77.5},"Bulgaria":{m:71.5,f:78.5},"Burkina Faso":{m:60.0,f:62.5},"Burundi":{m:59.0,f:63.0},
+  "Cambodia":{m:67.5,f:72.0},"Cameroon":{m:59.0,f:62.5},"Canada":{m:80.0,f:84.5},"Cape Verde":{m:71.0,f:77.0},
+  "Central African Republic":{m:52.0,f:56.0},"Chad":{m:53.0,f:56.5},"Chile":{m:77.5,f:82.5},"China":{m:75.5,f:80.5},
+  "Colombia":{m:73.5,f:80.0},"Comoros":{m:63.0,f:67.0},"Congo":{m:62.0,f:66.0},"Costa Rica":{m:77.5,f:82.5},
+  "Croatia":{m:74.5,f:81.0},"Cuba":{m:76.5,f:80.5},"Cyprus":{m:79.5,f:83.5},"Czech Republic":{m:76.5,f:82.5},
+  "Denmark":{m:79.5,f:83.5},"Djibouti":{m:62.0,f:66.0},"Dominican Republic":{m:71.5,f:77.5},
+  "DR Congo":{m:59.0,f:63.0},"Ecuador":{m:74.0,f:79.5},"Egypt":{m:69.5,f:74.0},"El Salvador":{m:69.0,f:78.0},
+  "Equatorial Guinea":{m:57.5,f:61.5},"Eritrea":{m:64.0,f:68.5},"Estonia":{m:74.5,f:83.0},
+  "Eswatini":{m:55.0,f:62.0},"Ethiopia":{m:64.5,f:68.5},"Fiji":{m:65.5,f:69.5},"Finland":{m:79.0,f:84.5},
+  "France":{m:79.5,f:85.5},"Gabon":{m:64.0,f:68.0},"Gambia":{m:60.5,f:64.0},"Georgia":{m:70.0,f:78.5},
+  "Germany":{m:78.5,f:83.5},"Ghana":{m:63.0,f:65.5},"Greece":{m:78.5,f:84.0},"Guatemala":{m:70.5,f:77.5},
+  "Guinea":{m:59.0,f:62.0},"Guyana":{m:65.0,f:71.0},"Haiti":{m:62.0,f:66.5},"Honduras":{m:72.0,f:77.0},
+  "Hungary":{m:73.0,f:79.5},"Iceland":{m:81.5,f:84.5},"India":{m:68.5,f:71.5},"Indonesia":{m:69.5,f:73.5},
+  "Iran":{m:74.5,f:77.5},"Iraq":{m:68.5,f:73.0},"Ireland":{m:80.5,f:84.0},"Israel":{m:81.0,f:84.5},
+  "Italy":{m:81.0,f:85.5},"Jamaica":{m:72.0,f:76.5},"Japan":{m:81.5,f:87.5},"Jordan":{m:73.0,f:76.5},
+  "Kazakhstan":{m:68.0,f:76.5},"Kenya":{m:62.0,f:67.0},"Kuwait":{m:76.0,f:79.5},"Kyrgyzstan":{m:67.0,f:75.0},
+  "Laos":{m:65.0,f:69.0},"Latvia":{m:70.5,f:80.0},"Lebanon":{m:76.0,f:80.0},"Lesotho":{m:50.5,f:56.0},
+  "Liberia":{m:62.0,f:65.0},"Libya":{m:70.5,f:76.0},"Liechtenstein":{m:82.0,f:86.0},
+  "Lithuania":{m:71.0,f:80.5},"Luxembourg":{m:80.5,f:85.0},"Madagascar":{m:64.5,f:68.0},
+  "Malawi":{m:61.0,f:67.0},"Malaysia":{m:73.5,f:78.0},"Maldives":{m:77.0,f:80.5},"Mali":{m:57.5,f:60.5},
+  "Malta":{m:80.5,f:84.5},"Mauritania":{m:63.0,f:67.5},"Mauritius":{m:71.5,f:78.0},"Mexico":{m:72.0,f:78.0},
+  "Moldova":{m:67.0,f:76.0},"Monaco":{m:85.0,f:89.0},"Mongolia":{m:66.0,f:74.0},"Montenegro":{m:74.5,f:79.5},
+  "Morocco":{m:74.5,f:77.5},"Mozambique":{m:57.5,f:63.0},"Myanmar":{m:63.0,f:69.0},"Namibia":{m:60.0,f:66.5},
+  "Nepal":{m:69.0,f:72.0},"Netherlands":{m:80.0,f:83.5},"New Zealand":{m:80.5,f:83.5},
+  "Nicaragua":{m:72.5,f:78.5},"Niger":{m:61.0,f:63.5},"Nigeria":{m:53.5,f:55.5},
+  "North Korea":{m:68.0,f:75.0},"North Macedonia":{m:73.5,f:78.0},"Norway":{m:81.5,f:85.0},
+  "Oman":{m:76.0,f:79.5},"Pakistan":{m:66.0,f:68.5},"Palestine":{m:72.5,f:76.5},"Panama":{m:75.5,f:81.5},
+  "Papua New Guinea":{m:63.0,f:67.5},"Paraguay":{m:71.5,f:76.0},"Peru":{m:74.0,f:79.5},
+  "Philippines":{m:67.5,f:74.5},"Poland":{m:74.0,f:81.5},"Portugal":{m:78.5,f:84.5},"Qatar":{m:78.0,f:81.0},
+  "Romania":{m:72.0,f:79.5},"Russia":{m:66.5,f:77.5},"Rwanda":{m:66.0,f:70.5},"Saudi Arabia":{m:75.0,f:78.5},
+  "Senegal":{m:66.0,f:70.0},"Serbia":{m:73.0,f:78.5},"Sierra Leone":{m:53.0,f:55.5},
+  "Singapore":{m:81.5,f:86.0},"Slovakia":{m:74.0,f:81.0},"Slovenia":{m:78.5,f:84.0},
+  "Somalia":{m:55.0,f:59.0},"South Africa":{m:60.5,f:67.5},"South Korea":{m:80.0,f:86.0},
+  "South Sudan":{m:55.5,f:59.5},"Spain":{m:80.5,f:86.0},"Sri Lanka":{m:73.5,f:80.0},
+  "Sudan":{m:63.5,f:67.5},"Suriname":{m:68.0,f:74.5},"Sweden":{m:81.5,f:85.0},
+  "Switzerland":{m:82.0,f:85.5},"Syria":{m:68.0,f:76.0},"Taiwan":{m:78.0,f:84.0},
+  "Tajikistan":{m:69.0,f:74.5},"Tanzania":{m:63.5,f:67.5},"Thailand":{m:73.5,f:80.5},
+  "Togo":{m:60.0,f:63.5},"Trinidad and Tobago":{m:69.5,f:76.0},"Tunisia":{m:74.5,f:78.5},
+  "Turkey":{m:74.5,f:80.5},"Turkmenistan":{m:65.0,f:72.5},"Uganda":{m:61.5,f:66.0},
+  "Ukraine":{m:66.5,f:76.5},"United Arab Emirates":{m:77.5,f:80.5},"United Kingdom":{m:79.5,f:83.0},
+  "United States":{m:74.8,f:80.2},"Uruguay":{m:74.0,f:81.0},"Uzbekistan":{m:69.5,f:74.5},
+  "Venezuela":{m:68.5,f:77.0},"Vietnam":{m:71.5,f:79.5},"Yemen":{m:63.5,f:67.0},
+  "Zambia":{m:60.0,f:66.0},"Zimbabwe":{m:59.5,f:64.5}
+};
 
 // ============================================
 // RENDER FUNCTIONS
@@ -1285,6 +1593,7 @@ function renderQuestion() {
 function selectAnswer(key, value) {
   state.answers[key] = value;
   renderQuestion();
+  showMotivation(key, value);
 }
 
 function toggleCondition(cond) {
@@ -1446,6 +1755,66 @@ function calculateResult() {
   const upfMap = { minimal: 'upf_minimal', low: 'upf_low', moderate: 'upf_moderate', high: 'upf_high', very_high: 'upf_very_high' };
   if (a.processed_food && upfMap[a.processed_food]) factors.push({ key: upfMap[a.processed_food], ...lifeFactors[upfMap[a.processed_food]] });
 
+  // Blood pressure
+  const bpMap = { normal: 'bp_normal', elevated: 'bp_elevated', high_1: 'bp_high_1', high_2: 'bp_high_2', unknown: 'bp_unknown' };
+  if (a.blood_pressure && bpMap[a.blood_pressure]) factors.push({ key: bpMap[a.blood_pressure], ...lifeFactors[bpMap[a.blood_pressure]] });
+
+  // Resting heart rate
+  const rhrMap = { low: 'rhr_low', normal: 'rhr_normal', elevated: 'rhr_elevated', high: 'rhr_high', unknown: 'rhr_unknown' };
+  if (a.resting_hr && rhrMap[a.resting_hr]) factors.push({ key: rhrMap[a.resting_hr], ...lifeFactors[rhrMap[a.resting_hr]] });
+
+  // Coffee
+  const coffeeMap = { moderate: 'coffee_moderate', light: 'coffee_light', heavy: 'coffee_heavy', none: 'coffee_none' };
+  if (a.coffee && coffeeMap[a.coffee]) factors.push({ key: coffeeMap[a.coffee], ...lifeFactors[coffeeMap[a.coffee]] });
+
+  // Hydration
+  const hydrationMap = { good: 'hydration_good', moderate: 'hydration_moderate', poor: 'hydration_poor' };
+  if (a.hydration && hydrationMap[a.hydration]) factors.push({ key: hydrationMap[a.hydration], ...lifeFactors[hydrationMap[a.hydration]] });
+
+  // Dental
+  const dentalMap = { excellent: 'dental_excellent', good: 'dental_good', poor: 'dental_poor' };
+  if (a.dental && dentalMap[a.dental]) factors.push({ key: dentalMap[a.dental], ...lifeFactors[dentalMap[a.dental]] });
+
+  // Sauna
+  const saunaMap = { frequent: 'sauna_frequent', moderate: 'sauna_moderate', rare: 'sauna_rare', never: 'sauna_never' };
+  if (a.sauna && saunaMap[a.sauna]) factors.push({ key: saunaMap[a.sauna], ...lifeFactors[saunaMap[a.sauna]] });
+
+  // Screen time
+  const screenMap = { low: 'screen_low', moderate: 'screen_moderate', high: 'screen_high', very_high: 'screen_very_high' };
+  if (a.screen_time && screenMap[a.screen_time]) factors.push({ key: screenMap[a.screen_time], ...lifeFactors[screenMap[a.screen_time]] });
+
+  // Nature
+  const natureMap = { high: 'nature_high', moderate: 'nature_moderate', low: 'nature_low' };
+  if (a.nature && natureMap[a.nature]) factors.push({ key: natureMap[a.nature], ...lifeFactors[natureMap[a.nature]] });
+
+  // Education
+  const eduMap = { postgrad: 'edu_postgrad', bachelors: 'edu_bachelors', some_college: 'edu_some_college', high_school: 'edu_high_school', less: 'edu_less' };
+  if (a.education && eduMap[a.education]) factors.push({ key: eduMap[a.education], ...lifeFactors[eduMap[a.education]] });
+
+  // Income
+  const incomeMap = { high: 'income_high', middle: 'income_middle', low: 'income_low' };
+  if (a.income && incomeMap[a.income]) factors.push({ key: incomeMap[a.income], ...lifeFactors[incomeMap[a.income]] });
+
+  // Gratitude
+  const gratMap = { high: 'gratitude_high', moderate: 'gratitude_moderate', low: 'gratitude_low' };
+  if (a.gratitude && gratMap[a.gratitude]) factors.push({ key: gratMap[a.gratitude], ...lifeFactors[gratMap[a.gratitude]] });
+
+  // Volunteering
+  const volMap = { regular: 'volunteer_regular', occasional: 'volunteer_occasional', none: 'volunteer_none' };
+  if (a.volunteering && volMap[a.volunteering]) factors.push({ key: volMap[a.volunteering], ...lifeFactors[volMap[a.volunteering]] });
+
+  // Religion
+  const relMap2 = { weekly: 'religion_weekly', occasional: 'religion_occasional', none: 'religion_none' };
+  if (a.religion && relMap2[a.religion]) factors.push({ key: relMap2[a.religion], ...lifeFactors[relMap2[a.religion]] });
+
+  // Omega-3
+  const o3Map = { high: 'omega3_high', moderate: 'omega3_moderate', low: 'omega3_low' };
+  if (a.omega3 && o3Map[a.omega3]) factors.push({ key: o3Map[a.omega3], ...lifeFactors[o3Map[a.omega3]] });
+
+  // Pet
+  const petMap = { dog: 'pet_dog', cat: 'pet_cat', other: 'pet_other', none: 'pet_none' };
+  if (a.pet && petMap[a.pet]) factors.push({ key: petMap[a.pet], ...lifeFactors[petMap[a.pet]] });
+
   // Family history (parents)
   const p1 = a.parent1_age || 0;
   const p2 = a.parent2_age || 0;
@@ -1513,6 +1882,10 @@ function renderResult() {
       <div class="death-date">${dateStr}</div>
       <div style="color:var(--text2)">That is approximately <strong>${r.remainingYears} years</strong> from today</div>
       <div class="countdown" id="countdown"></div>
+      <canvas id="lifeCanvas" width="300" height="200" style="margin:20px auto; display:block; border-radius:var(--radius);"></canvas>
+      <div style="margin-top:12px;">
+        <button class="btn-secondary btn-sm" onclick="saveTimerWidget()" style="font-size:0.8rem;">Save Timer as Widget</button>
+      </div>
       <div class="life-score-circle" style="border-color:${scoreColor}">
         <div class="life-score-num" style="color:${scoreColor}">${r.lifeScore}</div>
         <div class="life-score-label">Life Score</div>
@@ -1546,8 +1919,20 @@ function renderResult() {
       </div>
     </div>
 
+    <div id="clinicalTests" style="margin-top:48px;"></div>
+    <div id="leaderboard" style="max-width:700px; margin:0 auto;"></div>
+
+    <div class="goal-setup" style="margin-top:48px;">
+      <h3 style="color:var(--green)">Want to Change Your Death Date?</h3>
+      <p style="color:var(--text2)">Set a longevity goal and get a personalized daily action plan. Watch your death date move as you build healthy habits.</p>
+      <button class="btn-green" onclick="showPage('dashboard'); setTimeout(()=>showTab('myplan'),100);" style="margin-top:12px; font-size:1.1rem; padding:14px 32px;">
+        Set My Longevity Goal
+      </button>
+    </div>
+
     <div style="margin-top:48px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
       <button class="btn-primary" onclick="showPage('dashboard')" style="font-size:1.1rem; padding:16px 32px;">View Full Dashboard</button>
+      <button class="btn-green" onclick="saveProfile()">Save My Profile</button>
       <button class="btn-secondary" onclick="showPage('pricing')">Upgrade for More Insights</button>
     </div>
 
@@ -1559,6 +1944,9 @@ function renderResult() {
   document.getElementById('resultContent').innerHTML = html;
   showPage('result');
   startCountdown();
+  animateLifeCanvas();
+  renderClinicalTests();
+  document.getElementById('leaderboard').innerHTML = renderLeaderboard();
 }
 
 function startCountdown() {
@@ -1584,6 +1972,179 @@ function startCountdown() {
   setInterval(update, 1000);
 }
 
+function getRecommendedTests(r) {
+  const age = r.ageNow || 30;
+  const a = state.answers;
+  const tests = [];
+
+  // Universal tests
+  tests.push({ name: 'Complete Blood Count (CBC)', why: 'Baseline health marker. Detects anaemia, infection, blood disorders.', priority: 'important', frequency: '1-2 years' });
+  tests.push({ name: 'Comprehensive Metabolic Panel', why: 'Kidney function, liver function, blood glucose, electrolytes.', priority: 'important', frequency: '1 year' });
+  tests.push({ name: 'Lipid Panel (Cholesterol)', why: 'Heart disease risk. Total cholesterol, HDL, LDL, triglycerides.', priority: 'important', frequency: '1 year' });
+
+  // Age-based
+  if (age >= 40) {
+    tests.push({ name: 'HbA1c (Diabetes Screening)', why: 'Pre-diabetes detection. Catches insulin resistance before diabetes develops.', priority: 'critical', frequency: '1 year' });
+    tests.push({ name: 'Coronary Calcium Score (CT)', why: 'Gold standard for heart attack risk prediction after 40.', priority: 'important', frequency: '3-5 years' });
+  }
+  if (age >= 45) {
+    tests.push({ name: 'Colonoscopy', why: 'Colorectal cancer screening. Catches polyps before they become cancer.', priority: 'critical', frequency: '10 years' });
+  }
+  if (age >= 50) {
+    tests.push({ name: 'DEXA Bone Density Scan', why: 'Osteoporosis screening. Fractures are a major mortality risk in elderly.', priority: 'important', frequency: '2 years' });
+  }
+
+  // Condition-based
+  if (a.blood_pressure && ['high_1','high_2'].includes(a.blood_pressure)) {
+    tests.push({ name: 'Echocardiogram', why: 'Your blood pressure puts extra strain on your heart. Check for enlargement.', priority: 'critical', frequency: '1-2 years' });
+  }
+  if (a.smoking && ['current_light','current_heavy'].includes(a.smoking)) {
+    tests.push({ name: 'Low-Dose CT Lung Scan', why: 'Lung cancer screening for smokers. Early detection = 80% survival rate.', priority: 'critical', frequency: '1 year' });
+  }
+  if (a.alcohol === 'heavy') {
+    tests.push({ name: 'Liver Function Panel + FibroScan', why: 'Heavy drinking damages the liver. Catch fibrosis before cirrhosis.', priority: 'critical', frequency: '6 months' });
+  }
+  if (a.stress === 'very_high' || a.stress === 'high') {
+    tests.push({ name: 'Cortisol + Thyroid Panel', why: 'Chronic stress disrupts hormones. Thyroid dysfunction is treatable.', priority: 'important', frequency: '1 year' });
+  }
+
+  // Advanced biomarkers
+  tests.push({ name: 'Vitamin D Level', why: 'Deficiency linked to depression, immune dysfunction, and cancer. 40% of adults are deficient.', priority: 'important', frequency: '1 year' });
+  tests.push({ name: 'hs-CRP (Inflammation)', why: 'High-sensitivity C-reactive protein. Chronic inflammation accelerates all diseases of aging.', priority: 'important', frequency: '1 year' });
+  tests.push({ name: 'Apolipoprotein B (ApoB)', why: 'Better predictor of heart attack risk than standard cholesterol. The "must-know" biomarker.', priority: 'important', frequency: '1 year' });
+  tests.push({ name: 'Fasting Insulin', why: 'Catches insulin resistance 10-15 years before diabetes diagnosis. Prevention window.', priority: 'important', frequency: '1-2 years' });
+
+  return tests;
+}
+
+function renderClinicalTests() {
+  const r = state.result;
+  const el = document.getElementById('clinicalTests');
+  if (!el || !r) return;
+  const tests = getRecommendedTests(r);
+  el.innerHTML = `
+    <h3 style="font-size:1.3rem; margin-bottom:16px;">Recommended Clinical Tests &amp; Biomarkers</h3>
+    <p style="color:var(--text2); margin-bottom:20px;">Based on your profile, these screenings could catch problems early and add years to your life:</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px;">
+      ${tests.map(t => `
+        <div style="background:var(--surface); padding:16px; border-radius:var(--radius); border-left:3px solid ${t.priority === 'critical' ? 'var(--accent)' : t.priority === 'important' ? 'var(--gold)' : 'var(--green)'};">
+          <div style="font-weight:700; color:var(--text); margin-bottom:4px;">${t.name}</div>
+          <div style="font-size:0.85rem; color:var(--text2); margin-bottom:6px;">${t.why}</div>
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+            <span style="color:${t.priority === 'critical' ? 'var(--accent)' : t.priority === 'important' ? 'var(--gold)' : 'var(--green)'};">${t.priority.toUpperCase()}</span>
+            <span style="color:var(--text3);">Every ${t.frequency}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function animateLifeCanvas() {
+  const canvas = document.getElementById('lifeCanvas');
+  if (!canvas || !state.result) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const particles = [];
+  const totalLife = state.result.expectedAge;
+  const lived = state.result.ageNow || 30;
+  const pctLived = lived / totalLife;
+
+  // Create sand particles
+  for (let i = 0; i < 200; i++) {
+    const isLived = i < 200 * pctLived;
+    particles.push({
+      x: isLived ? Math.random() * w : w/2 + (Math.random()-0.5) * 60,
+      y: isLived ? h - Math.random() * (h * 0.4) : Math.random() * (h * 0.3),
+      r: 1.5 + Math.random() * 1.5,
+      speed: 0.2 + Math.random() * 0.5,
+      color: isLived ? '#e94560' : '#4ecca3',
+      lived: isLived
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    // Hourglass outline
+    ctx.strokeStyle = '#2a2a3e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(w*0.2, 0); ctx.lineTo(w*0.8, 0);
+    ctx.lineTo(w*0.52, h*0.48); ctx.lineTo(w*0.8, h);
+    ctx.lineTo(w*0.2, h); ctx.lineTo(w*0.48, h*0.48);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Particles
+    particles.forEach(p => {
+      if (!p.lived && p.y < h * 0.45) {
+        p.y += p.speed;
+        p.x += (Math.random() - 0.5) * 0.5;
+      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    });
+
+    // Labels
+    ctx.fillStyle = '#a0a0b0';
+    ctx.font = '11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Time remaining', w/2, h*0.15);
+    ctx.fillText('Time lived', w/2, h*0.9);
+    ctx.fillStyle = '#eaeaea';
+    ctx.font = 'bold 14px system-ui';
+    ctx.fillText(Math.round(pctLived*100) + '% lived', w/2, h*0.55);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function saveTimerWidget() {
+  const r = state.result;
+  if (!r) return;
+  const dd = r.deathDate;
+  const widgetHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Death Clock Widget</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#eaeaea;font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.w{text-align:center;padding:20px}
+.d{font-size:1.8rem;font-weight:800;color:#e94560;margin-bottom:8px}
+.c{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.u{background:#16213e;padding:8px 6px;border-radius:8px;min-width:50px}
+.n{font-size:1.2rem;font-weight:700;color:#4ecca3}
+.l{font-size:0.6rem;color:#666680;text-transform:uppercase}
+</style></head><body>
+<div class="w">
+<div style="color:#666680;font-size:0.8rem">Time remaining</div>
+<div class="d" id="dd"></div>
+<div class="c" id="cd"></div>
+</div>
+<script>
+const death=new Date(${dd.getTime()});
+function u(){const n=new Date(),d=death-n;if(d<=0){document.getElementById('dd').textContent='Live now.';return}
+const y=Math.floor(d/(365.25*864e5)),m=Math.floor(d%(365.25*864e5)/(30.44*864e5)),
+da=Math.floor(d%(30.44*864e5)/864e5),h=Math.floor(d%864e5/36e5),
+mi=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);
+document.getElementById('cd').innerHTML=[{n:y,l:'YRS'},{n:m,l:'MO'},{n:da,l:'D'},{n:h,l:'HR'},{n:mi,l:'M'},{n:s,l:'S'}]
+.map(x=>'<div class="u"><div class="n">'+x.n+'</div><div class="l">'+x.l+'</div></div>').join('')}
+u();setInterval(u,1000);
+</script></body></html>`;
+
+  const blob = new Blob([widgetHtml], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'death-clock-widget.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  alert('Widget downloaded! Open death-clock-widget.html in your browser, or use a tool like Widgetsmith (iOS) or KWGT (Android) to add a web widget to your home screen.');
+}
+
 // ============================================
 // DASHBOARD
 // ============================================
@@ -1596,7 +2157,7 @@ function renderDashboard() {
     <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${r.remainingYears}</div><div class="stat-label">Years Remaining</div></div>
     <div class="stat-card"><div class="stat-num" style="color:${scoreColor}">${r.lifeScore}</div><div class="stat-label">Life Score</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">+${state.bucketList.filter(b=>b.done).length}</div><div class="stat-label">Bucket List Done</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${state.goals.length}</div><div class="stat-label">Active Goals</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">+${state.longevityGoal ? state.longevityGoal.totalDaysAdded.toFixed(1) : '0'}</div><div class="stat-label">Days Added</div></div>
   `;
   showTab(state.currentTab);
 }
@@ -1604,12 +2165,12 @@ function renderDashboard() {
 function showTab(tab) {
   state.currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(t => { if(t.textContent.toLowerCase().includes(tab.replace('bucketlist','bucket'))) t.classList.add('active'); });
+  document.querySelectorAll('.tab-btn').forEach(t => { if(t.textContent.toLowerCase().includes(tab.replace('bucketlist','bucket').replace('myplan','my plan'))) t.classList.add('active'); });
 
   const el = document.getElementById('tabContent');
   if (tab === 'factors') renderFactorsTab(el);
   else if (tab === 'bucketlist') renderBucketTab(el);
-  else if (tab === 'goals') renderGoalsTab(el);
+  else if (tab === 'myplan') renderMyPlanTab(el);
   else if (tab === 'tips') renderTipsTab(el);
   else if (tab === 'products') renderProductsTab(el);
 }
@@ -1889,10 +2450,658 @@ function checkCookieConsent() {
 }
 
 // ============================================
+// ============================================
+// MOTIVATIONAL MESSAGES
+// ============================================
+const motivationMessages = {
+  great: [
+    "You absolute legend. Keep it up.",
+    "Your future self just high-fived you.",
+    "Death is taking notes. And sweating.",
+    "If longevity was a sport, you'd be winning.",
+    "The Grim Reaper just rescheduled.",
+    "You're making centenarians look lazy.",
+    "Your cells are literally cheering right now.",
+    "Plot twist: you might actually outlive everyone."
+  ],
+  good: [
+    "Not bad! You're doing better than most.",
+    "Solid choice. Your organs approve.",
+    "Nice. You just bought yourself some time.",
+    "The Grim Reaper yawned. You're not interesting yet.",
+    "Good job. Your future grandkids thank you.",
+    "Decent. But I know you can do better.",
+    "That's a respectable answer. Respectable."
+  ],
+  neutral: [
+    "Okay, middle of the road. Not dying fast, not living forever.",
+    "You're... average. Is that what you were going for?",
+    "Could be worse. Could also be way better.",
+    "The universe shrugged at this answer.",
+    "Meh. You're not losing years, but not gaining any either.",
+    "Perfectly mediocre. Like room temperature water."
+  ],
+  bad: [
+    "Oof. That one hurt your timeline.",
+    "The Grim Reaper just smiled.",
+    "Well, that's... not ideal. Let's fix it.",
+    "Your body just sent you a formal complaint.",
+    "Are you sure? Like, really sure?",
+    "That answer aged you 3 years just reading it.",
+    "Your doctor would like a word."
+  ],
+  terrible: [
+    "Yikes. We need to talk.",
+    "The Grim Reaper just added you to speed dial.",
+    "At this rate, your countdown timer needs fewer digits.",
+    "Okay, so we have some work to do. A lot of work.",
+    "Your future self is screaming through a time portal right now.",
+    "That's... brave? Reckless? Both?",
+    "The good news: there's nowhere to go but up."
+  ]
+};
+
+function getMotivationCategory(key, value) {
+  const greatAnswers = {
+    exercise: ['5+'], diet: ['very_healthy'], smoking: ['never'], alcohol: ['never'],
+    drugs: ['none'], stress: ['low'], social: ['strong'], sleep_hours: ['optimal'],
+    sleep_quality: ['excellent'], healthcare: ['regular'], sport: ['tennis','badminton'],
+    veg_diet: ['vegan','vegetarian'], processed_food: ['minimal'], blood_pressure: ['normal'],
+    resting_hr: ['low'], coffee: ['moderate'], hydration: ['good'], dental: ['excellent'],
+    sauna: ['frequent'], omega3: ['high'], gratitude: ['high'], volunteering: ['regular'],
+    religion: ['weekly'], nature: ['high'], screen_time: ['low'], education: ['postgrad'],
+    income: ['high'], pet: ['dog']
+  };
+  const goodAnswers = {
+    exercise: ['3-4x'], diet: ['healthy'], smoking: ['former'], alcohol: ['occasional'],
+    stress: ['moderate'], social: ['moderate'], sleep_hours: ['moderate_short'],
+    sleep_quality: ['good'], healthcare: ['occasional'], sport: ['soccer','cycling','swimming','running'],
+    veg_diet: ['pescatarian','flexitarian'], processed_food: ['low'], blood_pressure: ['elevated'],
+    resting_hr: ['normal'], coffee: ['light','heavy'], hydration: ['moderate'], dental: ['good'],
+    sauna: ['moderate','rare'], omega3: ['moderate'], gratitude: ['moderate'],
+    volunteering: ['occasional'], religion: ['occasional'], nature: ['moderate'],
+    screen_time: ['moderate'], education: ['bachelors','some_college'], income: ['middle'],
+    relationship: ['married','partnered'], pet: ['cat','other'], stress_mgmt: ['yes']
+  };
+  const terribleAnswers = {
+    smoking: ['current_heavy'], drugs: ['opioids'], social: ['isolated'],
+    exercise: ['none'], stress: ['very_high'], processed_food: ['very_high'],
+    blood_pressure: ['high_2'], resting_hr: ['high'], screen_time: ['very_high'],
+    healthcare: ['never'], alcohol: ['heavy']
+  };
+  const badAnswers = {
+    smoking: ['current_light'], drugs: ['recreational','cannabis'], social: ['few'],
+    exercise: ['1-2x'], stress: ['high'], diet: ['poor'], sleep_hours: ['short'],
+    sleep_quality: ['poor'], processed_food: ['high'], blood_pressure: ['high_1'],
+    resting_hr: ['elevated'], hydration: ['poor'], dental: ['poor'], omega3: ['low'],
+    nature: ['low'], screen_time: ['high'], education: ['less'], income: ['low'],
+    healthcare: ['rarely'], occupation: ['hazardous'], air_quality: ['poor'],
+    relationship: ['divorced_widowed'], sleep_hours: ['long']
+  };
+
+  if (terribleAnswers[key] && terribleAnswers[key].includes(value)) return 'terrible';
+  if (badAnswers[key] && badAnswers[key].includes(value)) return 'bad';
+  if (greatAnswers[key] && greatAnswers[key].includes(value)) return 'great';
+  if (goodAnswers[key] && goodAnswers[key].includes(value)) return 'good';
+  return 'neutral';
+}
+
+function showMotivation(key, value) {
+  if (['dob','body','conditions','family','country'].includes(key)) return;
+  const cat = getMotivationCategory(key, value);
+  const msgs = motivationMessages[cat];
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+
+  const existing = document.querySelector('.motivation-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  let toastClass = cat;
+  if (cat === 'terrible') toastClass = 'bad';
+  toast.className = 'motivation-toast ' + toastClass;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+}
+
+function getCountryComparison() {
+  const r = state.result;
+  const a = state.answers;
+  const country = a.country || 'United States';
+  const sex = a.sex || 'male';
+  const countryData = countryLifeExpectancy[country];
+  if (!countryData) return null;
+
+  const countryAvg = sex === 'male' ? countryData.m : countryData.f;
+  const userLE = parseFloat(r.adjustedLE);
+  const diff = userLE - countryAvg;
+
+  const sd = 13;
+  const zScore = (userLE - countryAvg) / sd;
+  const percentile = Math.round(Math.min(99, Math.max(1, 100 / (1 + Math.exp(-1.7 * zScore)))));
+
+  let verdict, verdictClass;
+  if (diff > 10) { verdict = 'You\'re basically immortal compared to your country.'; verdictClass = 'top'; }
+  else if (diff > 5) { verdict = 'You\'re aging like fine wine. Death is jealous.'; verdictClass = 'top'; }
+  else if (diff > 2) { verdict = 'Above average. Your country is proud of you.'; verdictClass = 'top'; }
+  else if (diff > -2) { verdict = 'Right around average. You blend in. Like camouflage.'; verdictClass = 'mid'; }
+  else if (diff > -5) { verdict = 'Below average. The Grim Reaper has you bookmarked.'; verdictClass = 'low'; }
+  else { verdict = 'Significantly below your country\'s average. Time for a life overhaul.'; verdictClass = 'low'; }
+
+  return { country, countryAvg, userLE, diff, percentile, verdict, verdictClass };
+}
+
+function renderLeaderboard() {
+  const comp = getCountryComparison();
+  if (!comp) return '';
+
+  const pctPosition = comp.percentile;
+  const diffSign = comp.diff >= 0 ? '+' : '';
+
+  return `
+    <div class="leaderboard">
+      <h3>Global Leaderboard</h3>
+      <div class="lb-card">
+        <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+          <div>
+            <div style="font-size:0.8rem; color:var(--text3); text-transform:uppercase; letter-spacing:1px;">Your Rank in ${comp.country}</div>
+            <div class="lb-rank ${comp.verdictClass}">Top ${100 - comp.percentile}%</div>
+          </div>
+          <div style="flex:1; min-width:200px;">
+            <div style="font-size:0.85rem; color:var(--text2); margin-bottom:4px;">
+              You outlive <strong style="color:var(--text)">${comp.percentile}%</strong> of ${comp.country === 'United States' ? 'Americans' : comp.country + ' residents'} (${state.answers.sex || 'male'})
+            </div>
+            <div class="lb-bar">
+              <div class="lb-bar-fill" style="width:${comp.percentile}%; background:linear-gradient(90deg, var(--accent), var(--gold), var(--green));"></div>
+              <div class="lb-bar-marker" style="left:${comp.percentile}%;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text3);">
+              <span>Dies youngest</span><span>Lives longest</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px; padding:12px; background:var(--bg2); border-radius:8px; font-size:0.9rem; color:var(--text2);">
+          ${comp.verdict}
+        </div>
+        <div class="lb-comparison">
+          <div class="lb-vs">
+            <div class="lb-vs-num" style="color:var(--text)">${comp.userLE}</div>
+            <div class="lb-vs-label">Your projected age</div>
+          </div>
+          <div class="lb-vs">
+            <div class="lb-vs-num" style="color:var(--text3)">${comp.countryAvg}</div>
+            <div class="lb-vs-label">${comp.country} average (${state.answers.sex || 'male'})</div>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:12px; font-size:1.2rem; font-weight:700; color:${comp.diff >= 0 ? 'var(--green)' : 'var(--accent)'};">
+          ${diffSign}${comp.diff.toFixed(1)} years vs average
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// LONGEVITY GOAL SYSTEM
+// ============================================
+function saveGoalState() {
+  try { localStorage.setItem('deathclock_goals', JSON.stringify(state.longevityGoal)); } catch(e) {}
+}
+
+function loadGoalState() {
+  try {
+    const saved = localStorage.getItem('deathclock_goals');
+    if (saved) state.longevityGoal = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function saveProfile() {
+  if (state.userTier === 'free') {
+    showPaywall('save');
+    return;
+  }
+  if (!state.result) { alert('Complete the calculator first.'); return; }
+  const profile = {
+    answers: { ...state.answers },
+    result: {
+      ...state.result,
+      deathDate: state.result.deathDate.getTime(),
+      dob: state.result.dob.getTime()
+    },
+    bucketList: [...state.bucketList],
+    savedAt: new Date().toISOString()
+  };
+  try {
+    localStorage.setItem('deathclock_profile', JSON.stringify(profile));
+    // Show success toast
+    const existing = document.querySelector('.motivation-toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'motivation-toast good';
+    toast.textContent = 'Profile saved! Your data is safe.';
+    document.body.appendChild(toast);
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+  } catch(e) {
+    alert('Could not save profile. Storage may be full.');
+  }
+}
+
+function loadProfile() {
+  try {
+    const saved = localStorage.getItem('deathclock_profile');
+    if (!saved) return false;
+    const profile = JSON.parse(saved);
+    state.answers = profile.answers || {};
+    state.bucketList = profile.bucketList || [];
+    if (profile.result) {
+      state.result = {
+        ...profile.result,
+        deathDate: new Date(profile.result.deathDate),
+        dob: new Date(profile.result.dob)
+      };
+      // Re-sort factors
+      if (state.result.factors) {
+        state.result.factors.sort((a, b) => a.impact - b.impact);
+      }
+      // Show dashboard nav items
+      document.getElementById('navDash').classList.remove('hidden');
+      document.getElementById('navPrice').classList.remove('hidden');
+      document.getElementById('navCta').textContent = 'Recalculate';
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+function loadUserTier() {
+  try {
+    const tier = localStorage.getItem('deathclock_tier');
+    if (tier) state.userTier = tier;
+  } catch(e) {}
+}
+
+function showPaywall(feature) {
+  document.getElementById('modal').classList.remove('hidden');
+  let featureText = 'This feature';
+  if (feature === 'save') featureText = 'Saving your profile';
+  else if (feature === 'unlimited_habits') featureText = 'Unlimited habit tracking';
+
+  document.getElementById('modalContent').innerHTML = `
+    <h3 style="color:var(--gold); margin-bottom:12px;">Upgrade to Premium</h3>
+    <p style="color:var(--text2); margin-bottom:20px;">${featureText} requires a Premium subscription. Save your profile, track unlimited habits, and get clinical test recommendations.</p>
+    <div style="background:var(--bg2); padding:20px; border-radius:var(--radius); margin-bottom:20px; border:1px solid var(--gold);">
+      <div style="font-size:1.5rem; font-weight:800; color:var(--gold);">$4.99<span style="font-size:0.85rem; color:var(--text3);">/month</span></div>
+      <ul style="text-align:left; margin-top:12px; color:var(--text2); font-size:0.9rem; list-style:none; padding:0;">
+        <li style="margin-bottom:6px;">&#10003; Save & reload your profile</li>
+        <li style="margin-bottom:6px;">&#10003; Unlimited habit tracking</li>
+        <li style="margin-bottom:6px;">&#10003; Unlimited bucket list items</li>
+        <li style="margin-bottom:6px;">&#10003; Clinical test recommendations</li>
+        <li style="margin-bottom:6px;">&#10003; Export your full report</li>
+      </ul>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">Maybe Later</button>
+      <button class="btn-gold" onclick="upgradeTier('premium')">Upgrade Now</button>
+    </div>
+    <p style="font-size:0.75rem; color:var(--text3); margin-top:12px;">For demo purposes, clicking Upgrade activates Premium locally.</p>
+  `;
+}
+
+function upgradeTier(tier) {
+  state.userTier = tier;
+  try { localStorage.setItem('deathclock_tier', tier); } catch(e) {}
+  closeModal();
+  // Show confirmation
+  const existing = document.querySelector('.motivation-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'motivation-toast great';
+  toast.textContent = 'Welcome to Premium! Death just got a lot further away.';
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+  // Re-render current page
+  if (state.currentPage === 'dashboard') renderDashboard();
+}
+
+function generateCheatDeathPlan(result, targetAge) {
+  const currentProjected = parseFloat(result.adjustedLE);
+  const gap = targetAge - currentProjected;
+  const a = state.answers;
+  const potentialHabits = [];
+
+  // Scan for improvable habits based on user's current answers
+  // Exercise improvements
+  if (a.exercise !== '5+') potentialHabits.push({ id: 'walk_30', name: 'Walk 30 minutes', dailyImpact: 3/365.25, annualImpact: 3, cat: 'fitness', difficulty: 'easy', source: 'VA study, n=719,147', icon: '\u{1F6B6}' });
+  if (!['tennis','badminton','soccer'].includes(a.sport)) potentialHabits.push({ id: 'social_sport', name: 'Play a social sport', dailyImpact: 4.7/365.25, annualImpact: 4.7, cat: 'fitness', difficulty: 'medium', source: 'Copenhagen study, n=8,577', icon: '\u{1F3BE}' });
+
+  // Diet improvements
+  if (a.diet !== 'very_healthy') potentialHabits.push({ id: 'eat_veggies', name: 'Eat 5+ servings of vegetables', dailyImpact: 3/365.25, annualImpact: 3, cat: 'diet', difficulty: 'easy', source: 'Harvard meta-analysis', icon: '\u{1F966}' });
+  if (['high','very_high'].includes(a.processed_food)) potentialHabits.push({ id: 'reduce_upf', name: 'Avoid ultra-processed food today', dailyImpact: 2/365.25, annualImpact: 2, cat: 'diet', difficulty: 'medium', source: 'BMJ meta-analysis, 18 studies', icon: '\u{1F34E}' });
+  if (a.omega3 === 'low') potentialHabits.push({ id: 'omega3', name: 'Take omega-3 supplement or eat fish', dailyImpact: 3/365.25, annualImpact: 3, cat: 'diet', difficulty: 'easy', source: 'Framingham study, n=2,240', icon: '\u{1F41F}' });
+  if (a.hydration !== 'good') potentialHabits.push({ id: 'hydrate', name: 'Drink 8+ glasses of water', dailyImpact: 2/365.25, annualImpact: 2, cat: 'body', difficulty: 'easy', source: 'NIH ARIC, n=15,752', icon: '\u{1F4A7}' });
+
+  // Sleep improvements
+  if (a.sleep_hours === 'short' || a.sleep_hours === 'moderate_short') potentialHabits.push({ id: 'sleep_schedule', name: 'Be in bed by 11pm (7+ hrs sleep)', dailyImpact: 2/365.25, annualImpact: 2, cat: 'sleep', difficulty: 'medium', source: 'Sleep Foundation meta-analysis', icon: '\u{1F634}' });
+
+  // Mental health
+  if (a.stress_mgmt !== 'yes') potentialHabits.push({ id: 'meditate', name: 'Meditate for 10 minutes', dailyImpact: 1.5/365.25, annualImpact: 1.5, cat: 'mental', difficulty: 'easy', source: 'VA study', icon: '\u{1F9D8}' });
+  if (a.gratitude !== 'high') potentialHabits.push({ id: 'gratitude', name: 'Write 3 things you are grateful for', dailyImpact: 2/365.25, annualImpact: 2, cat: 'mental', difficulty: 'easy', source: 'JAMA Psychiatry, n=49,275', icon: '\u{1F4DD}' });
+
+  // Social
+  if (a.social !== 'strong') potentialHabits.push({ id: 'social_time', name: 'Connect with a friend or family member', dailyImpact: 2/365.25, annualImpact: 2, cat: 'social', difficulty: 'easy', source: 'Harvard 80-year study', icon: '\u{1F465}' });
+
+  // Substances
+  if (a.smoking && a.smoking.startsWith('current')) potentialHabits.push({ id: 'no_smoke', name: 'No cigarettes today', dailyImpact: 8/365.25, annualImpact: 8, cat: 'substances', difficulty: 'hard', source: 'Lancet, n=599,912', icon: '\u{1F6AD}' });
+  if (a.alcohol === 'heavy') potentialHabits.push({ id: 'no_heavy_drink', name: 'Max 2 drinks today', dailyImpact: 3/365.25, annualImpact: 3, cat: 'substances', difficulty: 'medium', source: 'Lancet, n=599,912', icon: '\u{1F377}' });
+
+  // Body
+  if (a.dental !== 'excellent') potentialHabits.push({ id: 'floss', name: 'Floss your teeth', dailyImpact: 1.5/365.25, annualImpact: 1.5, cat: 'body', difficulty: 'easy', source: 'Leisure World, n=5,611', icon: '\u{1F9B7}' });
+
+  // Nature
+  if (a.nature !== 'high') potentialHabits.push({ id: 'nature', name: 'Spend 20 minutes in nature', dailyImpact: 2/365.25, annualImpact: 2, cat: 'environment', difficulty: 'easy', source: 'Lancet, n=4.6M', icon: '\u{1F33F}' });
+
+  // Screen time
+  if (['high','very_high'].includes(a.screen_time)) potentialHabits.push({ id: 'screen_limit', name: 'Keep screen time under 2 hours', dailyImpact: 1.5/365.25, annualImpact: 1.5, cat: 'environment', difficulty: 'medium', source: 'BJSM', icon: '\u{1F4F5}' });
+
+  // Sort by impact descending, take top 7
+  potentialHabits.sort((a,b) => b.annualImpact - a.annualImpact);
+  return potentialHabits.slice(0, 7);
+}
+
+function getStreakInfo() {
+  const g = state.longevityGoal;
+  if (!g || !g.logs) return { streak: 0, multiplier: 1 };
+  const today = new Date().toISOString().split('T')[0];
+  let streak = 0;
+  let d = new Date();
+  // Check backwards from yesterday (today might not be logged yet)
+  d.setDate(d.getDate() - 1);
+  while (true) {
+    const key = d.toISOString().split('T')[0];
+    const dayLog = g.logs[key];
+    if (!dayLog || dayLog.length === 0) break;
+    // Need at least 50% of habits logged
+    if (dayLog.length >= Math.ceil(g.plan.length * 0.5)) {
+      streak++;
+    } else {
+      break;
+    }
+    d.setDate(d.getDate() - 1);
+  }
+  // Check if today has any logs (extend streak)
+  const todayLog = g.logs[today];
+  if (todayLog && todayLog.length >= Math.ceil(g.plan.length * 0.5)) {
+    streak++;
+  }
+  let multiplier = 1;
+  if (streak >= 365) multiplier = 3;
+  else if (streak >= 90) multiplier = 2.5;
+  else if (streak >= 30) multiplier = 2;
+  else if (streak >= 7) multiplier = 1.5;
+  return { streak, multiplier };
+}
+
+function getTodayKey() { return new Date().toISOString().split('T')[0]; }
+
+function toggleHabit(habitId) {
+  const g = state.longevityGoal;
+  if (!g) return;
+  const today = getTodayKey();
+  if (!g.logs[today]) g.logs[today] = [];
+  const idx = g.logs[today].indexOf(habitId);
+  if (idx >= 0) {
+    g.logs[today].splice(idx, 1);
+  } else {
+    g.logs[today].push(habitId);
+    // Show float animation
+    showHabitFloat(habitId);
+  }
+  recalcTotalDaysAdded();
+  saveGoalState();
+  showTab('myplan');
+}
+
+function showHabitFloat(habitId) {
+  const habit = state.longevityGoal.plan.find(h => h.id === habitId);
+  if (!habit) return;
+  const { multiplier } = getStreakInfo();
+  const impact = (habit.dailyImpact * multiplier).toFixed(3);
+  const el = document.createElement('div');
+  el.className = 'habit-float';
+  el.textContent = '+' + impact + ' days';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+function recalcTotalDaysAdded() {
+  const g = state.longevityGoal;
+  if (!g) return;
+  let total = 0;
+  const sortedDates = Object.keys(g.logs).sort();
+  for (const dateKey of sortedDates) {
+    const dayHabits = g.logs[dateKey];
+    // Calculate streak up to this date to get multiplier
+    let streakAtDate = 0;
+    let d = new Date(dateKey);
+    d.setDate(d.getDate() - 1);
+    while (true) {
+      const k = d.toISOString().split('T')[0];
+      const dl = g.logs[k];
+      if (!dl || dl.length < Math.ceil(g.plan.length * 0.5)) break;
+      streakAtDate++;
+      d.setDate(d.getDate() - 1);
+    }
+    let mult = 1;
+    if (streakAtDate >= 365) mult = 3;
+    else if (streakAtDate >= 90) mult = 2.5;
+    else if (streakAtDate >= 30) mult = 2;
+    else if (streakAtDate >= 7) mult = 1.5;
+
+    for (const hid of dayHabits) {
+      const habit = g.plan.find(h => h.id === hid);
+      if (habit) total += habit.dailyImpact * mult;
+    }
+  }
+  g.totalDaysAdded = total;
+}
+
+function setLongevityGoal(targetAge) {
+  const plan = generateCheatDeathPlan(state.result, targetAge);
+  state.longevityGoal = {
+    targetAge,
+    currentProjected: parseFloat(state.result.adjustedLE),
+    plan,
+    logs: {},
+    totalDaysAdded: 0,
+    createdAt: new Date().toISOString()
+  };
+  saveGoalState();
+  showTab('myplan');
+}
+
+function renderGoalSetup() {
+  const r = state.result;
+  const currentAge = parseFloat(r.adjustedLE);
+  return `
+    <div class="goal-setup">
+      <h3>Set Your Longevity Goal</h3>
+      <p style="color:var(--text2); margin-bottom:16px;">You are currently projected to live to age <strong>${r.adjustedLE}</strong>. How long do you want to live?</p>
+      <div style="margin:20px 0;">
+        <label style="font-size:0.85rem; color:var(--text3);">I want to live to age:</label>
+        <div style="display:flex; align-items:center; gap:12px; justify-content:center; margin-top:8px;">
+          <input type="range" id="goalAge" min="${Math.ceil(currentAge)}" max="100" value="${Math.min(Math.ceil(currentAge) + 10, 100)}"
+            oninput="updateGoalPreview(this.value)" style="width:200px;">
+          <input type="number" id="goalAgeNum" min="${Math.ceil(currentAge)}" max="100" value="${Math.min(Math.ceil(currentAge) + 10, 100)}"
+            onchange="document.getElementById('goalAge').value=this.value; updateGoalPreview(this.value)" style="width:80px;">
+        </div>
+      </div>
+      <div id="goalPreview"></div>
+      <button class="btn-primary" onclick="setLongevityGoal(parseInt(document.getElementById('goalAgeNum').value))" style="margin-top:16px; font-size:1.1rem; padding:14px 32px;">
+        Generate My Cheat Death Plan
+      </button>
+    </div>
+  `;
+}
+
+function updateGoalPreview(val) {
+  document.getElementById('goalAgeNum').value = val;
+  const r = state.result;
+  const currentAge = parseFloat(r.adjustedLE);
+  const el = document.getElementById('goalPreview');
+  if (val > 100) {
+    el.innerHTML = '<div class="goal-gap" style="color:var(--accent)">You can\'t cheat death.</div><div style="color:var(--text2); font-size:0.9rem;">But at least you can avoid it for longer than most of us. Cap is 100.</div>';
+    document.getElementById('goalAgeNum').value = 100;
+    document.getElementById('goalAge').value = 100;
+    return;
+  }
+  const gap = val - currentAge;
+  let feasClass = 'green', feasText = 'Achievable with lifestyle changes';
+  if (gap > 15) { feasClass = 'red'; feasText = 'Extraordinary effort required'; }
+  else if (gap > 8) { feasClass = 'gold'; feasText = 'Ambitious but possible'; }
+  else if (gap <= 0) { feasClass = 'green'; feasText = 'You are already on track!'; }
+  el.innerHTML = `
+    <div class="goal-gap">You need to add ${gap > 0 ? gap.toFixed(1) : '0'} years</div>
+    <div class="goal-feasibility ${feasClass}">${feasText}</div>
+  `;
+}
+
+function renderMyPlanTab(el) {
+  const g = state.longevityGoal;
+
+  // If no goal set yet, show setup
+  if (!g) {
+    if (!state.result) { el.innerHTML = '<p style="color:var(--text3)">Complete the calculator first.</p>'; return; }
+    el.innerHTML = renderGoalSetup();
+    setTimeout(() => updateGoalPreview(document.getElementById('goalAgeNum')?.value || 85), 50);
+    return;
+  }
+
+  const today = getTodayKey();
+  const todayLog = g.logs[today] || [];
+  const { streak, multiplier } = getStreakInfo();
+  const habitsLoggedToday = todayLog.length;
+  const totalHabits = g.plan.length;
+  const todayDaysAdded = todayLog.reduce((sum, hid) => {
+    const h = g.plan.find(x => x.id === hid);
+    return sum + (h ? h.dailyImpact * multiplier : 0);
+  }, 0);
+
+  // Calculate projected death date shift
+  const shiftedDeath = new Date(state.result.deathDate.getTime() + g.totalDaysAdded * 24*60*60*1000);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const newDateStr = months[shiftedDeath.getMonth()] + ' ' + shiftedDeath.getDate() + ', ' + shiftedDeath.getFullYear();
+
+  // Progress toward goal
+  const goalGap = g.targetAge - g.currentProjected;
+  const daysNeeded = goalGap * 365.25;
+  const progress = daysNeeded > 0 ? Math.min(100, (g.totalDaysAdded / daysNeeded) * 100) : 100;
+
+  // Build heatmap (last 28 days)
+  let heatmapHtml = '';
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const k = d.toISOString().split('T')[0];
+    const dayLog = g.logs[k] || [];
+    let cls = 'missed';
+    if (dayLog.length >= totalHabits) cls = 'full';
+    else if (dayLog.length > 0) cls = 'partial';
+    heatmapHtml += '<div class="heatmap-day ' + cls + '" title="' + k + ': ' + dayLog.length + '/' + totalHabits + '"></div>';
+  }
+
+  el.innerHTML = `
+    <div class="days-added-banner">
+      <div class="days-added-num">+${g.totalDaysAdded.toFixed(1)} days</div>
+      <div class="days-added-label">added to your life</div>
+      ${streak > 0 ? '<div class="streak-badge">\u{1F525} ' + streak + ' day streak (' + multiplier + 'x multiplier)</div>' : '<div style="font-size:0.8rem; color:var(--text3); margin-top:4px;">Start your streak by logging all habits today</div>'}
+    </div>
+
+    <div class="plan-summary">
+      <div class="plan-stat">
+        <div class="plan-stat-num" style="color:var(--green)">+${todayDaysAdded.toFixed(3)}</div>
+        <div class="plan-stat-label">Today</div>
+      </div>
+      <div class="plan-stat">
+        <div class="plan-stat-num" style="color:var(--text)">${habitsLoggedToday}/${totalHabits}</div>
+        <div class="plan-stat-label">Habits Today</div>
+      </div>
+      <div class="plan-stat">
+        <div class="plan-stat-num" style="color:var(--gold)">${progress.toFixed(1)}%</div>
+        <div class="plan-stat-label">Goal Progress</div>
+      </div>
+      <div class="plan-stat">
+        <div class="plan-stat-num" style="color:var(--blue)">${g.targetAge}</div>
+        <div class="plan-stat-label">Target Age</div>
+      </div>
+    </div>
+
+    <div style="margin:20px 0 8px; font-weight:600; font-size:1.1rem;">Today's Habits</div>
+    <p style="color:var(--text3); font-size:0.8rem; margin-bottom:12px;">Tap to log each habit. Complete 50%+ to maintain your streak.</p>
+
+    ${g.plan.map(h => {
+      const logged = todayLog.includes(h.id);
+      const impactStr = '+' + (h.dailyImpact * multiplier).toFixed(3) + ' days';
+      return '<div class="habit-card ' + (logged ? 'logged' : '') + '" onclick="toggleHabit(\'' + h.id + '\')">' +
+        '<div class="habit-check">' + (logged ? '✓' : '') + '</div>' +
+        '<div class="habit-info">' +
+          '<div class="habit-name">' + (h.icon || '') + ' ' + h.name + '</div>' +
+          '<div class="habit-meta">' + h.difficulty + ' | ' + h.source + '</div>' +
+        '</div>' +
+        '<div class="habit-impact">' + impactStr + '</div>' +
+      '</div>';
+    }).join('')}
+
+    <div style="margin-top:24px;">
+      <div style="font-weight:600; margin-bottom:8px;">Death Date Shift</div>
+      <div style="color:var(--text2); font-size:0.9rem;">
+        Original: <span style="color:var(--accent)">${state.result.deathDate.toLocaleDateString()}</span>
+        → New: <span style="color:var(--green)">${newDateStr}</span>
+      </div>
+      <div style="margin-top:12px; background:var(--bg); border-radius:8px; height:8px; overflow:hidden;">
+        <div style="width:${progress}%; height:100%; background:var(--green); border-radius:8px; transition:width 0.3s;"></div>
+      </div>
+      <div style="font-size:0.8rem; color:var(--text3); margin-top:4px;">${progress.toFixed(1)}% toward living to ${g.targetAge}</div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div style="font-weight:600; margin-bottom:8px;">Last 28 Days</div>
+      <div class="heatmap">${heatmapHtml}</div>
+      <div style="display:flex; justify-content:center; gap:12px; font-size:0.7rem; color:var(--text3); margin-top:4px;">
+        <span><span style="display:inline-block; width:10px; height:10px; background:var(--green); border-radius:2px;"></span> All done</span>
+        <span><span style="display:inline-block; width:10px; height:10px; background:var(--gold); border-radius:2px;"></span> Partial</span>
+        <span><span style="display:inline-block; width:10px; height:10px; background:var(--bg); border-radius:2px;"></span> Missed</span>
+      </div>
+    </div>
+
+    <div style="margin-top:24px; text-align:center;">
+      <button class="btn-secondary btn-sm" onclick="state.longevityGoal=null; saveGoalState(); showTab('myplan');">Reset Goal</button>
+    </div>
+  `;
+}
+
+// ============================================
 // INIT
 // ============================================
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 checkCookieConsent();
+loadGoalState();
+loadUserTier();
+// Auto-load saved profile
+if (loadProfile()) {
+  // Show welcome back message on home page
+  const heroP = document.querySelector('.hero p');
+  if (heroP) {
+    const savedAt = localStorage.getItem('deathclock_profile');
+    if (savedAt) {
+      try {
+        const profile = JSON.parse(savedAt);
+        const savedDate = new Date(profile.savedAt).toLocaleDateString();
+        heroP.insertAdjacentHTML('afterend',
+          '<div style="margin:-16px auto 24px; padding:12px 20px; background:var(--surface); border-radius:var(--radius); display:inline-block; font-size:0.9rem; color:var(--green);">' +
+          'Welcome back! Your profile from ' + savedDate + ' is loaded. ' +
+          '<a href="#" onclick="showPage(\'dashboard\');return false;" style="color:var(--gold);">View Dashboard</a></div>');
+      } catch(e) {}
+    }
+  }
+}
 </script>
 </body>
 </html>
