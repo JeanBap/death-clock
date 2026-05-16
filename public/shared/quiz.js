@@ -1426,6 +1426,98 @@ function getHabitCommentary() {
   return msgs.join(' ');
 }
 
+// ===== TIME-SPENT VISUALISATION =====
+function renderTimeSpentViz() {
+  const r = state.result;
+  const a = state.answers;
+  if (!r) return;
+  const container = document.getElementById('timeSpentViz');
+  if (!container) return;
+
+  const remaining = parseFloat(r.remainingYears);
+  if (!remaining || remaining <= 0) return;
+
+  // Calculate time allocations based on user answers
+  const sleepHrsPerDay = a.sleep_hours === 'short' ? 5 : a.sleep_hours === 'moderate_short' ? 6.5 : a.sleep_hours === 'long' ? 9.5 : 7.5;
+  const sleepFraction = sleepHrsPerDay / 24;
+
+  const screenHrsPerDay = a.screen_time === 'very_high' ? 7 : a.screen_time === 'high' ? 5 : a.screen_time === 'moderate' ? 3 : 1.5;
+  const screenFraction = screenHrsPerDay / 24;
+
+  const workHrsPerDay = a.occupation === 'sedentary' ? 8.5 : a.occupation === 'physical' ? 9 : a.occupation === 'hazardous' ? 10 : 7.5;
+  // Assume retirement at 65, scale work years
+  const workYearsLeft = Math.max(0, Math.min(remaining, 65 - r.ageNow));
+  const workFraction = (workHrsPerDay / 24) * (workYearsLeft / remaining);
+
+  const exerciseHrsPerWeek = a.exercise === '5+' ? 7 : a.exercise === '3-4x' ? 4 : a.exercise === '1-2x' ? 1.5 : 0.5;
+  const exerciseFraction = (exerciseHrsPerWeek / 7) / 24;
+
+  const eatingHrsPerDay = a.diet === 'very_healthy' ? 2 : a.diet === 'poor' ? 1 : 1.5;
+  const eatingFraction = eatingHrsPerDay / 24;
+
+  const commuteHrsPerDay = a.occupation === 'sedentary' ? 1 : 0.5;
+  const commuteFraction = (commuteHrsPerDay / 24) * (workYearsLeft / remaining);
+
+  // Build allocations
+  const allocations = [
+    { label: 'Sleeping', emoji: '😴', fraction: sleepFraction, color: '#6366f1' },
+    { label: 'Working', emoji: '💼', fraction: workFraction, color: '#f59e0b' },
+    { label: 'Screens', emoji: '📱', fraction: screenFraction, color: '#ef4444' },
+    { label: 'Eating', emoji: '🍽️', fraction: eatingFraction, color: '#10b981' },
+    { label: 'Exercise', emoji: '🏃', fraction: exerciseFraction, color: '#06b6d4' },
+    { label: 'Commuting', emoji: '🚗', fraction: commuteFraction, color: '#8b5cf6' }
+  ];
+
+  // Calculate "free time" as remainder
+  const usedFraction = allocations.reduce((s, a) => s + a.fraction, 0);
+  const freeFraction = Math.max(0, 1 - usedFraction);
+  allocations.push({ label: 'Free Time', emoji: '✨', fraction: freeFraction, color: '#22c55e' });
+
+  // Convert to years, months, weeks
+  let html = '<div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px;">';
+  html += '<h3 style="margin-bottom:4px; font-size:1.2rem; text-align:center;">How You Will Spend Your Remaining Time</h3>';
+  html += '<p style="color:var(--text3); font-size:0.8rem; text-align:center; margin-bottom:20px;">Based on your habits. ' + remaining.toFixed(1) + ' years = ' + Math.round(remaining * 12) + ' months = ' + Math.round(remaining * 52.14) + ' weeks</p>';
+
+  // Stacked bar
+  html += '<div style="display:flex; border-radius:8px; overflow:hidden; height:32px; margin-bottom:20px;">';
+  allocations.forEach(al => {
+    const pct = (al.fraction * 100).toFixed(1);
+    if (parseFloat(pct) < 1) return;
+    html += '<div style="width:' + pct + '%; background:' + al.color + '; display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:#fff; font-weight:600; min-width:20px;" title="' + al.label + ': ' + pct + '%">' + al.emoji + '</div>';
+  });
+  html += '</div>';
+
+  // Detail rows
+  html += '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:8px;">';
+  allocations.forEach(al => {
+    const years = (remaining * al.fraction).toFixed(1);
+    const months = Math.round(remaining * al.fraction * 12);
+    const weeks = Math.round(remaining * al.fraction * 52.14);
+    if (parseFloat(years) < 0.1) return;
+    html += '<div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--bg); border-radius:8px; border-left:3px solid ' + al.color + ';">';
+    html += '<span style="font-size:1.2rem;">' + al.emoji + '</span>';
+    html += '<div>';
+    html += '<div style="font-size:0.8rem; font-weight:600;">' + al.label + '</div>';
+    html += '<div style="font-size:0.7rem; color:var(--text2);">' + years + ' yrs / ' + months + ' mo / ' + weeks + ' wks</div>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  // Motivational nudge
+  const screenYears = (remaining * screenFraction).toFixed(1);
+  const exerciseYears = (remaining * exerciseFraction).toFixed(1);
+  html += '<div style="margin-top:16px; padding:12px; background:rgba(233,69,96,0.08); border:1px solid var(--accent); border-radius:8px; text-align:center;">';
+  html += '<p style="font-size:0.85rem; color:var(--text); margin:0;">';
+  if (parseFloat(screenYears) > parseFloat(exerciseYears) * 3) {
+    html += '📱 You will spend <strong>' + screenYears + ' years</strong> on screens but only <strong>' + exerciseYears + ' years</strong> exercising. That is a ' + Math.round(parseFloat(screenYears) / Math.max(0.1, parseFloat(exerciseYears))) + ':1 ratio. Is that the life you want?';
+  } else {
+    html += '💪 Your exercise-to-screen ratio is solid. Keep it up and you will outlive most of your friends.';
+  }
+  html += '</p></div>';
+  html += '</div>';
+  container.innerHTML = html;
+}
+
 function renderResultGhost() {
   const params = getDeathyParams();
   const hScore = calcDeathyHealth(params);
@@ -1507,7 +1599,11 @@ function renderResult() {
       <div class="death-date-label">You will die on</div>
       <div class="death-date">${dateStr}</div>
       <div style="color:var(--text2)">That is approximately <strong>${r.remainingYears} years</strong> from today</div>
-      <div class="countdown" id="countdown"></div>
+      <div style="margin:24px 0 8px; padding:20px 12px; background:rgba(255,0,0,0.05); border:1px solid rgba(255,0,0,0.15); border-radius:12px;">
+        <div style="text-align:center; color:var(--accent); font-size:0.75rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:12px;">Time Remaining</div>
+        <div class="countdown" id="countdown" style="font-size:1.1rem;"></div>
+        <div style="text-align:center; margin-top:8px; color:var(--text3); font-size:0.7rem;">Every second counts. Make them matter.</div>
+      </div>
       <div id="lifeVisContainer" style="margin:24px auto; max-width:400px;"></div>
       <div style="margin-top:12px;">
         <button class="btn-secondary btn-sm" onclick="saveTimerWidget()" style="font-size:0.8rem;">Save Timer as Widget</button>
@@ -1551,6 +1647,9 @@ function renderResult() {
           `).join('')}
       </div>
     </div>
+
+    <!-- TIME-SPENT VISUALISATION -->
+    <div id="timeSpentViz" style="margin-top:48px;"></div>
 
     <!-- SHARE YOUR RESULT -->
     <div class="share-card" style="margin-top:48px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; text-align:center;">
@@ -1639,6 +1738,7 @@ function renderResult() {
   document.getElementById('resultContent').innerHTML = html;
   showPage('result');
   startCountdown();
+  renderTimeSpentViz();
   animateLifeCanvas();
   creditReferrer();
   renderClinicalTests();
@@ -1671,7 +1771,7 @@ function startCountdown() {
     el.innerHTML = [
       { n: years, l: 'Years' }, { n: months, l: 'Months' }, { n: days, l: 'Days' },
       { n: hours, l: 'Hours' }, { n: mins, l: 'Min' }, { n: secs, l: 'Sec' }
-    ].map(u => `<div class="countdown-unit"><div class="countdown-num">${u.n}</div><div class="countdown-label">${u.l}</div></div>`).join('');
+    ].map(u => `<div class="countdown-unit"><div class="countdown-num" style="font-size:1.8rem; font-weight:800; color:var(--accent); line-height:1;">${u.n}</div><div class="countdown-label" style="font-size:0.6rem; text-transform:uppercase; letter-spacing:1px; color:var(--text3); margin-top:4px;">${u.l}</div></div>`).join('');
   }
   update();
   setInterval(update, 1000);
