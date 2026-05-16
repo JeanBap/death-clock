@@ -124,6 +124,21 @@
       </div>
     </div>
 
+    <!-- Weekly Leaderboard + Limited Shop -->
+    <div style="margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:220px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px;">
+        <h4 style="margin-bottom:8px; font-size:0.9rem;">🏆 Weekly Leaderboard</h4>
+        <div id="leaderboardContent"><p style="color:var(--text3); font-size:0.8rem;">Loading...</p></div>
+      </div>
+      <div style="flex:1; min-width:220px; background:var(--surface); border:1px solid var(--gold); border-radius:var(--radius); padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h4 style="font-size:0.9rem;">⏰ Limited-Time Items</h4>
+          <span style="font-size:0.6rem; color:var(--accent); font-weight:600;">FOMO fuel</span>
+        </div>
+        <div id="limitedShopContent"><p style="color:var(--text3); font-size:0.8rem;">Loading...</p></div>
+      </div>
+    </div>
+
     <!-- Ghost Challenges -->
     <div style="margin-top:24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -194,6 +209,7 @@
 <script src="/shared/interactions.js"></script>
 <script src="/shared/challenges.js"></script>
 <script src="/shared/engagement.js"></script>
+<script src="/shared/quickwins.js"></script>
 <script>
 
 function pageInit() {
@@ -206,6 +222,7 @@ function pageInit() {
     loadChallenges();
     updateCoinDisplay();
     if (typeof initEngagement === 'function') initEngagement();
+    if (typeof initQuickWins === 'function') initQuickWins();
   }, 1500);
 }
 
