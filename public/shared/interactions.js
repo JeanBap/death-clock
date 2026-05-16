@@ -213,6 +213,30 @@ function showGhostActionMenu(targetId, targetName, targetColor, targetEyes, targ
     + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
     + '🪙 Dare Challenge <span style="color:var(--text3); font-size:0.75rem;">bet coins</span></button>';
 
+  // Friend interactions
+  html += '<div style="border-top:1px solid var(--border); margin:4px 0;"></div>';
+  html += '<div style="padding:4px 8px; font-size:0.7rem; color:var(--text3); text-transform:uppercase; letter-spacing:1px;">Social</div>';
+
+  html += '<button onclick="pokeGhost(\'' + targetId + '\', \'' + escHtml(targetName) + '\'); document.getElementById(\'ghostActionMenu\')?.remove();" '
+    + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--text); font-size:0.9rem; cursor:pointer; border-radius:8px; transition:background 0.2s;" '
+    + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
+    + '👉 Poke <span style="color:var(--text3); font-size:0.75rem;">+2xp</span></button>';
+
+  html += '<button onclick="highFiveGhost(\'' + targetId + '\', \'' + escHtml(targetName) + '\'); document.getElementById(\'ghostActionMenu\')?.remove();" '
+    + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--text); font-size:0.9rem; cursor:pointer; border-radius:8px; transition:background 0.2s;" '
+    + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
+    + '🙌 High Five <span style="color:var(--text3); font-size:0.75rem;">+3xp</span></button>';
+
+  html += '<button onclick="comboHaunt(\'' + targetId + '\', \'' + escHtml(targetName) + '\'); document.getElementById(\'ghostActionMenu\')?.remove();" '
+    + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--accent2); font-size:0.9rem; cursor:pointer; border-radius:8px; font-weight:700; transition:background 0.2s;" '
+    + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
+    + '👻💥 Combo Haunt <span style="color:var(--text3); font-size:0.75rem;">2🪙 +20xp</span></button>';
+
+  html += '<button onclick="promptGiftCoins(\'' + targetId + '\', \'' + escHtml(targetName) + '\'); document.getElementById(\'ghostActionMenu\')?.remove();" '
+    + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--green); font-size:0.9rem; cursor:pointer; border-radius:8px; transition:background 0.2s;" '
+    + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
+    + '🎁 Gift Coins <span style="color:var(--text3); font-size:0.75rem;">send 🪙</span></button>';
+
   menu.innerHTML = html;
   document.body.appendChild(menu);
 
@@ -518,6 +542,15 @@ async function loadActivityFeed() {
 
 function renderActivityFeed() {
   loadActivityFeed();
+}
+
+// ===== FRIEND GIFT PROMPT =====
+function promptGiftCoins(targetId, targetName) {
+  const amount = prompt('How many coins to gift ' + targetName + '? (1-50)');
+  if (!amount) return;
+  const n = parseInt(amount);
+  if (isNaN(n) || n < 1 || n > 50) { showToast('Enter 1-50'); return; }
+  if (typeof giftCoins === 'function') giftCoins(targetId, targetName, n);
 }
 
 // ===== CSS ANIMATIONS =====
