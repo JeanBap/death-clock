@@ -285,6 +285,11 @@ async function doHauntAction(actionKey, targetId, targetName) {
 
   // Accumulate XP
   if (typeof addXP === 'function') addXP(action.xp);
+  // Track weekly XP
+  if (typeof trackWeeklyXP === 'function') trackWeeklyXP(action.xp);
+
+  // Queue notification for target (they see it next visit)
+  if (typeof queueHauntNotification === 'function') queueHauntNotification(senderName, actionKey);
 
   // Show animation
   playHauntAnimation(action.animation, action.emoji);
