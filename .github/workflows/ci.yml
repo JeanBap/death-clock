@@ -40,6 +40,12 @@ jobs:
           echo "Checking HTML files have required meta..."
           errors=0
           for f in public/*.html; do
+            # Skip Google/Bing verification files
+            basename=$(basename "$f")
+            if echo "$basename" | grep -qE '^(google|Bing|yandex|BingSite)'; then
+              echo "SKIP: $f (verification file)"
+              continue
+            fi
             if ! grep -q 'viewport' "$f"; then
               echo "FAIL: $f missing viewport meta"
               errors=$((errors + 1))
