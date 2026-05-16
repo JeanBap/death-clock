@@ -30,8 +30,8 @@ const lifeFactors = {
   smoking_current_heavy: { impact: -10, label: 'Heavy smoker', tip: 'Smoking is the single biggest controllable factor. Quitting now could add back 5-8 years.', cat: 'substances', productCat: 'smoking_cessation' },
 
   // Exercise
-  exercise_5plus: { impact: 4.5, label: 'Very active (5+ days/week)', tip: 'Excellent! You are in the top tier for exercise longevity benefit.', cat: 'fitness' },
-  exercise_3to4: { impact: 3, label: 'Active (3-4 days/week)', tip: 'Great habit! Adding one more day could push you into the optimal zone.', cat: 'fitness' },
+  exercise_5plus: { impact: 3.5, label: 'Very active (5+ days/week)', tip: 'Excellent! You are in the top tier for exercise longevity benefit.', cat: 'fitness' },
+  exercise_3to4: { impact: 2.5, label: 'Active (3-4 days/week)', tip: 'Great habit! Adding one more day could push you into the optimal zone.', cat: 'fitness' },
   exercise_1to2: { impact: 1, label: 'Somewhat active (1-2 days/week)', tip: 'Good start! Try to build up to 150+ minutes per week for maximum benefit.', cat: 'fitness', productCat: 'fitness' },
   exercise_none: { impact: -4, label: 'Sedentary', tip: 'Physical inactivity is as dangerous as smoking. Even walking 30 min/day helps enormously.', cat: 'fitness', productCat: 'fitness' },
 
@@ -43,8 +43,8 @@ const lifeFactors = {
   bmi_underweight: { impact: -2, label: 'Underweight (BMI <18.5)', tip: 'Being underweight carries health risks too. Focus on nutrient-dense foods.', cat: 'body' },
 
   // Diet
-  diet_very_healthy: { impact: 5, label: 'Very healthy diet', tip: 'Mediterranean-style diets are associated with the greatest longevity gains.', cat: 'diet' },
-  diet_healthy: { impact: 3, label: 'Healthy diet', tip: 'Good dietary habits. Focus on whole foods, vegetables, and lean proteins.', cat: 'diet' },
+  diet_very_healthy: { impact: 3.5, label: 'Very healthy diet', tip: 'Mediterranean-style diets are associated with the greatest longevity gains.', cat: 'diet' },
+  diet_healthy: { impact: 2, label: 'Healthy diet', tip: 'Good dietary habits. Focus on whole foods, vegetables, and lean proteins.', cat: 'diet' },
   diet_average: { impact: 0, label: 'Average diet', tip: 'Room for improvement. Reducing processed food intake can add years.', cat: 'diet', productCat: 'nutrition' },
   diet_poor: { impact: -4, label: 'Poor diet', tip: 'Poor diet is a major mortality risk factor. Meal planning and delivery services can help restructure habits.', cat: 'diet', productCat: 'nutrition' },
 
@@ -71,10 +71,10 @@ const lifeFactors = {
   stress_mgmt_no: { impact: 0, label: 'No stress management', tip: 'Even 10 minutes of daily meditation can measurably reduce mortality risk.', cat: 'mental', productCat: 'mental_health' },
 
   // Social
-  social_strong: { impact: 4, label: 'Strong social network', tip: 'Strong relationships are the #1 predictor of healthy longevity per the Harvard 80-year study.', cat: 'social' },
-  social_moderate: { impact: 2, label: 'Moderate social connections', tip: 'Good foundation. Deepening existing relationships has compounding benefits.', cat: 'social' },
+  social_strong: { impact: 3, label: 'Strong social network', tip: 'Strong relationships are the #1 predictor of healthy longevity per the Harvard 80-year study.', cat: 'social' },
+  social_moderate: { impact: 1.5, label: 'Moderate social connections', tip: 'Good foundation. Deepening existing relationships has compounding benefits.', cat: 'social' },
   social_few: { impact: -2, label: 'Few social connections', tip: 'Social isolation carries health risks equivalent to smoking. Community groups, clubs, and volunteering help.', cat: 'social' },
-  social_isolated: { impact: -7, label: 'Socially isolated', tip: 'Severe isolation can reduce lifespan by up to 15 years. This is one of the most impactful factors to address.', cat: 'social' },
+  social_isolated: { impact: -5, label: 'Socially isolated', tip: 'Severe isolation can reduce lifespan by up to 15 years. This is one of the most impactful factors to address.', cat: 'social' },
 
   // Relationship
   rel_married: { impact: 2.5, label: 'Married', tip: 'Marriage is associated with longer lifespan, likely due to social support and shared health behaviors.', cat: 'social' },
@@ -125,8 +125,8 @@ const lifeFactors = {
   family_early_death: { impact: -3, label: 'Family history of early death (<65)', tip: 'Family history is a risk signal. Proactive screening and lifestyle optimization are extra important for you.', cat: 'genetics', productCat: 'health_testing' },
 
   // Vegetarian/Vegan diet (meta-analysis: 977,763 participants)
-  veg_vegan: { impact: 3.5, label: 'Vegan diet', tip: 'Vegan diets linked to 15% lower all-cause mortality (meta-analysis, n=977,763).', cat: 'diet' },
-  veg_vegetarian: { impact: 2.5, label: 'Vegetarian diet', tip: 'Vegetarian diets linked to 12% lower mortality (Adventist Health Study-2, n=96,000).', cat: 'diet' },
+  veg_vegan: { impact: 2.5, label: 'Vegan diet', tip: 'Vegan diets linked to 15% lower all-cause mortality (meta-analysis, n=977,763).', cat: 'diet' },
+  veg_vegetarian: { impact: 2, label: 'Vegetarian diet', tip: 'Vegetarian diets linked to 12% lower mortality (Adventist Health Study-2, n=96,000).', cat: 'diet' },
   veg_pescatarian: { impact: 2, label: 'Pescatarian diet', tip: 'Fish-based diets combine plant benefits with omega-3 fatty acids.', cat: 'diet' },
   veg_flexitarian: { impact: 1, label: 'Flexitarian (mostly plant-based)', tip: 'Reducing meat intake even partially provides longevity benefits.', cat: 'diet' },
   veg_omnivore: { impact: 0, label: 'Omnivore (regular meat)', tip: 'Standard mixed diet. Consider reducing red and processed meat.', cat: 'diet' },
@@ -139,9 +139,9 @@ const lifeFactors = {
   upf_very_high: { impact: -4, label: 'Very high processed food (>75%)', tip: 'Ultra-processed food dominant diet. Each 10% less = 14% lower mortality.', cat: 'diet', productCat: 'nutrition' },
 
   // Sports (Copenhagen City Heart Study: n=8,577, 25-year follow-up)
-  sport_tennis: { impact: 4.5, label: 'Tennis player', tip: 'Tennis adds the most years of any sport (Copenhagen study, n=8,577).', cat: 'fitness' },
-  sport_badminton: { impact: 3.0, label: 'Badminton player', tip: 'Racquet sports excel due to social + aerobic + agility combination.', cat: 'fitness' },
-  sport_soccer: { impact: 2.5, label: 'Soccer/football player', tip: 'Team sports provide social bonding plus cardiovascular training.', cat: 'fitness' },
+  sport_tennis: { impact: 3.0, label: 'Tennis player', tip: 'Tennis adds the most years of any sport (Copenhagen study, n=8,577).', cat: 'fitness' },
+  sport_badminton: { impact: 2.5, label: 'Badminton player', tip: 'Racquet sports excel due to social + aerobic + agility combination.', cat: 'fitness' },
+  sport_soccer: { impact: 2.0, label: 'Soccer/football player', tip: 'Team sports provide social bonding plus cardiovascular training.', cat: 'fitness' },
   sport_cycling: { impact: 1.5, label: 'Cyclist', tip: 'Regular cycling reduces mortality risk by 40% (BMJ).', cat: 'fitness' },
   sport_swimming: { impact: 1.5, label: 'Swimmer', tip: 'Full-body low-impact exercise. 28% lower all-cause mortality.', cat: 'fitness' },
   sport_running: { impact: 1.0, label: 'Runner/jogger', tip: 'Even slow jogging 1-2.4 hours/week reduces mortality 44%.', cat: 'fitness' },
@@ -179,8 +179,8 @@ const lifeFactors = {
   dental_poor: { impact: -2, label: 'Irregular brushing, rare dentist', tip: 'Never flossing = 30% higher mortality (Leisure World study, n=5,611). Chronic inflammation link.', cat: 'body' },
 
   // Sauna Use (Finnish study, JAMA, n=2,315, 20-year follow-up)
-  sauna_frequent: { impact: 3, label: 'Frequent sauna (4-7x/week)', tip: '40% lower all-cause mortality (JAMA, Finnish study, n=2,315, 20 years).', cat: 'fitness' },
-  sauna_moderate: { impact: 1.5, label: 'Moderate sauna (2-3x/week)', tip: 'Significant heat shock protein activation. 24% lower mortality.', cat: 'fitness' },
+  sauna_frequent: { impact: 2, label: 'Frequent sauna (4-7x/week)', tip: '40% lower all-cause mortality (JAMA, Finnish study, n=2,315, 20 years).', cat: 'fitness' },
+  sauna_moderate: { impact: 1, label: 'Moderate sauna (2-3x/week)', tip: 'Significant heat shock protein activation. 24% lower mortality.', cat: 'fitness' },
   sauna_rare: { impact: 0.5, label: 'Occasional sauna (1x/week)', tip: 'Some benefit from heat therapy. Try to increase frequency.', cat: 'fitness' },
   sauna_never: { impact: 0, label: 'Never use sauna', tip: 'Sauna use is one of the highest-ROI longevity interventions available.', cat: 'fitness' },
 
@@ -196,8 +196,8 @@ const lifeFactors = {
   screen_very_high: { impact: -3, label: 'Very high screen time (6+ hrs)', tip: '6+ hours/day TV = 4.8 years less life expectancy. Get a standing desk.', cat: 'environment', productCat: 'fitness' },
 
   // Education Level (Lancet Public Health meta-analysis)
-  edu_postgrad: { impact: 4, label: 'Postgraduate degree', tip: 'Each year of education reduces mortality 2-3% (Lancet meta-analysis).', cat: 'social' },
-  edu_bachelors: { impact: 3, label: 'Bachelors degree', tip: '8-year life expectancy gap between degree holders and non-graduates.', cat: 'social' },
+  edu_postgrad: { impact: 2.5, label: 'Postgraduate degree', tip: 'Each year of education reduces mortality 2-3% (Lancet meta-analysis).', cat: 'social' },
+  edu_bachelors: { impact: 2, label: 'Bachelors degree', tip: '8-year life expectancy gap between degree holders and non-graduates.', cat: 'social' },
   edu_some_college: { impact: 1.5, label: 'Some college / trade school', tip: 'Education provides health literacy and socioeconomic benefits.', cat: 'social' },
   edu_high_school: { impact: 0, label: 'High school', tip: 'Baseline. Continued learning and skill development still protective.', cat: 'social' },
   edu_less: { impact: -2, label: 'Less than high school', tip: 'Education gap accounts for up to 11 years life expectancy difference.', cat: 'social' },
@@ -218,13 +218,13 @@ const lifeFactors = {
   volunteer_none: { impact: 0, label: 'No volunteering', tip: 'Volunteering provides purpose + social connection, a longevity double benefit.', cat: 'social' },
 
   // Religious/Spiritual Practice (Hummer et al., n=22,080)
-  religion_weekly: { impact: 3, label: 'Weekly religious attendance', tip: '+7 years life expectancy for weekly attenders (Hummer, n=22,080). 33% lower mortality (JAMA).', cat: 'social' },
+  religion_weekly: { impact: 2, label: 'Weekly religious attendance', tip: '+4 years life expectancy for weekly attenders (Hummer, n=22,080). Community + purpose benefit.', cat: 'social' },
   religion_occasional: { impact: 1, label: 'Occasional spiritual practice', tip: 'Some community and purpose benefits from periodic involvement.', cat: 'social' },
   religion_none: { impact: 0, label: 'No religious practice', tip: 'Secular community groups can provide similar social bonding benefits.', cat: 'social' },
 
   // Omega-3 / Fish Oil (Framingham Offspring Cohort)
-  omega3_high: { impact: 3, label: 'High omega-3 intake (fish/supplements)', tip: '+5 years for highest omega-3 blood levels (Framingham study). 34% lower all-cause mortality.', cat: 'diet' },
-  omega3_moderate: { impact: 1.5, label: 'Moderate omega-3 (fish 1-2x/week)', tip: 'Regular fish consumption provides meaningful cardiovascular protection.', cat: 'diet' },
+  omega3_high: { impact: 2, label: 'High omega-3 intake (fish/supplements)', tip: '+5 years for highest omega-3 blood levels (Framingham study). 34% lower all-cause mortality.', cat: 'diet' },
+  omega3_moderate: { impact: 1, label: 'Moderate omega-3 (fish 1-2x/week)', tip: 'Regular fish consumption provides meaningful cardiovascular protection.', cat: 'diet' },
   omega3_low: { impact: -1, label: 'Low omega-3 (rarely eat fish)', tip: 'Low omega-3 = same mortality impact as smoking (Framingham). Consider supplements.', cat: 'diet', productCat: 'supplements' },
 
   // Pet Ownership (AHA meta-analysis, n=3.4M)
@@ -1263,30 +1263,74 @@ function calculateResult() {
     factors.push({ key: 'gp_early', impact: -1, label: 'Grandparent early death (<65)', tip: 'Family history flag. Proactive screening is extra important.', cat: 'genetics' });
   }
 
-  // Cap category stacking to prevent absurd totals
-  // Diet-related: diet + veg_diet + processed food
+  // ===== CATEGORY CAPS (prevent absurd stacking) =====
+  function capCategory(factorList, cap) {
+    const total = factorList.reduce((s,f) => s + f.impact, 0);
+    if (Math.abs(total) > cap) {
+      const scale = cap / Math.abs(total);
+      factorList.forEach(f => f.impact = Math.round(f.impact * scale * 10) / 10);
+    }
+  }
+
+  // Diet: diet + veg_diet + processed food + coffee + omega3 (max +5 / -6)
   const dietFactors = factors.filter(f => ['diet_very_healthy','diet_healthy','diet_average','diet_poor',
     'veg_vegan','veg_vegetarian','veg_pescatarian','veg_flexitarian','veg_omnivore',
-    'upf_minimal','upf_low','upf_moderate','upf_high','upf_very_high'].includes(f.key));
-  const dietTotal = dietFactors.reduce((s,f) => s + f.impact, 0);
-  const dietCap = 7; // max +/- 7 years from all diet factors combined
-  if (Math.abs(dietTotal) > dietCap) {
-    const scale = dietCap / Math.abs(dietTotal);
-    dietFactors.forEach(f => f.impact = Math.round(f.impact * scale * 10) / 10);
+    'upf_minimal','upf_low','upf_moderate','upf_high','upf_very_high',
+    'coffee_moderate','coffee_light','coffee_heavy','coffee_none',
+    'omega3_high','omega3_moderate','omega3_low'].includes(f.key));
+  capCategory(dietFactors, 5);
+
+  // Fitness: exercise + sport + sauna (max +6 / -5)
+  const fitFactors = factors.filter(f => f.key && (f.key.startsWith('exercise_') || f.key.startsWith('sport_') || f.key.startsWith('sauna_')));
+  capCategory(fitFactors, 6);
+
+  // Social: social + relationship + education + income + religion + volunteering + pet (max +8 / -8)
+  const socialFactors = factors.filter(f => ['social_strong','social_moderate','social_few','social_isolated',
+    'rel_married','rel_partnered','rel_single','rel_divorced',
+    'edu_postgrad','edu_bachelors','edu_some_college','edu_high_school','edu_less',
+    'income_high','income_middle','income_low',
+    'religion_weekly','religion_occasional','religion_none',
+    'volunteer_regular','volunteer_occasional','volunteer_none',
+    'pet_dog','pet_cat','pet_other','pet_none'].includes(f.key));
+  capCategory(socialFactors, 8);
+
+  // Mental: stress + stress_mgmt + gratitude (max +4 / -5)
+  const mentalFactors = factors.filter(f => ['stress_low','stress_moderate','stress_high','stress_very_high',
+    'stress_mgmt_yes','stress_mgmt_no','gratitude_high','gratitude_moderate','gratitude_low'].includes(f.key));
+  capCategory(mentalFactors, 4);
+
+  // Body: BMI + hydration + dental (max +3 / -7)
+  const bodyFactors = factors.filter(f => f.key && (f.key.startsWith('bmi_') || f.key.startsWith('hydration_') || f.key.startsWith('dental_')));
+  const bodyTotal = bodyFactors.reduce((s,f) => s + f.impact, 0);
+  if (bodyTotal > 3) capCategory(bodyFactors, 3);
+  else if (bodyTotal < -7) capCategory(bodyFactors, 7);
+
+  // Genetics: family + grandparent (max +4 / -4)
+  const geneticFactors = factors.filter(f => ['family_longevity','family_average','family_early_death','gp_longevity','gp_good','gp_early'].includes(f.key));
+  capCategory(geneticFactors, 4);
+
+  // Environment: air + occupation + nature + screen (max +3 / -5)
+  const envFactors = factors.filter(f => ['air_good','air_moderate','air_poor',
+    'occ_sedentary','occ_moderate','occ_physical','occ_hazardous',
+    'nature_high','nature_moderate','nature_low',
+    'screen_low','screen_moderate','screen_high','screen_very_high'].includes(f.key));
+  const envTotal = envFactors.reduce((s,f) => s + f.impact, 0);
+  if (envTotal > 3) capCategory(envFactors, 3);
+  else if (envTotal < -5) capCategory(envFactors, 5);
+
+  // ===== DIMINISHING RETURNS on positives =====
+  const rawTotal = factors.reduce((sum, f) => sum + f.impact, 0);
+  let totalAdjust;
+  if (rawTotal > 0) {
+    // Diminishing returns: sqrt curve scaled so +18 raw = +18, +36 raw = +13.5 effective
+    // Formula: min(18, sqrt(rawTotal) * 4.25)
+    totalAdjust = Math.min(18, Math.sqrt(rawTotal) * 4.25);
+  } else {
+    // Negatives hit harder (no diminishing returns, just cap)
+    totalAdjust = Math.max(-30, rawTotal);
   }
 
-  // Fitness: exercise + sport (already reduced sport, but still cap)
-  const fitFactors = factors.filter(f => f.key && (f.key.startsWith('exercise_') || f.key.startsWith('sport_')));
-  const fitTotal = fitFactors.reduce((s,f) => s + f.impact, 0);
-  const fitCap = 8;
-  if (Math.abs(fitTotal) > fitCap) {
-    const scale = fitCap / Math.abs(fitTotal);
-    fitFactors.forEach(f => f.impact = Math.round(f.impact * scale * 10) / 10);
-  }
-
-  // Calculate
-  const totalAdjust = factors.reduce((sum, f) => sum + f.impact, 0);
-  const cappedAdjust = Math.max(-30, Math.min(30, totalAdjust));
+  const cappedAdjust = Math.max(-30, Math.min(18, totalAdjust));
   const adjustedLE = baseLE + cappedAdjust;
   const remainingYears = Math.max(0.5, adjustedLE - age);
   if (isNaN(remainingYears) || isNaN(adjustedLE)) {
@@ -1296,8 +1340,8 @@ function calculateResult() {
   const deathDate = new Date(now.getTime() + remainingYears * 365.25 * 24 * 60 * 60 * 1000);
 
   // Life score (0-100)
-  const maxPossible = 40; // realistic best case (capped categories)
-  const minPossible = -60; // realistic worst case
+  const maxPossible = 18; // realistic best case after caps
+  const minPossible = -30; // realistic worst case
   const lifeScore = Math.round(Math.max(0, Math.min(100, ((totalAdjust - minPossible) / (maxPossible - minPossible)) * 100)));
 
   state.result = {
