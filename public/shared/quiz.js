@@ -1488,7 +1488,7 @@ function renderTimeSpentViz() {
   html += '</div>';
 
   // Detail rows
-  html += '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:8px;">';
+  html += '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:8px;">';
   allocations.forEach(al => {
     const years = (remaining * al.fraction).toFixed(1);
     const months = Math.round(remaining * al.fraction * 12);
