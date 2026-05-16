@@ -218,6 +218,27 @@ function updateProfileUI() {
 
 
 // ============================================
+// AUTH GUARD - redirect unauthenticated users
+// ============================================
+function requireAuth() {
+  if (!supaClient) return;
+  const protectedPages = ['/mansion.html', '/groups.html', '/dashboard.html'];
+  const currentPath = window.location.pathname;
+  if (!protectedPages.some(p => currentPath.endsWith(p))) return;
+
+  supaClient.auth.getSession().then(({ data }) => {
+    if (!data?.session?.user) {
+      window.location.href = '/profile.html?redirect=' + encodeURIComponent(currentPath);
+    }
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', requireAuth);
+} else {
+  requireAuth();
+}
+
+// ============================================
 // COOKIE CONSENT
 // ============================================
 
