@@ -1489,6 +1489,8 @@ const DataStore = {
       answers: state.answers,
       result: state.result ? { ...state.result, deathDate: state.result.deathDate.getTime(), dob: state.result.dob.getTime() } : null,
       bucketList: state.bucketList,
+      goals: state.goals,
+      goalTrackers: (function(){ try { return JSON.parse(localStorage.getItem('dc_goal_trackers') || '[]'); } catch(e){ return []; } })(),
       longevityGoal: state.longevityGoal,
       deathyState: getDeathyState(),
       socialCircle: JSON.parse(localStorage.getItem('dc_social_circle') || '[]'),
@@ -1561,6 +1563,8 @@ const DataStore = {
     if (isCloud) {
       state.answers = p.answers || {};
       state.bucketList = p.bucket_list || [];
+      state.goals = p.goals || [];
+      if (p.goal_trackers) { try { localStorage.setItem('dc_goal_trackers', JSON.stringify(p.goal_trackers)); } catch(e){} }
       state.longevityGoal = p.longevity_goal;
       state.userTier = p.tier || 'free';
       if (p.result) {
@@ -1577,6 +1581,8 @@ const DataStore = {
     } else {
       state.answers = p.answers || {};
       state.bucketList = p.bucketList || [];
+      state.goals = p.goals || [];
+      if (p.goalTrackers) { try { localStorage.setItem('dc_goal_trackers', JSON.stringify(p.goalTrackers)); } catch(e){} }
       state.longevityGoal = p.longevityGoal;
       state.userTier = p.tier || state.userTier;
       if (p.result) {
@@ -3749,18 +3755,21 @@ function saveBucket() {
     targetDate: document.getElementById('bucketDate').value,
     done: false
   });
+  DataStore.save().catch(()=>{});
   closeModal();
   showTab('bucketlist');
 }
 
 function toggleBucket(i) {
   state.bucketList[i].done = !state.bucketList[i].done;
+  DataStore.save().catch(()=>{});
   showTab('bucketlist');
   renderDashboard();
 }
 
 function deleteBucket(i) {
   state.bucketList.splice(i, 1);
+  DataStore.save().catch(()=>{});
   showTab('bucketlist');
 }
 
@@ -3799,6 +3808,7 @@ function saveGoal() {
     lifeImpact: parseFloat(document.getElementById('goalImpact').value) || 0,
     progress: 0
   });
+  DataStore.save().catch(()=>{});
   closeModal();
   showTab('goals');
 }
@@ -3806,11 +3816,13 @@ function saveGoal() {
 function updateGoalProgress(i, delta) {
   state.goals[i].progress = Math.max(0, Math.min(100, state.goals[i].progress + delta));
   if (state.goals[i].progress === 100) state.goals[i].status = 'completed';
+  DataStore.save().catch(()=>{});
   showTab('goals');
 }
 
 function deleteGoal(i) {
   state.goals.splice(i, 1);
+  DataStore.save().catch(()=>{});
   showTab('goals');
 }
 
@@ -4067,6 +4079,8 @@ function loadProfile() {
     const profile = JSON.parse(saved);
     state.answers = profile.answers || {};
     state.bucketList = profile.bucketList || profile.bucket_list || [];
+    state.goals = profile.goals || profile.goals_list || [];
+    if (profile.goalTrackers) { try { localStorage.setItem('dc_goal_trackers', JSON.stringify(profile.goalTrackers)); } catch(e){} }
     state.longevityGoal = profile.longevityGoal || profile.longevity_goal || null;
     state.userTier = profile.tier || state.userTier;
     if (profile.result) {
