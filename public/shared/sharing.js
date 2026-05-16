@@ -915,7 +915,7 @@ async function authMagicLink() {
   try {
     const { error } = await supaClient.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin + '/' }
+      options: { emailRedirectTo: window.location.origin + '/profile.html' }
     });
     if (error) throw error;
     showToast('Magic link sent! Check your inbox.');
@@ -927,7 +927,7 @@ async function authGoogle() {
   try {
     const { error } = await supaClient.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/' }
+      options: { redirectTo: window.location.origin + '/profile.html' }
     });
     if (error) throw error;
   } catch(e) { showAuthError(e.message); }
