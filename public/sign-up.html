@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create your Death Clock account</title>
+<meta name="description" content="Create a free Death Clock account to track and sync your life expectancy across devices.">
+<meta name="theme-color" content="#e94560">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data:; font-src 'self' data:;">
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://www.death-clock.app/sign-up">
+<link rel="stylesheet" href="/shared/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .auth-card { max-width: 420px; margin: 64px auto; background: var(--panel, #1a1a2e); border-radius: 16px; padding: 32px; }
+  .auth-card h1 { margin: 0 0 8px; font-size: 1.7rem; }
+  .auth-card p.sub { color: var(--text2, #b8b8d4); margin: 0 0 24px; font-size: 0.95rem; }
+  .auth-card label { display: block; margin: 16px 0 6px; font-size: 0.85rem; color: var(--text2, #b8b8d4); }
+  .auth-card input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border, #2a2a44); background: rgba(0,0,0,0.25); color: inherit; font-size: 1rem; box-sizing: border-box; }
+  .auth-card button { width: 100%; padding: 13px; border-radius: 10px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 16px; }
+  .auth-card button.primary { background: var(--accent, #e94560); color: #fff; }
+  .auth-card button.oauth { background: rgba(255,255,255,0.08); color: inherit; margin-top: 10px; }
+  .auth-card .divider { text-align: center; margin: 20px 0 4px; color: var(--text3, #666680); font-size: 0.8rem; }
+  .auth-card .err { color: #ff6680; font-size: 0.9rem; min-height: 1.1em; margin-top: 8px; }
+  .auth-card .footer { margin-top: 20px; text-align: center; font-size: 0.9rem; }
+  .auth-card .footer a { color: var(--accent, #e94560); }
+  .consent { display: flex; align-items: flex-start; gap: 8px; margin: 18px 0 4px; font-size: 0.85rem; color: var(--text2, #b8b8d4); }
+  .consent input { width: auto; margin-top: 3px; }
+  @media (prefers-color-scheme: light) { .auth-card { background: #fff; box-shadow: 0 8px 28px rgba(0,0,0,0.08); } }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link" style="position:absolute; left:-9999px;">Skip to main content</a>
+<main id="main" class="container">
+  <div class="auth-card" role="region" aria-labelledby="signupTitle">
+    <h1 id="signupTitle">Create your account</h1>
+    <p class="sub">Free. Sync your life expectancy and habit history across devices.</p>
+    <form id="signupForm" autocomplete="on" novalidate>
+      <label for="authEmail">Email</label>
+      <input id="authEmail" type="email" autocomplete="email" required inputmode="email" autocapitalize="off" autocorrect="off">
+      <label for="authPassword">Password (8+ chars)</label>
+      <input id="authPassword" type="password" autocomplete="new-password" required minlength="8">
+      <div class="consent">
+        <input id="consent" type="checkbox" required>
+        <label for="consent">I agree to the <a href="/legal/terms">Terms</a> and <a href="/legal/privacy">Privacy Policy</a>. I am 18 or older.</label>
+      </div>
+      <button class="primary" type="submit" id="btnSignUp">Create account</button>
+    </form>
+    <div class="divider">or continue with</div>
+    <button class="oauth" type="button" id="btnGoogle">Google</button>
+    <button class="oauth" type="button" id="btnApple">Apple</button>
+    <div class="err" id="authErr" role="alert" aria-live="polite"></div>
+    <div class="footer">Have an account? <a href="/sign-in">Sign in</a></div>
+  </div>
+</main>
+<script>
+  const SUPABASE_URL  = 'https://tosyulolriavzgkpwzrn.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvc3l1bG9scmlhdnpna3B3enJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzE0NzIsImV4cCI6MjA5NDM0NzQ3Mn0.LVxiplL8DGVB481AXiEDVGWplfXprMPK_zR8A__6j7M';
+  const CALLBACK_URL  = 'https://www.death-clock.app/sign-in/callback';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const err = document.getElementById('authErr');
+  function show(m) { err.textContent = m || ''; }
+
+  const params = new URLSearchParams(window.location.search);
+  const rawNext = params.get('next') || '';
+  const NEXT = /^\/[a-z0-9/_\-]*$/i.test(rawNext) ? rawNext : '';
+  const nextQs = NEXT ? ('?next=' + encodeURIComponent(NEXT)) : '';
+
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); show('');
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const consent = document.getElementById('consent').checked;
+    if (!email || password.length < 8) return show('Email and 8+ character password required');
+    if (!consent) return show('Please accept the terms to continue');
+    try {
+      const { error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: CALLBACK_URL + nextQs } });
+      if (error) throw error;
+      show('Account created. Check your email to confirm, then sign in.');
+    } catch (e) { show(e.message || 'Sign up failed'); }
+  });
+
+  document.getElementById('btnGoogle').addEventListener('click', async () => {
+    show('');
+    try { const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: CALLBACK_URL + nextQs } }); if (error) throw error; }
+    catch (e) { show(e.message || 'Google sign up failed'); }
+  });
+  document.getElementById('btnApple').addEventListener('click', async () => {
+    show('');
+    try { const { error } = await sb.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: CALLBACK_URL + nextQs } }); if (error) throw error; }
+    catch (e) { show(e.message || 'Apple sign up failed'); }
+  });
+</script>
+</body>
+</html>

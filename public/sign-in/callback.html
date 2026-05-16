@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signing you in…</title>
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data:;">
+<link rel="canonical" href="https://www.death-clock.app/sign-in/callback">
+<link rel="stylesheet" href="/shared/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .pulse { display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:14px; }
+  .pulse .dot { width:14px; height:14px; border-radius:50%; background:var(--accent, #e94560); animation: p 1.2s ease-in-out infinite; }
+  @keyframes p { 0%,100%{opacity:.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.1)} }
+  .err { color: #ff6680; max-width: 420px; text-align: center; }
+</style>
+</head>
+<body>
+<main class="container">
+  <div class="pulse" id="pulse">
+    <div class="dot" aria-hidden="true"></div>
+    <p id="status">Signing you in…</p>
+    <p class="err" id="errMsg" role="alert" aria-live="polite"></p>
+  </div>
+</main>
+<script>
+  // RISK MITIGATION 1: auth-hash detection BEFORE routing.
+  // Magic link returns ?type=magiclink&access_token=...&refresh_token=... in the URL fragment.
+  // We must read the fragment, hand it to Supabase, and only THEN decide where to send the user.
+
+  const SUPABASE_URL  = 'https://tosyulolriavzgkpwzrn.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvc3l1bG9scmlhdnpna3B3enJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzE0NzIsImV4cCI6MjA5NDM0NzQ3Mn0.LVxiplL8DGVB481AXiEDVGWplfXprMPK_zR8A__6j7M';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { detectSessionInUrl: true, flowType: 'pkce', persistSession: true, autoRefreshToken: true } });
+  const status = (m) => { document.getElementById('status').textContent = m; };
+  const fail   = (m) => { document.getElementById('errMsg').textContent = m; document.getElementById('status').textContent = 'Sign in could not complete.'; };
+
+  // RISK MITIGATION 3: history.replaceState so back button does not loop into /sign-in.
+  function navigateClean(dest) {
+    try { history.replaceState(null, '', dest); } catch (_) {}
+    window.location.replace(dest);
+  }
+
+  // RISK MITIGATION 2: explicit destination-by-profile table, no implicit deep-link routing.
+  async function pickDestination() {
+    const params = new URLSearchParams(window.location.search);
+    const rawNext = params.get('next') || '';
+    if (rawNext && /^\/[a-z0-9/_\-]*$/i.test(rawNext)) return rawNext;
+    try {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return '/sign-in';
+      // Profile completeness check: if no DOB recorded yet, send to onboarding
+      // (the localStorage profile blob is the source of truth for v1; cloud sync
+      // is awaiting the dc_user_data migration).
+      try {
+        const local = JSON.parse(localStorage.getItem('deathclock_profile') || '{}');
+        const hasDob = !!(local && local.result && local.result.dob);
+        return hasDob ? '/stats' : '/onboarding';
+      } catch (_) { return '/onboarding'; }
+    } catch (_) { return '/sign-in'; }
+  }
+
+  async function handle() {
+    try {
+      // OAuth code flow (PKCE) lands at ?code=...
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('code')) {
+        const { error } = await sb.auth.exchangeCodeForSession(window.location.href);
+        if (error) throw error;
+      }
+
+      // Magic link hash flow lands at #access_token=...&refresh_token=...&type=magiclink
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        const h = new URLSearchParams(window.location.hash.slice(1));
+        const access_token  = h.get('access_token');
+        const refresh_token = h.get('refresh_token');
+        if (access_token && refresh_token) {
+          const { error } = await sb.auth.setSession({ access_token, refresh_token });
+          if (error) throw error;
+        }
+      }
+
+      // OAuth error returned in hash
+      if (window.location.hash && window.location.hash.includes('error')) {
+        const h = new URLSearchParams(window.location.hash.slice(1));
+        const e = h.get('error_description') || h.get('error') || 'OAuth error';
+        return fail(decodeURIComponent(e));
+      }
+
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return fail('Session did not establish. Please try again.');
+
+      status('Welcome back. Redirecting…');
+      const dest = await pickDestination();
+      setTimeout(() => navigateClean(dest), 350);
+    } catch (e) {
+      fail(e.message || 'Sign in could not complete.');
+    }
+  }
+  handle();
+</script>
+</body>
+</html>
