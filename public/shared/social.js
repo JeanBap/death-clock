@@ -288,7 +288,7 @@ function showCreateGroupModal() {
   showModal('createGroupModal');
 }
 
-function showInviteModal() {
+function showGroupInviteModal() {
   if (!state.currentGroup) { showToast('Select a group first'); return; }
   showModal('inviteModal');
   const modal = document.getElementById('inviteModal');
