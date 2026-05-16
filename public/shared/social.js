@@ -256,10 +256,6 @@ function getGhostEyeStyle() {
   return 'dead';
 }
 
-function generateInviteCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
-
 async function createHauntingGroup() {
   const user = await getSocialSession();
   if (!user) { showToast('Sign in first!'); return; }
