@@ -195,17 +195,18 @@ function showGhostActionMenu(targetId, targetName, targetColor, targetEyes, targ
 
   Object.keys(HAUNT_ACTIONS).forEach(key => {
     const a = HAUNT_ACTIONS[key];
+    const cost = (typeof HAUNT_COSTS !== 'undefined' && HAUNT_COSTS[key]) ? HAUNT_COSTS[key] : 1;
     html += '<button onclick="doHauntAction(\'' + key + '\', \'' + targetId + '\', \'' + escHtml(targetName) + '\')" '
       + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--text); font-size:0.9rem; cursor:pointer; border-radius:8px; transition:background 0.2s;" '
       + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
-      + a.emoji + ' ' + a.name + ' <span style="color:var(--text3); font-size:0.75rem;">+' + a.xp + 'xp</span></button>';
+      + a.emoji + ' ' + a.name + ' <span style="color:var(--text3); font-size:0.75rem;">' + cost + '🪙 +' + a.xp + 'xp</span></button>';
   });
 
   html += '<div style="border-top:1px solid var(--border); margin:4px 0;"></div>';
   html += '<button onclick="startGhostBattle(\'' + targetId + '\', \'' + escHtml(targetName) + '\')" '
     + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--accent); font-size:0.9rem; cursor:pointer; border-radius:8px; font-weight:700; transition:background 0.2s;" '
     + 'onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'">'
-    + '⚔️ Challenge to Battle! <span style="color:var(--text3); font-size:0.75rem;">+25xp</span></button>';
+    + '⚔️ Challenge to Battle! <span style="color:var(--text3); font-size:0.75rem;">3🪙 +25xp</span></button>';
 
   html += '<button onclick="showCreateChallengeModal(\'' + targetId + '\', \'' + escHtml(targetName) + '\')" '
     + 'style="display:block; width:100%; text-align:left; padding:8px 12px; background:none; border:none; color:var(--gold); font-size:0.9rem; cursor:pointer; border-radius:8px; font-weight:700; transition:background 0.2s;" '
@@ -230,6 +231,16 @@ async function doHauntAction(actionKey, targetId, targetName) {
   const user = await getSocialSession();
   if (!user || !state.currentGroup) { showToast('Sign in and join a group first!'); return; }
 
+  // Check + deduct coins
+  if (typeof spendHauntCoins === 'function') {
+    const spent = await spendHauntCoins(actionKey);
+    if (!spent) {
+      showToast('🪙 Not enough coins! Get your daily free coins or buy more.');
+      if (typeof showBuyCoinsModal === 'function') showBuyCoinsModal();
+      return;
+    }
+  }
+
   const action = HAUNT_ACTIONS[actionKey];
   const senderName = state.socialProfile?.display_name || state.socialProfile?.username || 'A ghost';
   const msg = action.messages[Math.floor(Math.random() * action.messages.length)]
@@ -247,6 +258,9 @@ async function doHauntAction(actionKey, targetId, targetName) {
       xp_earned: action.xp
     });
   } catch(e) { console.error('Haunt save error:', e); }
+
+  // Accumulate XP
+  if (typeof addXP === 'function') addXP(action.xp);
 
   // Show animation
   playHauntAnimation(action.animation, action.emoji);
@@ -272,6 +286,16 @@ async function startGhostBattle(targetId, targetName) {
 
   const user = await getSocialSession();
   if (!user || !state.currentGroup) { showToast('Sign in first!'); return; }
+
+  // Check + deduct coins
+  if (typeof spendBattleCoins === 'function') {
+    const spent = await spendBattleCoins();
+    if (!spent) {
+      showToast('🪙 Not enough coins for battle! Need 3 coins.');
+      if (typeof showBuyCoinsModal === 'function') showBuyCoinsModal();
+      return;
+    }
+  }
 
   // Fetch both profiles
   const { data: profiles } = await socialClient.from('dc_profiles')
@@ -300,6 +324,9 @@ async function startGhostBattle(targetId, targetName) {
       xp_earned: iWon ? 25 : 10
     });
   } catch(e) { console.error('Battle save error:', e); }
+
+  // Accumulate XP
+  if (typeof addXP === 'function') addXP(iWon ? 25 : 10);
 
   showBattleModal(attacker, defender, battle);
 }

@@ -33,6 +33,17 @@ const DARE_TEMPLATES = [
 ];
 
 const CHALLENGE_FEE_RATE = 0.20; // 20% rake
+const DAILY_FREE_COINS = 15;
+
+// Coin costs per haunt action
+const HAUNT_COSTS = {
+  boo: 1,
+  possess: 2,
+  curse: 2,
+  tickle: 1,
+  haunt: 3
+};
+const BATTLE_COST = 3;
 
 // ===== COIN BALANCE =====
 
@@ -48,8 +59,63 @@ async function ensureCoinRow() {
   if (!user) return;
   const { data } = await socialClient.from('dc_ghost_coins').select('user_id').eq('user_id', user.id).single();
   if (!data) {
-    await socialClient.from('dc_ghost_coins').insert({ user_id: user.id, balance: 0 });
+    await socialClient.from('dc_ghost_coins').insert({ user_id: user.id, balance: DAILY_FREE_COINS, last_daily_claim: new Date().toISOString().slice(0,10) });
   }
+}
+
+// ===== DAILY FREE COINS =====
+
+async function claimDailyCoins() {
+  const user = await getSocialSession();
+  if (!user) return false;
+  await ensureCoinRow();
+  const { data } = await socialClient.from('dc_ghost_coins').select('balance, last_daily_claim').eq('user_id', user.id).single();
+  const today = new Date().toISOString().slice(0, 10);
+  if (data?.last_daily_claim === today) return false; // Already claimed
+  const newBal = (data?.balance || 0) + DAILY_FREE_COINS;
+  await socialClient.from('dc_ghost_coins').update({
+    balance: newBal,
+    last_daily_claim: today,
+    updated_at: new Date().toISOString()
+  }).eq('user_id', user.id);
+  updateCoinDisplay(newBal);
+  return true;
+}
+
+async function checkAndClaimDaily() {
+  const claimed = await claimDailyCoins();
+  if (claimed) {
+    showToast('🪙 +' + DAILY_FREE_COINS + ' daily ghost coins! Haunt wisely.');
+  }
+}
+
+// ===== HAUNT COIN CHECK =====
+
+async function canAffordHaunt(actionKey) {
+  const cost = HAUNT_COSTS[actionKey] || 1;
+  const bal = await getMyCoins();
+  return bal >= cost;
+}
+
+async function spendHauntCoins(actionKey) {
+  const cost = HAUNT_COSTS[actionKey] || 1;
+  return await deductCoins(cost);
+}
+
+async function spendBattleCoins() {
+  return await deductCoins(BATTLE_COST);
+}
+
+// ===== XP ACCUMULATION =====
+
+async function addXP(amount) {
+  const user = await getSocialSession();
+  if (!user) return;
+  await ensureCoinRow();
+  const { data } = await socialClient.from('dc_ghost_coins').select('total_xp').eq('user_id', user.id).single();
+  const newXP = (data?.total_xp || 0) + amount;
+  await socialClient.from('dc_ghost_coins').update({ total_xp: newXP, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+  return newXP;
 }
 
 async function addCoins(amount, reason) {
@@ -79,11 +145,17 @@ async function deductCoins(amount) {
   return true;
 }
 
-function updateCoinDisplay(balance) {
-  const el = document.getElementById('coinBalance');
+async function updateCoinDisplay(balance) {
+  if (balance === undefined) {
+    balance = await getMyCoins();
+  }
+  const el = document.getElementById('coinCount');
   if (el) el.textContent = balance;
-  const el2 = document.getElementById('coinBalanceNav');
-  if (el2) el2.textContent = '🪙 ' + balance;
+  // Also check daily claim on display update
+  if (typeof checkAndClaimDaily === 'function' && !window._dailyChecked) {
+    window._dailyChecked = true;
+    checkAndClaimDaily();
+  }
 }
 
 // ===== BUY COINS MODAL =====
