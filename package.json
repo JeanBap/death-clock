@@ -1,0 +1,23 @@
+{
+  "name": "death-clock",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium webkit firefox",
+    "test:visual": "playwright test --grep @visual",
+    "test:a11y": "playwright test --grep @a11y",
+    "test:links": "linkinator https://www.death-clock.app/sitemap.xml --recurse --skip 'twitter.com|x.com'",
+    "lint:html": "echo 'placeholder'",
+    "lighthouse": "lhci autorun"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@lhci/cli": "^0.14.0",
+    "@playwright/test": "^1.49.0",
+    "linkinator": "^6.1.2",
+    "vitest": "^2.1.0"
+  }
+}

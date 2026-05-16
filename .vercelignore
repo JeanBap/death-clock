@@ -1,0 +1,9 @@
+.github/
+tests/
+playwright.config.ts
+vitest.config.js
+package.json
+node_modules/
+playwright-report/
+test-results/
+.lighthouseci/

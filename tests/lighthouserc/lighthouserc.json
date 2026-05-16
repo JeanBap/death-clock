@@ -1,0 +1,26 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://www.death-clock.app/",
+        "https://www.death-clock.app/about",
+        "https://www.death-clock.app/pricing",
+        "https://www.death-clock.app/blog/",
+        "https://www.death-clock.app/legal/privacy",
+        "https://www.death-clock.app/legal/terms",
+        "https://www.death-clock.app/legal/cookies"
+      ],
+      "numberOfRuns": 1,
+      "settings": { "preset": "desktop" }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance":     ["error", { "minScore": 0.90 }],
+        "categories:accessibility":   ["error", { "minScore": 0.95 }],
+        "categories:best-practices":  ["error", { "minScore": 0.95 }],
+        "categories:seo":             ["error", { "minScore": 0.95 }]
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}

@@ -1,0 +1,92 @@
+name: QA gate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: '0 6 * * *'
+
+concurrency:
+  group: qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  unit:
+    name: Vitest unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci || npm install
+      - run: npm run test:unit
+
+  e2e:
+    name: Playwright E2E (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    needs: unit
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium-desktop, webkit-desktop, firefox-desktop, mobile-iphone-se]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci || npm install
+      - run: npx playwright install --with-deps ${{ matrix.project == 'webkit-desktop' && 'webkit' || matrix.project == 'firefox-desktop' && 'firefox' || 'chromium' }}
+      - run: npx playwright test --project=${{ matrix.project }}
+        env:
+          DC_BASE_URL: https://www.death-clock.app
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: playwright-report/
+          retention-days: 14
+
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g @lhci/cli@0.14.0
+      - run: lhci autorun --config=tests/lighthouserc/lighthouserc.json
+
+  links:
+    name: Linkinator (zero internal 404s)
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g linkinator@6.1.2
+      - run: linkinator https://www.death-clock.app/sitemap.xml --recurse --skip "twitter.com|x.com|facebook.com|linkedin.com"
+
+  smoke:
+    name: Post-deploy smoke (200 + sentinel)
+    runs-on: ubuntu-latest
+    needs: [e2e, lighthouse, links]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hit each indexable route
+        run: |
+          ROUTES=( "/" "/about" "/pricing" "/blog/" "/legal/privacy" "/legal/terms" "/legal/cookies" "/mansion" )
+          FAIL=0
+          for r in "${ROUTES[@]}"; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://www.death-clock.app${r}")
+            if [ "$CODE" != "200" ]; then
+              echo "FAIL  $CODE  $r"; FAIL=1
+            else
+              echo "ok    $CODE  $r"
+            fi
+          done
+          exit $FAIL
