@@ -1,0 +1,64 @@
+name: CI Gate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate JS syntax
+        run: |
+          echo "Checking JavaScript syntax..."
+          errors=0
+          for f in public/shared/*.js; do
+            if ! node -c "$f" 2>/dev/null; then
+              echo "FAIL: $f"
+              node -c "$f"
+              errors=$((errors + 1))
+            else
+              echo "OK: $f"
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "$errors file(s) failed syntax check"
+            exit 1
+          fi
+          echo "All JS files pass syntax check"
+
+      - name: Check HTML structure
+        run: |
+          echo "Checking HTML files have required meta..."
+          errors=0
+          for f in public/*.html; do
+            if ! grep -q 'viewport' "$f"; then
+              echo "FAIL: $f missing viewport meta"
+              errors=$((errors + 1))
+            fi
+            if ! grep -q '<title>' "$f"; then
+              echo "FAIL: $f missing title"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "$errors issue(s) found"
+            exit 1
+          fi
+          echo "All HTML files pass structure check"
+
+      - name: Check no console.log in production
+        run: |
+          echo "Checking for debug statements..."
+          if grep -rn 'console\.log' public/shared/*.js | grep -v '// debug' | grep -v 'catch'; then
+            echo "WARNING: console.log found (non-blocking)"
+          fi
+          echo "Check complete"
