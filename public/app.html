@@ -25,6 +25,7 @@
 <meta name="twitter:description" content="I just found out when I'm going to die. Calculate yours.">
 <meta name="twitter:image" content="https://death-clock.app/og-image.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/shared/calculator-quips.js" defer></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -2707,6 +2708,7 @@ function selectAnswer(key, value) {
   state.answers[key] = value;
   renderQuestion();
   showMotivation(key, value);
+  try { if (window.dcQuip && typeof window.dcQuip.maybeFire === 'function') window.dcQuip.maybeFire(key, value); } catch (_) {}
 }
 
 function toggleCondition(cond) {
