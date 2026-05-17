@@ -40,13 +40,25 @@ function renderHubStats() {
   const coins = getCoins();
   const todayDone = getTodayCompletedCount();
   const todayTotal = getDailyTasks().length;
-  const activeChallenges = getChallenges().filter(c => c.status === 'active').length;
+  const pctToday = todayTotal > 0 ? Math.round((todayDone / todayTotal) * 100) : 0;
   const mult = getStreakMultiplier(streak);
   const multClass = mult >= 3 ? 'mult-3x' : mult >= 2 ? 'mult-2x' : mult >= 1.5 ? 'mult-1_5x' : 'mult-1x';
+  // SVG ring circumference for r=35
+  const circ = 2 * Math.PI * 35;
+  const offset = circ - (pctToday / 100) * circ;
 
   row.innerHTML = `
-    <div class="stat-card"><div class="num" style="color:var(--accent);">${daysLeft.toLocaleString()}</div><div class="lbl">Days left</div></div>
-    <div class="stat-card"><div class="num" style="color:var(--green);">+${daysAdded}</div><div class="lbl">Days added</div></div>
+    <div class="stat-card" style="display:flex;align-items:center;gap:12px;text-align:left;grid-column:span 1;">
+      <div class="progress-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle class="ring-bg" cx="40" cy="40" r="35"/>
+          <circle class="ring-fill" cx="40" cy="40" r="35" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+        </svg>
+        <div class="ring-text">${todayDone}/${todayTotal}<div class="ring-label">today</div></div>
+      </div>
+      <div><div class="num" style="color:var(--accent);font-size:1.4rem;">${daysLeft.toLocaleString()}</div><div class="lbl">Days left</div></div>
+    </div>
+    <div class="stat-card"><div class="num" style="color:var(--green);">+${daysAdded.toFixed(1)}</div><div class="lbl">Days added</div></div>
     <div class="stat-card"><div class="num"><span class="streak-fire">${streak}</span></div><div class="lbl">Streak <span class="combo-badge ${multClass}">${mult}x</span></div></div>
     <div class="stat-card"><div class="num" style="color:var(--gold);">${coins}</div><div class="lbl">Coins</div></div>
   `;
@@ -233,13 +245,25 @@ function completeTask(taskId) {
     addCoins(comboBonus);
   }
 
-  // Animate
+  // Animate the task item
+  const el = document.querySelector('[data-task="' + taskId + '"]');
+  if (el) {
+    el.classList.add('completing');
+    setTimeout(() => el.classList.add('done'), 400);
+  }
+
+  // Check if all done - confetti!
+  const allDone = tasks.every(t => t.done);
+
   showToast('+' + daysReward.toFixed(1) + ' days | +' + coinReward + ' coins' + (comboBonus > 0 ? ' | COMBO +' + comboBonus : ''));
 
   // Re-render
-  renderHubStats();
-  const c = document.getElementById('hubContent');
-  if (c && hubTab === 'today') renderTodayTab(c);
+  setTimeout(() => {
+    renderHubStats();
+    const c = document.getElementById('hubContent');
+    if (c && hubTab === 'today') renderTodayTab(c);
+    if (allDone) launchConfetti();
+  }, 500);
 }
 
 function getTodayCompletedCount() {
@@ -264,18 +288,38 @@ function renderTodayTab(c) {
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   const cats = new Set(tasks.filter(t => t.done).map(t => t.cat));
   const comboActive = cats.size >= 3;
+  const streak = getStreakCount();
+  const isFirstVisit = !localStorage.getItem('dc_hub_visited');
+
+  // Mark first visit
+  if (isFirstVisit) localStorage.setItem('dc_hub_visited', '1');
+
+  let onboardHtml = '';
+  if (isFirstVisit || (streak <= 1 && done === 0)) {
+    onboardHtml = `
+      <div class="onboard-card">
+        <h3>Welcome to your Action Hub</h3>
+        <p>Complete daily tasks to add days to your life. Each task is based on your health profile. Tap a task to mark it done and earn coins.</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <span class="combo-badge mult-1_5x">7-day streak = 1.5x coins</span>
+          <span class="combo-badge mult-2x">30 days = 2x</span>
+          <span class="combo-badge mult-3x">90 days = 3x</span>
+        </div>
+      </div>`;
+  }
 
   c.innerHTML = `
+    ${onboardHtml}
     <div class="hub-panel" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <h3>Today's Tasks <span style="font-size:0.75rem;color:var(--text3);font-weight:400;">${done}/${total} done</span></h3>
-        ${comboActive ? '<span class="combo-badge mult-2x" style="font-size:0.75rem;">COMBO ACTIVE</span>' : ''}
+        <h3>Today's Tasks <span style="font-size:0.8rem;color:var(--text3);font-weight:400;">${done}/${total} done</span></h3>
+        ${comboActive ? '<span class="combo-badge mult-2x" style="font-size:0.8rem;">COMBO ACTIVE</span>' : ''}
       </div>
       <div class="progress-bar-sm" style="margin-bottom:16px;">
         <div class="fill" style="width:${pct}%;background:${pct === 100 ? 'var(--green)' : 'var(--accent)'};"></div>
       </div>
       ${tasks.map(t => `
-        <div class="task-item ${t.done ? 'done' : ''}" onclick="${t.done ? '' : 'completeTask(\'' + t.id + '\')'}">
+        <div class="task-item ${t.done ? 'done' : ''}" data-task="${t.id}" tabindex="0" role="button" aria-label="${t.done ? 'Completed: ' : 'Complete: '}${escHtml(t.name)}" onclick="${t.done ? '' : 'completeTask(\'' + t.id + '\')'}" onkeydown="if(event.key==='Enter'&&!this.classList.contains('done'))completeTask('${t.id}')">
           <div class="task-check">${t.done ? '&#10003;' : ''}</div>
           <div style="flex:1;min-width:0;">
             <div class="task-name" style="font-size:0.85rem;">${escHtml(t.name)}</div>
@@ -284,7 +328,12 @@ function renderTodayTab(c) {
           <div class="task-days">+${t.days.toFixed(1)} days</div>
         </div>
       `).join('')}
-      ${done === total && total > 0 ? '<div style="text-align:center;margin-top:16px;padding:16px;background:rgba(78,204,163,0.1);border-radius:8px;"><div style="font-size:1.5rem;margin-bottom:4px;">&#127881;</div><strong style="color:var(--green);">All tasks complete!</strong><p style="color:var(--text3);font-size:0.8rem;margin-top:4px;">Come back tomorrow for new tasks. Your streak lives on.</p></div>' : ''}
+      ${done === total && total > 0 ? `<div id="celebrationBox" style="text-align:center;margin-top:16px;padding:24px;background:linear-gradient(135deg,rgba(78,204,163,0.1),rgba(240,192,64,0.1));border-radius:12px;border:1px solid var(--green);">
+        <div class="confetti-burst" id="confettiEmoji">&#127881;&#127775;&#127942;</div>
+        <strong style="color:var(--green);font-size:1.1rem;">All tasks complete!</strong>
+        <p style="color:var(--text2);font-size:0.85rem;margin-top:8px;line-height:1.5;">Come back tomorrow for new tasks. Your streak lives on.</p>
+        <button class="btn-green btn-sm" style="margin-top:12px;" onclick="shareWeeklyReport()">Brag to friends</button>
+      </div>` : ''}
     </div>
     <div class="hub-grid">
       <div class="hub-panel">
@@ -294,11 +343,33 @@ function renderTodayTab(c) {
       <div class="hub-panel">
         <h3>Quick Actions</h3>
         <button class="btn-primary btn-sm" style="width:100%;margin-bottom:8px;" onclick="switchHubTab('challenges')">Challenge a Friend</button>
-        <button class="btn-secondary btn-sm" style="width:100%;margin-bottom:8px;" onclick="switchHubTab('health')">Connect Health Tracker</button>
-        <button class="btn-secondary btn-sm" style="width:100%;" onclick="shareWeeklyReport()">Share My Progress</button>
+        <button class="btn-secondary btn-sm" style="width:100%;margin-bottom:8px;" onclick="switchHubTab('health')">Log Health Data</button>
+        <button class="btn-secondary btn-sm" style="width:100%;" onclick="shareWeeklyReport()">Share Progress</button>
       </div>
     </div>
   `;
+}
+
+// Confetti launcher
+function launchConfetti() {
+  const emojis = ['&#127881;','&#11088;','&#127942;','&#128170;','&#127775;','&#129321;'];
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;';
+  document.body.appendChild(container);
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.innerHTML = emojis[i % emojis.length];
+    p.style.cssText = 'position:absolute;font-size:' + (16 + Math.random() * 16) + 'px;left:' + Math.random() * 100 + '%;top:-20px;animation:confettiFall ' + (1.5 + Math.random() * 2) + 's ease-out forwards;animation-delay:' + (Math.random() * 0.5) + 's;';
+    container.appendChild(p);
+  }
+  // Add the CSS animation inline
+  if (!document.getElementById('confettiStyle')) {
+    const s = document.createElement('style');
+    s.id = 'confettiStyle';
+    s.textContent = '@keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(' + (180 + Math.random() * 360) + 'deg)}}';
+    document.head.appendChild(s);
+  }
+  setTimeout(() => container.remove(), 4000);
 }
 
 // ============================================
