@@ -1628,7 +1628,7 @@ function renderResult() {
           <span style="font-size:0.9rem; font-weight:700; color:var(--green);">Start My Plan</span>
           <span style="font-size:0.7rem; color:var(--text3);">Daily habits to push back your death date</span>
         </button>
-        <button onclick="showPage('mansion');" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 12px; background:#ff6b6b15; border:2px solid #ff6b6b; border-radius:12px; cursor:pointer; transition:transform 0.15s;">
+        <button onclick="challengeAFriend()" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 12px; background:#ff6b6b15; border:2px solid #ff6b6b; border-radius:12px; cursor:pointer; transition:transform 0.15s;">
           <span style="font-size:1.5rem;">⚔️</span>
           <span style="font-size:0.9rem; font-weight:700; color:#ff6b6b;">Challenge a Friend</span>
           <span style="font-size:0.7rem; color:var(--text3);">Compare death dates. Loser buys dinner.</span>
@@ -1756,7 +1756,7 @@ function renderResult() {
       <p style="color:var(--text2); font-size:0.85rem; margin-bottom:12px;">Ready to fight back?</p>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn-green" onclick="showPage('dashboard'); setTimeout(()=>showTab('myplan'),100);" style="font-size:1rem; padding:12px 24px;">🎯 My Plan</button>
-        <button class="btn-primary" onclick="showPage('mansion');" style="font-size:1rem; padding:12px 24px;">⚔️ Challenge Friends</button>
+        <button class="btn-primary" onclick="challengeAFriend()" style="font-size:1rem; padding:12px 24px;">⚔️ Challenge Friends</button>
         <button class="btn-secondary" onclick="saveProfile()">💾 Save Profile</button>
       </div>
     </div>

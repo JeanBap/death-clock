@@ -53,6 +53,44 @@ function shareResult(platform) {
   if (links[platform]) window.open(links[platform], '_blank', 'width=600,height=400');
 }
 
+function challengeAFriend() {
+  let challengeText = 'I just took the Death Clock quiz. Think you\'ll outlive me? Take it and find out: https://death-clock.app';
+  if (state.result) {
+    const r = state.result;
+    challengeText = 'I\'m dying on ' + r.deathDate.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) +
+      '. That gives me ' + r.remainingYears + ' years. Think you can beat me? Take the Death Clock quiz: https://death-clock.app';
+  }
+  const encoded = encodeURIComponent(challengeText);
+  const url = encodeURIComponent('https://death-clock.app');
+
+  // Show challenge modal
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  if (modal && content) {
+    modal.classList.remove('hidden');
+    content.innerHTML = `
+      <h3 style="text-align:center; margin-bottom:4px;">&#9876; Challenge a Friend</h3>
+      <p style="text-align:center; color:var(--text2); font-size:0.85rem; margin-bottom:16px;">Who dies first? Send this challenge.</p>
+      <div style="background:var(--bg); padding:12px; border-radius:8px; margin-bottom:16px; font-size:0.85rem; color:var(--text2);">${challengeText.replace(/'/g,'&#39;')}</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button onclick="window.open('https://wa.me/?text=${encoded}','_blank','width=600,height=400')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:12px; background:#25D366; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:0.9rem;">WhatsApp</button>
+        <button onclick="window.open('https://twitter.com/intent/tweet?text=${encoded}','_blank','width=600,height=400')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:12px; background:#1DA1F2; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:0.9rem;">Twitter/X</button>
+        <button onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${encoded}','_blank','width=600,height=400')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:12px; background:#4267B2; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:0.9rem;">Facebook</button>
+        <button id="challengeCopyBtn" onclick="navigator.clipboard.writeText(decodeURIComponent('${encoded}')).then(()=>{document.getElementById('challengeCopyBtn').textContent='Copied!';setTimeout(()=>document.getElementById('challengeCopyBtn').textContent='Copy Text',2000)})" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:12px; background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:0.9rem;">Copy Text</button>
+      </div>
+      <button onclick="closeModal()" style="display:block; margin:16px auto 0; background:none; border:none; color:var(--text3); cursor:pointer; font-size:0.85rem;">Close</button>
+    `;
+  } else {
+    // Fallback: native share or copy
+    if (navigator.share) {
+      navigator.share({ title: 'Death Clock Challenge', text: challengeText, url: 'https://death-clock.app' });
+    } else {
+      navigator.clipboard.writeText(challengeText);
+      if (typeof showToast === 'function') showToast('Challenge copied to clipboard!');
+    }
+  }
+}
+
 function generateInviteCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = 'DC-';
