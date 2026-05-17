@@ -594,3 +594,95 @@ function loadProfile() {
   } catch(e) { return false; }
 }
 
+// ============================================
+// EXIT-INTENT POPUP
+// ============================================
+(function() {
+  let exitShown = false;
+  function showExitIntent() {
+    if (exitShown) return;
+    if (localStorage.getItem('dc_exit_dismissed')) return;
+    if (state.result) return; // Don't show if they already have results
+    exitShown = true;
+    const modal = document.getElementById('modal');
+    const content = document.getElementById('modalContent');
+    if (!modal || !content) return;
+    modal.classList.remove('hidden');
+    content.innerHTML = '<div style="text-align:center; padding:24px;">' +
+      '<div style="font-size:3rem; margin-bottom:12px;">💀</div>' +
+      '<h3 style="margin-bottom:8px;">Wait - Don\'t you want to know?</h3>' +
+      '<p style="color:var(--text2); margin-bottom:16px;">Get your personalised death date + a free longevity plan sent to your inbox.</p>' +
+      '<input type="email" id="exitEmail" placeholder="your@email.com" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:1rem;">' +
+      '<button class="btn-primary" style="width:100%; padding:14px;" onclick="captureExitEmail()">Send Me My Results</button>' +
+      '<p style="margin-top:12px; font-size:0.75rem; color:var(--text3); cursor:pointer;" onclick="closeModal(); localStorage.setItem(\'dc_exit_dismissed\',\'1\');">No thanks, I prefer ignorance</p>' +
+      '</div>';
+  }
+  document.addEventListener('mouseout', function(e) {
+    if (e.clientY < 5 && e.relatedTarget == null) showExitIntent();
+  });
+})();
+
+function captureExitEmail() {
+  const email = document.getElementById('exitEmail')?.value.trim();
+  if (!email || !email.includes('@')) { showToast('Enter a valid email'); return; }
+  localStorage.setItem('dc_exit_email', email);
+  localStorage.setItem('dc_exit_dismissed', '1');
+  if (supaClient) {
+    supaClient.from('dc_email_captures').insert({ email, source: 'exit_intent', created_at: new Date().toISOString() }).then(() => {});
+  }
+  closeModal();
+  showToast('We\'ll send your results when ready!');
+}
+
+// ============================================
+// RETAKE QUIZ PROMPT (30 days)
+// ============================================
+function checkRetakePrompt() {
+  if (!state.result) return;
+  const lastCalc = localStorage.getItem('dc_last_calc_date');
+  if (!lastCalc) { localStorage.setItem('dc_last_calc_date', new Date().toISOString()); return; }
+  const daysSince = (Date.now() - new Date(lastCalc).getTime()) / (1000*60*60*24);
+  if (daysSince >= 30 && !sessionStorage.getItem('dc_retake_shown')) {
+    sessionStorage.setItem('dc_retake_shown', '1');
+    const banner = document.getElementById('welcomeBackBanner');
+    if (banner) {
+      banner.style.display = 'block';
+      banner.style.color = 'var(--gold)';
+      banner.innerHTML = '🔄 It\'s been ' + Math.floor(daysSince) + ' days since your last calculation. Your habits may have changed - <a href="/#quiz" style="color:var(--green); font-weight:700;">retake the quiz</a> to see if your death date moved!';
+    }
+  }
+}
+
+// ============================================
+// STREAK / RETURNING USER WELCOME
+// ============================================
+function updateStreak() {
+  const today = new Date().toDateString();
+  const lastVisit = localStorage.getItem('dc_last_visit');
+  let streak = parseInt(localStorage.getItem('dc_visit_streak') || '0');
+  if (lastVisit !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    streak = (lastVisit === yesterday) ? streak + 1 : 1;
+    localStorage.setItem('dc_visit_streak', streak.toString());
+    localStorage.setItem('dc_last_visit', today);
+  }
+  return streak;
+}
+
+function showStreakWelcome() {
+  if (!state.result) return;
+  const streak = updateStreak();
+  const banner = document.getElementById('welcomeBackBanner');
+  if (!banner) return;
+  const goal = state.longevityGoal;
+  const daysAdded = goal ? goal.totalDaysAdded || 0 : 0;
+  if (streak > 1 || daysAdded > 0) {
+    banner.style.display = 'block';
+    let msg = '👋 Welcome back!';
+    if (streak > 1) msg += ' 🔥 ' + streak + '-day streak!';
+    if (daysAdded > 0) msg += ' You\'ve added <strong style="color:var(--green);">' + daysAdded + ' days</strong> to your life so far.';
+    banner.innerHTML = msg;
+  }
+  checkRetakePrompt();
+}
+

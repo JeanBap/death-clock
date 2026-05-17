@@ -22,6 +22,12 @@
 <meta name="twitter:description" content="The story behind Death Clock. Built on 53M+ participants and 1,200+ studies.">
 <meta name="twitter:image" content="https://death-clock.app/og-image.png">
 <link rel="stylesheet" href="/shared/styles.css">
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(reg){reg.unregister();});});
+  if(navigator.serviceWorker.controller){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k);});});}
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>

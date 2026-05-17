@@ -22,6 +22,12 @@
 <meta name="twitter:description" content="Unlock all habits, cloud sync, and advanced longevity insights.">
 <meta name="twitter:image" content="https://death-clock.app/og-image.png">
 <link rel="stylesheet" href="/shared/styles.css">
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(reg){reg.unregister();});});
+  if(navigator.serviceWorker.controller){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k);});});}
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
@@ -66,6 +72,10 @@
   <div class="container">
     <h2>Unlock Your Full Lifespan Potential</h2>
     <p class="pricing-sub">Choose a plan that fits your journey</p>
+    <div style="display:flex; justify-content:center; margin-bottom:24px; gap:0;">
+      <button id="toggleMonthly" class="btn-primary btn-sm" style="border-radius:var(--radius) 0 0 var(--radius); opacity:1;" onclick="setPricingPeriod('monthly')">Monthly</button>
+      <button id="toggleAnnual" class="btn-secondary btn-sm" style="border-radius:0 var(--radius) var(--radius) 0; position:relative;" onclick="setPricingPeriod('annual')">Annual <span style="font-size:0.7rem; color:var(--green); font-weight:700;">Save 17%</span></button>
+    </div>
     <div class="pricing-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
       <div class="price-card">
         <div class="price-tier">Free</div>
@@ -81,10 +91,11 @@
         </div>
         <button class="btn-secondary price-cta" onclick="showPage('quiz')">Get Started</button>
       </div>
-      <div class="price-card">
+      <div class="price-card" style="border-color:var(--green); position:relative;">
+        <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--green); color:#000; font-size:0.7rem; font-weight:800; padding:4px 12px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px;">Most Popular</div>
         <div class="price-tier">Premium</div>
-        <div class="price-amount">$4.99</div>
-        <div class="price-period">/month</div>
+        <div class="price-amount" id="premiumPrice">$4.99</div>
+        <div class="price-period" id="premiumPeriod">/month</div>
         <div class="price-features">
           <div class="price-feature">Everything in Free</div>
           <div class="price-feature">Unlimited bucket list &amp; goals</div>
@@ -93,12 +104,12 @@
           <div class="price-feature">"Years Added" progress tracker</div>
           <div class="price-feature">Clinical test recommendations</div>
         </div>
-        <button class="btn-primary price-cta">Subscribe $4.99/mo</button>
+        <button class="btn-primary price-cta" id="premiumCta">Subscribe $4.99/mo</button>
       </div>
       <div class="price-card featured">
         <div class="price-tier">Pro Plus</div>
-        <div class="price-amount">$29.99</div>
-        <div class="price-period">/month</div>
+        <div class="price-amount" id="proPrice">$29.99</div>
+        <div class="price-period" id="proPeriod">/month</div>
         <div class="price-features">
           <div class="price-feature">Everything in Premium</div>
           <div class="price-feature">Dynamic biological age tracking</div>
@@ -109,7 +120,7 @@
           <div class="price-feature">Advanced analytics dashboard</div>
           <div class="price-feature">Family Plan (parents/kids)</div>
         </div>
-        <button class="btn-gold price-cta">Subscribe $29.99/mo</button>
+        <button class="btn-gold price-cta" id="proCta">Subscribe $29.99/mo</button>
       </div>
       <div class="price-card">
         <div class="price-tier">Lifetime</div>
@@ -308,6 +319,13 @@ function updateClinicStates() {
   }
 }
 
+function markFieldError(id, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.borderColor = show ? 'var(--accent)' : 'var(--border)';
+  el.style.boxShadow = show ? '0 0 0 2px rgba(233,69,96,0.2)' : 'none';
+}
+
 async function submitClinicQuote() {
   const name = document.getElementById('clinicName')?.value.trim();
   const email = document.getElementById('clinicEmail')?.value.trim();
@@ -318,12 +336,24 @@ async function submitClinicQuote() {
   const interest = document.getElementById('clinicInterest')?.value;
   const budget = document.getElementById('clinicBudget')?.value;
 
-  if (!name || !email || !country) {
-    showToast('Please fill in name, email, and country'); return;
-  }
-  if (!email.includes('@')) { showToast('Please enter a valid email'); return; }
+  // Clear previous errors
+  ['clinicName','clinicEmail','clinicCountry','clinicInterest','clinicBudget'].forEach(id => markFieldError(id, false));
+  let errors = [];
+  if (!name) { markFieldError('clinicName', true); errors.push('name'); }
+  if (!email || !email.includes('@') || !email.includes('.')) { markFieldError('clinicEmail', true); errors.push('email'); }
+  if (!country) { markFieldError('clinicCountry', true); errors.push('country'); }
+  if (!interest) { markFieldError('clinicInterest', true); errors.push('interest'); }
+  if (!budget) { markFieldError('clinicBudget', true); errors.push('budget'); }
+  if (errors.length) { showToast('Please fill in: ' + errors.join(', ')); return; }
 
-  const data = { name, email, country, state: stateVal, city, preferred_country: preferredCountry, interest, budget, life_score: state.result?.lifeScore || null, remaining_years: state.result?.remainingYears || null, submitted_at: new Date().toISOString() };
+  // Show loading
+  const btn = document.querySelector('#clinicQuoteForm .btn-gold');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  btn.style.opacity = '0.6';
+
+  const data = { name, email, country, state_region: stateVal, city, preferred_clinic_country: preferredCountry, interest, budget, life_score: state.result?.lifeScore || null, remaining_years: state.result?.remainingYears || null };
 
   try {
     if (supaClient) {
@@ -340,6 +370,34 @@ async function submitClinicQuote() {
     document.getElementById('clinicQuoteForm').style.display = 'none';
     document.getElementById('clinicQuoteSuccess').classList.remove('hidden');
     showToast('Quote saved! We\'ll be in touch.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+    btn.style.opacity = '1';
+  }
+}
+
+function setPricingPeriod(period) {
+  const monthly = document.getElementById('toggleMonthly');
+  const annual = document.getElementById('toggleAnnual');
+  if (period === 'annual') {
+    annual.className = 'btn-primary btn-sm'; annual.style.borderRadius = '0 var(--radius) var(--radius) 0'; annual.style.opacity = '1';
+    monthly.className = 'btn-secondary btn-sm'; monthly.style.borderRadius = 'var(--radius) 0 0 var(--radius)'; monthly.style.opacity = '0.7';
+    document.getElementById('premiumPrice').textContent = '$49.99';
+    document.getElementById('premiumPeriod').textContent = '/year';
+    document.getElementById('premiumCta').textContent = 'Subscribe $49.99/yr';
+    document.getElementById('proPrice').textContent = '$299';
+    document.getElementById('proPeriod').textContent = '/year';
+    document.getElementById('proCta').textContent = 'Subscribe $299/yr';
+  } else {
+    monthly.className = 'btn-primary btn-sm'; monthly.style.borderRadius = 'var(--radius) 0 0 var(--radius)'; monthly.style.opacity = '1';
+    annual.className = 'btn-secondary btn-sm'; annual.style.borderRadius = '0 var(--radius) var(--radius) 0'; annual.style.opacity = '0.7';
+    document.getElementById('premiumPrice').textContent = '$4.99';
+    document.getElementById('premiumPeriod').textContent = '/month';
+    document.getElementById('premiumCta').textContent = 'Subscribe $4.99/mo';
+    document.getElementById('proPrice').textContent = '$29.99';
+    document.getElementById('proPeriod').textContent = '/month';
+    document.getElementById('proCta').textContent = 'Subscribe $29.99/mo';
   }
 }
 

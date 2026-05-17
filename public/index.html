@@ -26,6 +26,17 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"Death Clock","url":"https://death-clock.app","description":"The internet's most honest life expectancy calculator based on 53M+ research participants and 1,200+ studies.","applicationCategory":"HealthApplication","operatingSystem":"Web","offers":{"@type":"AggregateOffer","lowPrice":"0","highPrice":"29.99","priceCurrency":"USD"},"author":{"@type":"Organization","name":"Death Clock","url":"https://death-clock.app"}}
 </script>
 <link rel="stylesheet" href="/shared/styles.css">
+<script>
+// Force-kill old service workers that serve stale cached content
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    registrations.forEach(function(registration) { registration.unregister(); });
+  });
+  if (navigator.serviceWorker.controller) {
+    caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
+  }
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
@@ -164,6 +175,7 @@ function pageInit() {
   if (state.result) {
     document.getElementById('navDash')?.classList.remove('hidden');
     document.getElementById('navPrice')?.classList.remove('hidden');
+    showStreakWelcome();
   }
 }
 

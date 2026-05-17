@@ -1586,6 +1586,29 @@
 
 </article>
 
+<!-- BLOG CTA -->
+<div style="max-width:680px; margin:40px auto; padding:32px; background:linear-gradient(135deg,#1a1a2e,#16213e); border:1px solid #e94560; border-radius:12px; text-align:center;">
+  <h3 style="color:#fff; margin:0 0 8px;">Is loneliness stealing years from YOUR life?</h3>
+  <p style="color:#a0a0b0; margin:0 0 16px; font-size:0.95rem;">Our calculator measures social isolation, stress, and mental health to show the exact impact on your lifespan.</p>
+  <a href="/" style="display:inline-block; padding:14px 32px; background:#e94560; color:#fff; text-decoration:none; border-radius:8px; font-weight:700; font-size:1rem;">Calculate My Death Date</a>
+  <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.1);">
+    <p style="color:#a0a0b0; font-size:0.85rem; margin:0 0 8px;">Get a personalised mental health longevity plan via email:</p>
+    <div style="display:flex; gap:8px; max-width:400px; margin:0 auto;">
+      <input type="email" id="blogEmailCapture" placeholder="your@email.com" style="flex:1; padding:10px 14px; background:#0f0f1a; border:1px solid #333; border-radius:8px; color:#fff; font-size:0.9rem;">
+      <button onclick="captureBlogEmail('blog_mental_health')" style="padding:10px 20px; background:#4ecdc4; color:#000; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Send</button>
+    </div>
+  </div>
+</div>
+<script>
+function captureBlogEmail(src){
+  const e=document.getElementById('blogEmailCapture');
+  if(!e||!e.value.includes('@')){alert('Enter a valid email');return;}
+  const email=e.value.trim();
+  fetch('https://tosyulolriavzgkpwzrn.supabase.co/rest/v1/dc_email_captures',{method:'POST',headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvc3l1bG9scmlhdnpna3B3enJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzE0NzIsImV4cCI6MjA5NDM0NzQ3Mn0.LVxiplL8DGVB481AXiEDVGWplfXprMPK_zR8A__6j7M'},body:JSON.stringify({email:email,source:src||'blog_mental_health'})});
+  e.value='';e.placeholder='Sent! Check your inbox.';e.disabled=true;
+}
+</script>
+
 <footer>
     <div class="footer-links">
         <a href="/">Calculator</a>
