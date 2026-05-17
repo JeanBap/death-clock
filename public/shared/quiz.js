@@ -874,7 +874,8 @@ function renderQuestion() {
     const cls = i < state.currentQuestion ? 'done' : i === state.currentQuestion ? 'active' : '';
     prog += `<div class="q-progress-dot ${cls}"></div>`;
   }
-  document.getElementById('qProgress').innerHTML = prog;
+  const pctComplete = Math.round((state.currentQuestion / total) * 100);
+  document.getElementById('qProgress').innerHTML = `<div style="display:flex;align-items:center;gap:8px;width:100%;"><div style="flex:1;background:var(--bg);border-radius:4px;height:6px;overflow:hidden;"><div style="width:${pctComplete}%;height:100%;background:var(--accent);border-radius:4px;transition:width 0.3s;"></div></div><span style="font-size:0.7rem;color:var(--text3);white-space:nowrap;">${state.currentQuestion + 1}/${total}</span></div>`;
   document.getElementById('qBack').classList.toggle('hidden', state.currentQuestion === 0);
   document.getElementById('qNext').textContent = state.currentQuestion === total - 1 ? 'See My Death Date' : 'Next';
 
@@ -1366,6 +1367,31 @@ function calculateResult() {
   // Auto-save after calculation
   DataStore.save();
   saveInitialDeathy();
+  // Show onboarding for first-time users
+  if (!localStorage.getItem('dc_onboarded')) {
+    setTimeout(showOnboarding, 2000);
+  }
+}
+
+function showOnboarding() {
+  if (localStorage.getItem('dc_onboarded')) return;
+  localStorage.setItem('dc_onboarded', 'true');
+  const m = document.createElement('div');
+  m.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  m.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:100%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:8px;">☠</div>
+    <h3 style="margin-bottom:8px;color:var(--accent);">Welcome to the other side.</h3>
+    <p style="color:var(--text2);font-size:0.85rem;margin-bottom:20px;">Here's what you can do now:</p>
+    <div style="text-align:left;font-size:0.85rem;color:var(--text);line-height:2;">
+      <div><strong style="color:var(--green);">1.</strong> Start your <strong>Longevity Plan</strong> - daily habits that push back your death date</div>
+      <div><strong style="color:var(--green);">2.</strong> Meet your <strong>Ghost</strong> - it evolves as you get healthier</div>
+      <div><strong style="color:var(--green);">3.</strong> Challenge friends - compare death dates and compete</div>
+      <div><strong style="color:var(--green);">4.</strong> Sign up to save progress and unlock the Mansion</div>
+    </div>
+    <button onclick="this.closest('div[style]').remove()" class="btn-primary" style="margin-top:20px;width:100%;">Got it. Let's cheat death.</button>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
 }
 
 function getHabitCommentary() {
@@ -1601,6 +1627,7 @@ function renderResult() {
     <div class="death-date-reveal">
       <div class="death-date-label">You will die on</div>
       <div class="death-date">${dateStr}</div>
+      <div style="margin:8px 0;"><button class="btn-sm" onclick="navigator.clipboard.writeText('According to Death Clock, I will die on ${dateStr}. That gives me ${r.remainingYears} years. Calculate yours: https://death-clock.app');showToast('Death date copied!')" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);font-size:0.75rem;padding:4px 12px;border-radius:6px;cursor:pointer;">📋 Copy my death date</button></div>
       <div style="color:var(--text2)">That is approximately <strong>${r.remainingYears} years</strong> from today</div>
       <div style="margin:24px 0 8px; padding:20px 12px; background:rgba(255,0,0,0.05); border:1px solid rgba(255,0,0,0.15); border-radius:12px;">
         <div style="text-align:center; color:var(--accent); font-size:0.75rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:12px;">Time Remaining</div>
@@ -1696,7 +1723,14 @@ function renderResult() {
         <button class="btn-sm" onclick="shareResult('facebook')" style="background:#4267B2; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Facebook</button>
         <button class="btn-sm" onclick="shareResult('linkedin')" style="background:#0077B5; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">LinkedIn</button>
         <button class="btn-sm share-btn-copy" onclick="shareResult('copy')" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:8px 16px; border-radius:6px; cursor:pointer;">Copy</button>
+        <button class="btn-sm" onclick="shareGhostCard()" style="background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Download Card</button>
       </div>
+    </div>
+
+    <!-- PUSH NOTIFICATION OPT-IN -->
+    <div style="margin-top:24px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; text-align:center;">
+      <p style="color:var(--text2); font-size:0.85rem; margin-bottom:8px;">Want Deathy to haunt your notifications with daily reminders?</p>
+      <button class="btn-sm" onclick="requestNotificationPermission()" style="background:var(--gold)15; border:1px solid var(--gold); color:var(--gold); padding:8px 16px; border-radius:6px; cursor:pointer;">Enable Death Reminders</button>
     </div>
 
     <!-- PRODUCT RECOMMENDATIONS -->
