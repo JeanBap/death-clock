@@ -22,9 +22,8 @@
 <meta name="twitter:description" content="Manage your Death Clock profile, sign in, and sync your data.">
 <meta name="twitter:image" content="https://death-clock.app/og-image.png">
 <link rel="stylesheet" href="/shared/styles.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-4eCDoMN/7A46qQ5Tj0rZ/D2VEolFGNIINDTLAcWZcvhkRSsvTfqNfaBMlRRoGEZ5" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script defer data-domain="death-clock.app" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 <a href="#main" class="skip-link" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; z-index:9999; padding:12px 24px; background:var(--accent); color:#fff; font-weight:700; border-radius:0 0 8px 0; text-decoration:none;" onfocus="this.style.left='0'; this.style.width='auto'; this.style.height='auto';" onblur="this.style.left='-9999px'; this.style.width='1px'; this.style.height='1px';">Skip to main content</a>
@@ -37,7 +36,7 @@
       <a class="nav-tab" href="/blog/">Blog</a>
       <a class="nav-tab hidden" id="navDash" href="/dashboard.html">Dashboard</a>
       <a class="nav-tab hidden" id="navPrice" href="/pricing.html">Upgrade</a>
-      <a class="nav-tab" id="profileBtn" href="/sign-in">Sign In</a>
+      <a class="nav-tab" id="profileBtn" href="/profile.html">Sign In</a>
       <a class="nav-tab hidden" id="navMansion" href="/mansion.html">Mansion</a>
       <a class="btn-primary btn-sm" href="/#quiz" id="navCta" style="text-decoration:none;">Calculate</a>
     </div>
@@ -87,13 +86,6 @@
     </div>
   </div>
 
-
-    <!-- DANGER ZONE -->
-    <div id="dangerZone" class="hidden" style="margin-top:48px; padding:24px; border:1px solid rgba(233,69,96,0.3); border-radius:12px; background:rgba(233,69,96,0.05);">
-      <h3 style="color:var(--accent); margin-bottom:8px; font-size:1rem;">Danger Zone</h3>
-      <p style="color:var(--text3); font-size:0.8rem; margin-bottom:16px;">Permanently delete your account and all associated data. This action cannot be undone.</p>
-      <button onclick="deleteAccount()" style="background:var(--accent); color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem;">Delete My Account</button>
-    </div>
 </main>
 <!-- ===== COOKIE BANNER ===== -->
 <div id="cookieBanner" class="cookie-banner hidden">
@@ -132,13 +124,6 @@ function pageInit() {
   renderProfilePage();
 }
 
-</script>
-<script>
-if (typeof supaClient !== 'undefined' && supaClient) {
-  supaClient.auth.getSession().then(({data}) => {
-    if (data?.session?.user) document.getElementById('dangerZone')?.classList.remove('hidden');
-  });
-}
 </script>
 </body>
 </html>
