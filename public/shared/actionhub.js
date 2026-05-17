@@ -68,16 +68,16 @@ function renderHubTabs() {
   const c = document.getElementById('hubTabs');
   if (!c) return;
   const tabs = [
-    { id: 'today', label: "Today's Tasks" },
-    { id: 'challenges', label: 'Challenges' },
-    { id: 'progress', label: 'Progress' },
-    { id: 'feed', label: 'Friend Feed' },
-    { id: 'health', label: 'Health Data' },
-    { id: 'report', label: 'Weekly Report' },
-    { id: 'shop', label: 'Rewards' }
+    { id: 'today', label: 'Today', icon: '&#x2705;' },
+    { id: 'challenges', label: 'Challenges', icon: '&#x1F3AF;' },
+    { id: 'progress', label: 'Progress', icon: '&#x1F4C8;' },
+    { id: 'feed', label: 'Friends', icon: '&#x1F465;' },
+    { id: 'health', label: 'Health', icon: '&#x1F4AA;' },
+    { id: 'report', label: 'Report', icon: '&#x1F4CA;' },
+    { id: 'shop', label: 'Shop', icon: '&#x1FA99;' }
   ];
   c.innerHTML = tabs.map(t =>
-    '<button class="' + (t.id === hubTab ? 'active' : '') + '" onclick="switchHubTab(\'' + t.id + '\')">' + t.label + '</button>'
+    '<button class="' + (t.id === hubTab ? 'active' : '') + '" onclick="switchHubTab(\'' + t.id + '\')">' + t.icon + ' ' + t.label + '</button>'
   ).join('');
 }
 
@@ -222,6 +222,14 @@ function completeTask(taskId) {
   const coinReward = Math.round(10 * mult);
   const daysReward = task.days;
 
+  // First-ever task bonus (early win strategy)
+  let firstBonus = 0;
+  if (!localStorage.getItem('dc_first_task_done')) {
+    localStorage.setItem('dc_first_task_done', '1');
+    firstBonus = 25;
+    addCoins(firstBonus);
+  }
+
   // Award coins
   addCoins(coinReward);
 
@@ -255,7 +263,7 @@ function completeTask(taskId) {
   // Check if all done - confetti!
   const allDone = tasks.every(t => t.done);
 
-  showToast('+' + daysReward.toFixed(1) + ' days | +' + coinReward + ' coins' + (comboBonus > 0 ? ' | COMBO +' + comboBonus : ''));
+  showToast('+' + daysReward.toFixed(1) + ' days | +' + coinReward + ' coins' + (comboBonus > 0 ? ' | COMBO +' + comboBonus : '') + (firstBonus > 0 ? ' | FIRST TASK BONUS +' + firstBonus : ''));
 
   // Re-render
   setTimeout(() => {
@@ -294,14 +302,34 @@ function renderTodayTab(c) {
   // Mark first visit
   if (isFirstVisit) localStorage.setItem('dc_hub_visited', '1');
 
+  // Streak at risk warning (Duolingo-style)
+  const hour = new Date().getHours();
+  const hasInsurance = localStorage.getItem('dc_streak_insurance') === 'true';
+  let streakWarning = '';
+  if (streak >= 3 && done === 0 && hour >= 18) {
+    streakWarning = `
+      <div style="background:linear-gradient(135deg,rgba(233,69,96,0.15),rgba(233,69,96,0.05));border:2px solid var(--accent);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:2rem;">&#x1F525;</div>
+        <div style="flex:1;">
+          <div style="font-weight:800;color:var(--accent);font-size:0.95rem;">Your ${streak}-day streak is at risk!</div>
+          <div style="font-size:0.8rem;color:var(--text2);margin-top:2px;">Complete at least 1 task to keep it alive.</div>
+        </div>
+        ${!hasInsurance ? '<button class="btn-sm btn-secondary" style="font-size:0.7rem;white-space:nowrap;" onclick="buyStreakInsurance()">Get freeze (50c)</button>' : '<div style="font-size:0.7rem;color:var(--green);">&#x1F6E1; Freeze ready</div>'}
+      </div>`;
+  }
+
   let onboardHtml = '';
   if (isFirstVisit || (streak <= 1 && done === 0)) {
     onboardHtml = `
       <div class="onboard-card">
-        <h3>Welcome to your Action Hub</h3>
-        <p>Complete daily tasks to add days to your life. Each task is based on your health profile. Tap a task to mark it done and earn coins.</p>
+        <h3 style="margin-bottom:8px;">Welcome to your Action Hub</h3>
+        <p style="margin-bottom:12px;">Complete daily tasks to add days to your life. Each task is personalised to your health profile.</p>
+        <div style="background:var(--surface);border-radius:8px;padding:12px;margin-bottom:12px;">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--green);margin-bottom:4px;">Complete your first task for a bonus reward!</div>
+          <div style="font-size:0.75rem;color:var(--text3);">First task = 25 bonus coins + your streak begins</div>
+        </div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-          <span class="combo-badge mult-1_5x">7-day streak = 1.5x coins</span>
+          <span class="combo-badge mult-1_5x">7 days = 1.5x</span>
           <span class="combo-badge mult-2x">30 days = 2x</span>
           <span class="combo-badge mult-3x">90 days = 3x</span>
         </div>
@@ -309,6 +337,7 @@ function renderTodayTab(c) {
   }
 
   c.innerHTML = `
+    ${streakWarning}
     ${onboardHtml}
     <div class="hub-panel" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -488,7 +517,7 @@ function renderChallengesTab(c) {
         </div>
         <button class="btn-primary btn-sm" onclick="showNewChallengeModal()">New Challenge</button>
       </div>
-      ${active.length === 0 ? '<p style="color:var(--text3);font-size:0.85rem;text-align:center;padding:20px;">No active challenges yet. Challenge a friend to a health bet!</p>' : ''}
+      ${active.length === 0 ? '<div style="text-align:center;padding:24px;"><div style="font-size:2.5rem;margin-bottom:8px;">&#x1F3AF;</div><div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">No active challenges</div><div style="font-size:0.8rem;color:var(--text3);margin-bottom:12px;">Challenge a friend to a health bet. Loser\'s coins go to the winner!</div><button class="btn-primary btn-sm" onclick="showNewChallengeModal()">Create Your First Challenge</button></div>' : ''}
       ${active.map(ch => renderChallengeCard(ch)).join('')}
     </div>
     <div class="hub-panel" style="margin-bottom:16px;">
@@ -545,6 +574,8 @@ function renderChallengeCard(ch) {
       </div>
       <div class="progress-bar-sm" style="margin-top:8px;"><div class="fill" style="width:${pct}%;background:var(--green);"></div></div>
       ${ch.status === 'active' ? '<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm btn-green" style="flex:1;font-size:0.7rem;" onclick="logChallengeProgress(\'' + ch.id + '\')">Log Progress</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="nudgeChallenger(\'' + ch.id + '\')">Nudge</button></div>' : ''}
+      ${ch.status === 'lost' && ch.pendingAccept ? '<div style="margin-top:8px;padding:8px;background:rgba(233,69,96,0.1);border-radius:8px;text-align:center;"><div style="font-size:0.75rem;color:var(--accent);margin-bottom:6px;">' + ch.stake + ' coins transferred to ' + escHtml(ch.opponent) + '</div><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="acceptChallengeLoss(\'' + ch.id + '\')">Accept Loss</button></div>' : ''}
+      ${ch.status === 'won' ? '<div style="margin-top:8px;padding:8px;background:rgba(78,204,163,0.1);border-radius:8px;text-align:center;font-size:0.75rem;color:var(--green);font-weight:700;">+' + ch.pot + ' coins won!</div>' : ''}
     </div>
   `;
 }
@@ -659,19 +690,36 @@ function logChallengeProgress(chId) {
   // Check if challenge ended
   if (new Date(ch.expires) < new Date()) {
     ch.status = ch.progress > ch.opponentProgress ? 'won' : ch.progress < ch.opponentProgress ? 'lost' : 'draw';
+    ch.pendingAccept = ch.status !== 'draw'; // loser must accept
     if (ch.status === 'won') {
+      // Winner gets the full pot (both stakes)
       addCoins(ch.pot);
-      showToast('You won the challenge! +' + ch.pot + ' coins!');
+      showToast('You won! +' + ch.pot + ' coins transferred to you!');
+      setTimeout(launchConfetti, 300);
     } else if (ch.status === 'draw') {
       addCoins(ch.stake);
       showToast('Draw! Stake returned.');
     } else {
-      showToast('You lost the challenge. Better luck next time!');
+      // Lost - coins already deducted at creation, they go to winner
+      ch.pendingAccept = true;
+      showToast('You lost. ' + ch.stake + ' coins go to ' + ch.opponent + '.');
     }
   } else {
     showToast('Progress logged! ' + ch.progress + ' and counting.');
   }
   saveChallenges(challenges);
+  const c = document.getElementById('hubContent');
+  if (c) renderChallengesTab(c);
+}
+
+function acceptChallengeLoss(chId) {
+  const challenges = getChallenges();
+  const ch = challenges.find(c => c.id === chId);
+  if (!ch) return;
+  ch.pendingAccept = false;
+  ch.lossAccepted = true;
+  saveChallenges(challenges);
+  showToast('Loss accepted. Use those coins to fuel your next win!');
   const c = document.getElementById('hubContent');
   if (c) renderChallengesTab(c);
 }
@@ -1181,6 +1229,33 @@ function buyStreakInsurance() {
 }
 
 
+// Weekly league (simulated leaderboard for engagement)
+function generateLeaguePositions(userDays, userStreak) {
+  const names = ['HealthNinja','FitMom23','ZenMaster','RunnerX','GreenJuice','YogaBear','StepKing','NightOwl','EarlyBird','IronWill'];
+  const players = names.map(n => ({
+    name: n,
+    days: +(Math.random() * 8 + 1).toFixed(1),
+    isUser: false
+  }));
+  players.push({ name: 'You', days: +userDays.toFixed(1), isUser: true });
+  players.sort((a, b) => b.days - a.days);
+  const top = players.slice(0, 8);
+  const userIdx = top.findIndex(p => p.isUser);
+  // If user not in top 8, force them in at position 8
+  if (userIdx === -1) {
+    top[7] = { name: 'You', days: +userDays.toFixed(1), isUser: true };
+  }
+  const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
+  return top.map((p, i) => {
+    const medal = i < 3 ? medals[i] : '<span style="width:20px;display:inline-block;text-align:center;font-size:0.75rem;color:var(--text3);">' + (i + 1) + '</span>';
+    const highlight = p.isUser ? 'background:rgba(233,69,96,0.08);border:1px solid var(--accent);' : 'background:var(--bg);border:1px solid transparent;';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;' + highlight + '">' +
+      '<span style="font-size:1.1rem;">' + medal + '</span>' +
+      '<span style="flex:1;font-size:0.85rem;font-weight:' + (p.isUser ? '800' : '400') + ';color:' + (p.isUser ? 'var(--accent)' : 'var(--text)') + ';">' + p.name + '</span>' +
+      '<span style="font-size:0.8rem;color:var(--green);font-weight:700;">+' + p.days + 'd</span></div>';
+  }).join('');
+}
+
 // ============================================
 // 8. WEEKLY REPORT (#8)
 // ============================================
@@ -1270,6 +1345,14 @@ function renderReportTab(c) {
       </div>` : ''}
     </div>
 
+    <div class="hub-panel" style="margin-bottom:16px;">
+      <h3>Weekly League</h3>
+      <p style="font-size:0.8rem;color:var(--text3);margin-bottom:12px;">Compete with other Death Clock users. Top 3 earn bonus coins.</p>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${generateLeaguePositions(weekDays, streak)}
+      </div>
+      <div style="font-size:0.7rem;color:var(--text3);margin-top:8px;text-align:center;">League resets every Monday</div>
+    </div>
     <div class="hub-panel">
       <h3>Share Report</h3>
       <button class="btn-primary btn-sm" style="width:100%;" onclick="shareWeeklyReport()">Share Weekly Report Card</button>
@@ -1352,6 +1435,10 @@ function renderShopTab(c) {
       <div style="display:grid;gap:8px;">
         ${shopItems.filter(i => i.type === 'cosmetic' || i.type === 'utility').map(i => renderShopItem(i, coins, purchased)).join('')}
       </div>
+    </div>
+
+    <div style="text-align:center;padding:12px;font-size:0.7rem;color:var(--text3);border-top:1px solid var(--border);margin-top:8px;">
+      Coins are earned through daily tasks, streaks, and challenge wins. Coins can only be redeemed for in-app rewards, partner offers, and charitable donations. Coins have no cash value and cannot be exchanged for money.
     </div>
   `;
 }
