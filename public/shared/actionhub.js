@@ -65,17 +65,16 @@ function renderHubStats() {
     <div class="stat-card"><div class="num" style="color:var(--gold);">${coins}</div><div class="lbl">Coins</div></div>
   `;
 
-  // Level bar + Deathy mood
+  // Compact level indicator - inline within coins card area
   var level = getLevel();
   var xpInfo = getXPForNextLevel();
   var xpPct = Math.round((xpInfo.current / xpInfo.needed) * 100);
   var title = getLevelTitle(level);
-  var deathyMood = getDeathyMood();
 
-  row.insertAdjacentHTML('beforeend', '<div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);border-radius:10px;margin-top:-4px;">' +
-    '<div style="text-align:center;min-width:50px;"><div style="font-size:1.5rem;">' + deathyMood.emoji + '</div><div style="font-size:0.55rem;color:var(--text3);">' + deathyMood.mood + '</div></div>' +
-    '<div style="flex:1;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;"><span style="font-size:0.75rem;font-weight:700;">Lvl ' + level + ' - ' + title + '</span><span style="font-size:0.65rem;color:var(--text3);">' + xpInfo.current + '/' + xpInfo.needed + ' XP</span></div>' +
-    '<div class="progress-bar-sm"><div class="fill" style="width:' + xpPct + '%;background:linear-gradient(90deg,var(--accent),#6c63ff);"></div></div></div></div>');
+  row.insertAdjacentHTML('beforeend', '<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:4px 12px;font-size:0.7rem;color:var(--text3);">' +
+    '<span style="font-weight:700;color:var(--text2);">Lvl ' + level + '</span>' +
+    '<div style="flex:1;max-width:120px;height:4px;background:var(--border);border-radius:2px;"><div style="width:' + xpPct + '%;height:100%;background:linear-gradient(90deg,var(--accent),#6c63ff);border-radius:2px;"></div></div>' +
+    '<span>' + xpInfo.current + '/' + xpInfo.needed + ' XP</span></div>');
 }
 
 function renderHubTabs() {

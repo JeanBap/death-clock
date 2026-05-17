@@ -131,50 +131,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* NAV */
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(10, 10, 15, 0.92);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(233, 69, 96, 0.15);
-            padding: 0.9rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            text-decoration: none;
-            color: var(--text);
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .nav-logo .skull {
-            font-size: 1.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text2);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
+        /* NAV - inline styled, minimal overrides only */
 
         /* HERO */
         .hero {
@@ -686,10 +643,7 @@
 
         /* RESPONSIVE */
         @media (max-width: 640px) {
-            nav {
-                padding: 0.7rem 1rem;
-            }
-            .nav-links {
+            #mainNav .nav-links {
                 display: none;
             }
             .hero {
@@ -716,16 +670,17 @@
 <body>
 
 <!-- NAV -->
-<nav>
-    <a href="/" class="nav-logo">
-        <span class="skull">&#x1F480;</span>
-        <span>Death Clock</span>
-    </a>
-    <ul class="nav-links">
-        <li><a href="/">Calculator</a></li>
-        <li><a href="/blog/">Blog</a></li>
-        <li><a href="/about">About</a></li>
-    </ul>
+<nav id="mainNav" style="position:sticky;top:0;z-index:1000;background:rgba(10,10,15,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);">
+<div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+<a href="/" class="logo" style="display:flex;align-items:center;gap:6px;font-size:1.3rem;font-weight:800;color:var(--text);text-decoration:none;">Death<span style="color:var(--accent);">Clock</span></a>
+<div class="nav-links" style="display:flex;gap:8px;align-items:center;">
+<a href="/" style="padding:8px 14px;border-radius:8px;color:var(--text2);text-decoration:none;font-size:0.85rem;">Home</a>
+<a href="/about.html" style="padding:8px 14px;border-radius:8px;color:var(--text2);text-decoration:none;font-size:0.85rem;">About</a>
+<a href="/blog/" style="padding:8px 14px;border-radius:8px;color:var(--text);text-decoration:none;font-size:0.85rem;background:var(--surface);">Blog</a>
+<a href="/profile.html" style="padding:8px 14px;border-radius:8px;color:var(--text2);text-decoration:none;font-size:0.85rem;">Sign In</a>
+<a href="/#quiz" style="padding:8px 16px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;font-size:0.85rem;font-weight:600;">Calculate</a>
+</div>
+</div>
 </nav>
 
 <!-- HERO -->

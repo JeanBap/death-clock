@@ -37,12 +37,15 @@ footer{margin-top:60px;padding:24px 0;border-top:1px solid var(--border);text-al
 </style>
 </head>
 <body>
-<nav>
-<div class="container">
-<a href="/" class="logo">Death <span>Clock</span></a>
-<div class="nav-links">
-<a href="/">Calculator</a>
-<a href="/blog/" style="color:var(--text);font-weight:600;">Blog</a>
+<nav id="mainNav" style="position:sticky;top:0;z-index:1000;background:rgba(10,10,15,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);">
+<div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+<a href="/" class="logo" style="display:flex;align-items:center;gap:6px;font-size:1.3rem;font-weight:800;color:var(--text);text-decoration:none;">Death<span style="color:var(--accent);">Clock</span></a>
+<div class="nav-links" style="display:flex;gap:8px;align-items:center;">
+<a href="/" style="padding:8px 14px;border-radius:8px;color:var(--text2);text-decoration:none;font-size:0.85rem;">Home</a>
+<a href="/about.html" style="padding:8px 14px;border-radius:8px;color:var(--text2);text-decoration:none;font-size:0.85rem;">About</a>
+<a href="/blog/" style="padding:8px 14px;border-radius:8px;color:var(--text);text-decoration:none;font-size:0.85rem;background:var(--surface);">Blog</a>
+<a href="/profile.html" style="padding:8px 14px;border-radius:8px;color:var(--text2);text-decoration:none;font-size:0.85rem;">Sign In</a>
+<a href="/#quiz" style="padding:8px 16px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;font-size:0.85rem;font-weight:600;">Calculate</a>
 </div>
 </div>
 </nav>
