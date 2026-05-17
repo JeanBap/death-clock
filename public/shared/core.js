@@ -264,7 +264,7 @@ async function deleteAccount() {
     localStorage.clear();
     // Sign out
     await supaClient.auth.signOut();
-    alert('Account deleted successfully. We're sorry to see you go.');
+    alert("Account deleted successfully. We are sorry to see you go.");
     window.location.href = '/';
   } catch (e) {
     console.warn('Delete account error:', e);
