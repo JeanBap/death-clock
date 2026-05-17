@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.death-clock.app/sitemap.xml
+Disallow: /manifest.json
+Disallow: /sw.js
+
+Sitemap: https://death-clock.app/sitemap.xml
