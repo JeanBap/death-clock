@@ -273,7 +273,10 @@ function updateNavTimer() {
   if (!state.result) return;
   const bar = document.getElementById('deathyTimerBar');
   if (!bar) return;
-  bar.classList.add('active');
+  if (!bar.classList.contains('active')) {
+    bar.classList.add('active');
+    document.body.style.paddingTop = '108px';
+  }
 
   const now = new Date();
   const diff = state.result.deathDate - now;

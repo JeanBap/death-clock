@@ -573,9 +573,10 @@ function renderChallengeCard(ch) {
         </div>
       </div>
       <div class="progress-bar-sm" style="margin-top:8px;"><div class="fill" style="width:${pct}%;background:var(--green);"></div></div>
-      ${ch.status === 'active' ? '<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm btn-green" style="flex:1;font-size:0.7rem;" onclick="logChallengeProgress(\'' + ch.id + '\')">Log Progress</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="nudgeChallenger(\'' + ch.id + '\')">Nudge</button></div>' : ''}
+      ${ch.status === 'active' ? '<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm btn-green" style="flex:1;font-size:0.7rem;" onclick="logChallengeProgress(\'' + ch.id + '\')">Log Progress</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="showChallengeChat(\'' + ch.id + '\')">Chat</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="nudgeChallenger(\'' + ch.id + '\')">Nudge</button></div>' : ''}
       ${ch.status === 'lost' && ch.pendingAccept ? '<div style="margin-top:8px;padding:8px;background:rgba(233,69,96,0.1);border-radius:8px;text-align:center;"><div style="font-size:0.75rem;color:var(--accent);margin-bottom:6px;">' + ch.stake + ' coins transferred to ' + escHtml(ch.opponent) + '</div><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="acceptChallengeLoss(\'' + ch.id + '\')">Accept Loss</button></div>' : ''}
       ${ch.status === 'won' ? '<div style="margin-top:8px;padding:8px;background:rgba(78,204,163,0.1);border-radius:8px;text-align:center;font-size:0.75rem;color:var(--green);font-weight:700;">+' + ch.pot + ' coins won!</div>' : ''}
+      ${ch.status !== 'active' ? '<button class="btn-sm btn-secondary" style="font-size:0.7rem;margin-top:6px;width:100%;" onclick="showChallengeChat(\'' + ch.id + '\')">View Chat</button>' : ''}
     </div>
   `;
 }
@@ -685,8 +686,6 @@ function logChallengeProgress(chId) {
   const ch = challenges.find(c => c.id === chId);
   if (!ch) return;
   ch.progress = (ch.progress || 0) + 1;
-  // Simulate opponent progress
-  if (Math.random() > 0.4) ch.opponentProgress = (ch.opponentProgress || 0) + 1;
   // Check if challenge ended
   if (new Date(ch.expires) < new Date()) {
     ch.status = ch.progress > ch.opponentProgress ? 'won' : ch.progress < ch.opponentProgress ? 'lost' : 'draw';
@@ -726,6 +725,101 @@ function acceptChallengeLoss(chId) {
 
 function nudgeChallenger(chId) {
   showToast('Nudge sent! Your opponent has been poked.');
+}
+
+// Challenge chat/proof system
+function getChallengeMessages(chId) {
+  try { return JSON.parse(localStorage.getItem('dc_ch_msgs_' + chId) || '[]'); } catch(e) { return []; }
+}
+function saveChallengeMessages(chId, msgs) {
+  localStorage.setItem('dc_ch_msgs_' + chId, JSON.stringify(msgs));
+}
+
+function showChallengeChat(chId) {
+  const challenges = getChallenges();
+  const ch = challenges.find(c => c.id === chId);
+  if (!ch) return;
+  const msgs = getChallengeMessages(chId);
+  const me = ch.creator;
+
+  const content = document.getElementById('modalContent');
+  if (!content) return;
+  document.getElementById('hubModal').classList.add('active');
+
+  function renderChat() {
+    const msgs = getChallengeMessages(chId);
+    content.innerHTML = `
+      <h3 style="margin-bottom:4px;">Challenge Chat</h3>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;">${escHtml(ch.type)} - You vs ${escHtml(ch.opponent)}</div>
+      <div id="chatMessages" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px;padding:8px;background:var(--bg);border-radius:8px;min-height:60px;">
+        ${msgs.length === 0 ? '<div style="text-align:center;color:var(--text3);font-size:0.8rem;padding:20px 0;">No messages yet. Send proof or a message!</div>' : msgs.map(m => `
+          <div style="display:flex;flex-direction:column;${m.sender === me ? 'align-items:flex-end;' : 'align-items:flex-start;'}">
+            <div style="font-size:0.65rem;color:var(--text3);margin-bottom:2px;">${escHtml(m.sender)} &middot; ${new Date(m.ts).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+            ${m.type === 'photo' ? '<img src="' + m.data + '" style="max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--border);" alt="Proof photo">' : ''}
+            ${m.text ? '<div style="background:' + (m.sender === me ? 'var(--accent)' : 'var(--surface)') + ';color:' + (m.sender === me ? '#fff' : 'var(--text)') + ';padding:8px 12px;border-radius:12px;font-size:0.8rem;max-width:240px;word-wrap:break-word;">' + escHtml(m.text) + '</div>' : ''}
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <div style="flex:1;">
+          <input type="text" id="chatInput" placeholder="Type a message..." style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendChallengeMsg('${chId}')">
+        </div>
+        <label style="cursor:pointer;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:1rem;min-height:40px;display:flex;align-items:center;" title="Upload proof photo">
+          &#128247;
+          <input type="file" id="chatPhoto" accept="image/*" style="display:none;" onchange="sendChallengePhoto('${chId}', this)">
+        </label>
+        <button class="btn-primary btn-sm" onclick="sendChallengeMsg('${chId}')" style="min-height:40px;">Send</button>
+      </div>
+      <button class="btn-secondary" style="width:100%;margin-top:12px;" onclick="closeModal()">Close</button>
+    `;
+    const chatDiv = document.getElementById('chatMessages');
+    if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight;
+  }
+  renderChat();
+  window._refreshChat = renderChat;
+}
+
+function sendChallengeMsg(chId) {
+  const input = document.getElementById('chatInput');
+  const text = input?.value.trim();
+  if (!text) return;
+  const challenges = getChallenges();
+  const ch = challenges.find(c => c.id === chId);
+  if (!ch) return;
+  const msgs = getChallengeMessages(chId);
+  msgs.push({ sender: ch.creator, text, type: 'text', ts: new Date().toISOString() });
+  saveChallengeMessages(chId, msgs);
+  input.value = '';
+  if (window._refreshChat) window._refreshChat();
+}
+
+function sendChallengePhoto(chId, fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const challenges = getChallenges();
+  const ch = challenges.find(c => c.id === chId);
+  if (!ch) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Compress to max 200KB by reducing quality
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxW = 400, maxH = 400;
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      if (h > maxH) { w = w * maxH / h; h = maxH; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const data = canvas.toDataURL('image/jpeg', 0.6);
+      const msgs = getChallengeMessages(chId);
+      msgs.push({ sender: ch.creator, data, type: 'photo', text: 'Proof photo', ts: new Date().toISOString() });
+      saveChallengeMessages(chId, msgs);
+      if (window._refreshChat) window._refreshChat();
+      showToast('Photo uploaded!');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 // Group challenges (#9)
