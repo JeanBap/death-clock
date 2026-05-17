@@ -382,6 +382,61 @@ function saveChallenges(ch) {
   localStorage.setItem('dc_challenges', JSON.stringify(ch));
 }
 
+// Challenge pricing: 1 free/week, coins after, referral = 4 weeks free
+function getWeekStart() {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  d.setDate(d.getDate() - d.getDay()); // Sunday start
+  return d.toISOString().slice(0, 10);
+}
+
+function getWeeklyChallengeCount() {
+  const weekStart = getWeekStart();
+  return getChallenges().filter(ch => ch.created && ch.created.slice(0, 10) >= weekStart).length;
+}
+
+function hasReferralBonus() {
+  const exp = localStorage.getItem('dc_referral_bonus_expires');
+  if (!exp) return false;
+  return new Date(exp) > new Date();
+}
+
+function getReferralDaysLeft() {
+  const exp = localStorage.getItem('dc_referral_bonus_expires');
+  if (!exp) return 0;
+  return Math.max(0, Math.ceil((new Date(exp) - Date.now()) / 86400000));
+}
+
+function getReferralCode() {
+  let code = localStorage.getItem('dc_referral_code');
+  if (!code) {
+    code = 'DC' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    localStorage.setItem('dc_referral_code', code);
+  }
+  return code;
+}
+
+function redeemReferralCode(code) {
+  if (!code || code.length < 4) { showToast('Invalid referral code'); return false; }
+  if (code === getReferralCode()) { showToast("Can't use your own code!"); return false; }
+  const used = JSON.parse(localStorage.getItem('dc_referrals_used') || '[]');
+  if (used.includes(code)) { showToast('Already used this code'); return false; }
+  used.push(code);
+  localStorage.setItem('dc_referrals_used', JSON.stringify(used));
+  // Grant 4 weeks free challenges
+  const expires = new Date(Date.now() + 28 * 86400000).toISOString();
+  localStorage.setItem('dc_referral_bonus_expires', expires);
+  showToast('Referral accepted! Free challenges for 4 weeks!');
+  addCoins(50); // bonus coins for referral
+  return true;
+}
+
+function isChallengeFreeTier() {
+  if (hasReferralBonus()) return { free: true, reason: 'referral', daysLeft: getReferralDaysLeft() };
+  if (getWeeklyChallengeCount() < 1) return { free: true, reason: 'weekly', remaining: 1 - getWeeklyChallengeCount() };
+  return { free: false, reason: 'limit', used: getWeeklyChallengeCount() };
+}
+
 function createChallenge(type, target, stake, duration, opponent) {
   const ch = getChallenges();
   const challenge = {
@@ -402,8 +457,12 @@ function createChallenge(type, target, stake, duration, opponent) {
   };
   ch.push(challenge);
   saveChallenges(ch);
-  showToast('Challenge created! ' + stake + ' coins staked.');
-  addCoins(-stake);
+  if (stake > 0) {
+    showToast('Challenge created! ' + stake + ' coins staked.');
+    addCoins(-stake);
+  } else {
+    showToast('Free challenge created! Go get it.');
+  }
   renderHubStats();
   return challenge;
 }
@@ -412,11 +471,21 @@ function renderChallengesTab(c) {
   const challenges = getChallenges();
   const active = challenges.filter(ch => ch.status === 'active');
   const completed = challenges.filter(ch => ch.status !== 'active');
+  const tier = isChallengeFreeTier();
+
+  // Referral invite banner
+  const referralBanner = tier.free && tier.reason === 'referral'
+    ? '<div style="background:linear-gradient(135deg,rgba(78,204,163,0.15),rgba(45,212,191,0.15));border:1px solid var(--green);border-radius:10px;padding:12px;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><div style="font-size:1.4rem;">&#127881;</div><div style="flex:1;"><div style="font-weight:700;font-size:0.85rem;color:var(--green);">Referral bonus active</div><div style="font-size:0.75rem;color:var(--text2);">' + getReferralDaysLeft() + ' days of free challenges remaining</div></div></div>'
+    : '<div style="background:linear-gradient(135deg,rgba(233,69,96,0.1),rgba(78,204,163,0.1));border:1px solid var(--accent);border-radius:10px;padding:12px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showReferralModal()"><div style="font-size:1.4rem;">&#128279;</div><div style="flex:1;"><div style="font-weight:700;font-size:0.85rem;">Invite a friend, get 4 weeks free</div><div style="font-size:0.75rem;color:var(--text2);">Share your code. Both of you get unlimited challenges + 50 coins.</div></div><div style="font-size:0.8rem;color:var(--accent);font-weight:700;">Invite &rarr;</div></div>';
 
   c.innerHTML = `
+    ${referralBanner}
     <div class="hub-panel" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <h3>Active Challenges</h3>
+        <div>
+          <h3 style="margin:0;">Active Challenges</h3>
+          <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">${tier.free ? (tier.reason === 'referral' ? 'Unlimited free' : '1 free this week') : 'Free used - costs coins'}</div>
+        </div>
         <button class="btn-primary btn-sm" onclick="showNewChallengeModal()">New Challenge</button>
       </div>
       ${active.length === 0 ? '<p style="color:var(--text3);font-size:0.85rem;text-align:center;padding:20px;">No active challenges yet. Challenge a friend to a health bet!</p>' : ''}
@@ -503,9 +572,16 @@ function showNewChallengeModal(preselectedCat) {
     social: ['Call a friend every day', 'Plan 2 social activities', 'Send 5 encouraging messages', 'Cook dinner with someone']
   };
 
+  const tier = isChallengeFreeTier();
+  const tierBadge = tier.free
+    ? (tier.reason === 'referral'
+        ? '<div style="background:linear-gradient(135deg,var(--green),#2dd4bf);color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem;margin-bottom:12px;text-align:center;">Referral bonus active - ' + tier.daysLeft + ' days of free challenges left</div>'
+        : '<div style="background:var(--green);color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem;margin-bottom:12px;text-align:center;">This challenge is FREE (1 free per week)</div>')
+    : '<div style="background:var(--gold);color:#1a1a2e;padding:8px 12px;border-radius:8px;font-size:0.8rem;margin-bottom:12px;text-align:center;">Free challenge used this week - stake coins or <a href="#" onclick="showReferralModal();return false;" style="color:#1a1a2e;font-weight:700;text-decoration:underline;">invite a friend</a> for 4 weeks free</div>';
+
   content.innerHTML = `
     <h3 style="margin-bottom:12px;">Create a Challenge</h3>
-    <p style="color:var(--text2);font-size:0.85rem;margin-bottom:12px;">Pick a category, set the terms, stake your coins.</p>
+    ${tierBadge}
 
     <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Category</label>
     <div class="bet-modal-cat" id="betCats">
@@ -518,11 +594,8 @@ function showNewChallengeModal(preselectedCat) {
     </select>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div>
-        <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Stake (coins)</label>
-        <input type="number" id="betStake" value="50" min="10" max="500" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;">
-      </div>
-      <div>
+      ${tier.free ? '' : '<div><label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Stake (coins)</label><input type="number" id="betStake" value="50" min="10" max="500" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;"></div>'}
+      <div ${tier.free ? 'style="grid-column:span 2;"' : ''}>
         <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Duration</label>
         <select id="betDuration" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;">
           <option value="7">1 week</option>
@@ -535,7 +608,7 @@ function showNewChallengeModal(preselectedCat) {
     <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Opponent (name or email)</label>
     <input type="text" id="betOpponent" placeholder="Friend's name" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);margin-bottom:16px;font-size:0.85rem;">
 
-    <button class="btn-primary" style="width:100%;padding:12px;" onclick="submitChallenge()">Create Challenge</button>
+    <button class="btn-primary" style="width:100%;padding:12px;" onclick="submitChallenge()">${tier.free ? 'Create Free Challenge' : 'Stake & Create Challenge'}</button>
     <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeModal()">Cancel</button>
   `;
 }
@@ -556,16 +629,22 @@ function selectBetCat(cat) {
 }
 
 function submitChallenge() {
-  const stake = parseInt(document.getElementById('betStake')?.value || '50');
+  const tier = isChallengeFreeTier();
   const duration = parseInt(document.getElementById('betDuration')?.value || '7');
   const opponent = document.getElementById('betOpponent')?.value.trim() || 'Anyone';
   const challenge = document.getElementById('betChallenge')?.value || 'Health challenge';
-  const coins = getCoins();
 
-  if (stake > coins) { showToast('Not enough coins! You have ' + coins); return; }
-  if (stake < 10) { showToast('Minimum stake is 10 coins'); return; }
-
-  createChallenge(challenge, duration, stake, duration, opponent);
+  if (tier.free) {
+    // Free challenge - no stake required
+    createChallenge(challenge, duration, 0, duration, opponent);
+  } else {
+    // Must pay coins
+    const stake = parseInt(document.getElementById('betStake')?.value || '50');
+    const coins = getCoins();
+    if (stake > coins) { showToast('Not enough coins! You have ' + coins); return; }
+    if (stake < 10) { showToast('Minimum stake is 10 coins'); return; }
+    createChallenge(challenge, duration, stake, duration, opponent);
+  }
   closeModal();
   switchHubTab('challenges');
 }
@@ -666,6 +745,40 @@ function createGroupChallenge() {
   switchHubTab('challenges');
 }
 
+
+// Referral modal
+function showReferralModal() {
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  if (!modal || !content) return;
+  modal.classList.remove('hidden');
+  const myCode = getReferralCode();
+  const bonus = hasReferralBonus();
+  const shareUrl = 'https://death-clock.app/?ref=' + myCode;
+
+  content.innerHTML = `
+    <h3 style="margin-bottom:12px;">Invite Friends, Get Free Challenges</h3>
+    <p style="color:var(--text2);font-size:0.85rem;margin-bottom:16px;">Share your code with a friend. When they use it, you BOTH get 4 weeks of unlimited free challenges + 50 bonus coins.</p>
+
+    <div style="background:var(--bg);border:2px dashed var(--accent);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px;">
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px;">Your referral code</div>
+      <div style="font-size:1.5rem;font-weight:800;letter-spacing:4px;color:var(--accent);">${myCode}</div>
+      <button class="btn-sm btn-secondary" style="margin-top:8px;" onclick="navigator.clipboard.writeText('${shareUrl}');showToast('Link copied!')">Copy Link</button>
+    </div>
+
+    ${bonus ? '<div style="background:var(--green);color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem;text-align:center;margin-bottom:12px;">Referral bonus active - ' + getReferralDaysLeft() + ' days left</div>' : ''}
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
+      <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Have a friend's code? Enter it here:</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="refCodeInput" placeholder="e.g. DC3XK9P2" style="flex:1;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;text-transform:uppercase;">
+        <button class="btn-primary btn-sm" onclick="if(redeemReferralCode(document.getElementById('refCodeInput').value.trim().toUpperCase())){closeModal();switchHubTab('challenges');}">Redeem</button>
+      </div>
+    </div>
+
+    <button class="btn-secondary" style="width:100%;margin-top:16px;" onclick="closeModal()">Close</button>
+  `;
+}
 
 // ============================================
 // 4. HEALTH TRACKER INTEGRATION (#3)
