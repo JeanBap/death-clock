@@ -238,40 +238,6 @@ if (document.readyState === 'loading') {
   requireAuth();
 }
 
-
-// ============================================
-// ACCOUNT DELETION (GDPR Art. 17)
-// ============================================
-async function deleteAccount() {
-  if (!supaClient || !state.supaUser) return;
-  const confirmed = confirm('This will permanently delete your account and all data. This cannot be undone. Are you sure?');
-  if (!confirmed) return;
-  const doubleConfirm = confirm('FINAL WARNING: All your progress, habits, ghost coins, and social connections will be deleted forever. Type-confirm by clicking OK.');
-  if (!doubleConfirm) return;
-
-  try {
-    const userId = state.supaUser.id;
-    // Delete user data from all tables
-    await supaClient.from('dc_profiles').delete().eq('user_id', userId);
-    await supaClient.from('dc_habit_log').delete().eq('user_id', userId);
-    await supaClient.from('dc_social_profiles').delete().eq('user_id', userId);
-    await supaClient.from('dc_groups').delete().eq('owner_id', userId);
-    await supaClient.from('dc_group_members').delete().eq('user_id', userId);
-    await supaClient.from('ghost_interactions').delete().eq('actor_id', userId);
-    await supaClient.from('ghost_challenges').delete().eq('challenger_id', userId);
-    await supaClient.from('ghost_challenges').delete().eq('challenged_id', userId);
-    // Clear local storage
-    localStorage.clear();
-    // Sign out
-    await supaClient.auth.signOut();
-    alert("Account deleted successfully. We are sorry to see you go.");
-    window.location.href = '/';
-  } catch (e) {
-    console.warn('Delete account error:', e);
-    alert('Error deleting account. Please contact support.');
-  }
-}
-
 // ============================================
 // COOKIE CONSENT
 // ============================================
@@ -419,6 +385,11 @@ if (state.result) {
 
 // ============================================
 
+
+function closeModal() {
+  const m = document.getElementById('modal');
+  if (m) m.classList.add('hidden');
+}
 
 function showToast(msg) {
   const sr = document.getElementById('srAnnounce'); if (sr) sr.textContent = msg;
