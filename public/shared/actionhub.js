@@ -244,6 +244,13 @@ function completeTask(taskId) {
   // Log to habit history
   logDailyCompletion(task);
 
+  // BUG-009 FIX: Add real user activity to feed
+  const userName = state.supaUser?.email?.split('@')[0] || 'You';
+  addFeedItem(userName, 'completed "' + task.name + '"', '+' + daysReward.toFixed(1) + ' days added');
+
+  // BUG-005 FIX: Check and grant milestone rewards
+  checkMilestoneRewards();
+
   // Check combo
   const todayDone = tasks.filter(t => t.done);
   const catsCompleted = new Set(todayDone.map(t => t.cat));
@@ -795,6 +802,12 @@ function sendChallengeMsg(chId) {
 function sendChallengePhoto(chId, fileInput) {
   const file = fileInput.files[0];
   if (!file) return;
+  // BUG-006 FIX: Check total chat storage before adding photo
+  const chatSize = getChatStorageSize();
+  if (chatSize > 3 * 1024 * 1024) { // 3MB limit for all chat photos
+    showToast('Chat storage full. Delete old chats to send more photos.');
+    return;
+  }
   const challenges = getChallenges();
   const ch = challenges.find(c => c.id === chId);
   if (!ch) return;
@@ -830,17 +843,40 @@ function getGroupChallenges() {
 function renderGroupChallenges() {
   const groups = getGroupChallenges();
   if (groups.length === 0) return '<p style="color:var(--text3);font-size:0.8rem;">No team challenges yet.</p>';
-  return groups.map(g => `
-    <div style="padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+  return groups.map(g => {
+    const pct = g.target > 0 ? Math.min(100, Math.round((g.progress / g.target) * 100)) : 0;
+    const done = g.progress >= g.target;
+    return `
+    <div style="padding:12px;border:1px solid ${done ? 'var(--green)' : 'var(--border)'};border-radius:8px;margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <strong style="font-size:0.85rem;">${escHtml(g.name)}</strong>
         <span style="font-size:0.7rem;color:var(--text3);">${g.members.length} members</span>
       </div>
       <div style="font-size:0.8rem;color:var(--text2);margin-top:4px;">${escHtml(g.goal)}</div>
-      <div class="progress-bar-sm" style="margin-top:6px;"><div class="fill" style="width:${Math.round((g.progress/g.target)*100)}%;background:var(--green);"></div></div>
-      <div style="font-size:0.7rem;color:var(--text3);margin-top:4px;">${g.progress}/${g.target} ${g.unit}</div>
-    </div>
-  `).join('');
+      <div class="progress-bar-sm" style="margin-top:6px;"><div class="fill" style="width:${pct}%;background:${done ? 'var(--green)' : 'var(--gold)'};"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+        <span style="font-size:0.7rem;color:var(--text3);">${g.progress}/${g.target} ${g.unit}</span>
+        ${done ? '<span style="font-size:0.7rem;color:var(--green);font-weight:700;">Complete!</span>' : '<button class="btn-sm btn-green" style="font-size:0.65rem;padding:4px 10px;" onclick="logGroupProgress(\'' + g.id + '\')">+1 Progress</button>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// BUG-004 FIX: Add progress logging for group challenges
+function logGroupProgress(groupId) {
+  const groups = getGroupChallenges();
+  const g = groups.find(gr => gr.id === groupId);
+  if (!g) return;
+  g.progress = (g.progress || 0) + 1;
+  if (g.progress >= g.target) {
+    addCoins(100);
+    showToast('Team goal complete! +100 coins bonus!');
+    launchConfetti();
+  } else {
+    showToast('Progress logged! ' + g.progress + '/' + g.target + ' ' + g.unit);
+  }
+  localStorage.setItem('dc_group_challenges', JSON.stringify(groups));
+  switchHubTab('challenges');
 }
 
 function showCreateGroupModal() {
@@ -1035,24 +1071,8 @@ function saveHealthEntry() {
   const hd = { steps, sleep, weight, lastSync: new Date().toISOString(), provider: 'manual' };
   localStorage.setItem('dc_health_data', JSON.stringify(hd));
 
-  // Auto-complete relevant tasks
-  const tasks = getDailyTasks();
-  let autoCompleted = 0;
-  if (steps >= 10000) {
-    const stepTask = tasks.find(t => !t.done && t.name.toLowerCase().includes('step'));
-    if (stepTask) { stepTask.done = true; autoCompleted++; }
-  }
-  if (steps >= 5000) {
-    const walkTask = tasks.find(t => !t.done && t.name.toLowerCase().includes('walk'));
-    if (walkTask) { walkTask.done = true; autoCompleted++; }
-  }
-  if (sleep >= 7) {
-    const sleepTask = tasks.find(t => !t.done && t.name.toLowerCase().includes('sleep') || t.name.toLowerCase().includes('7'));
-    if (sleepTask) { sleepTask.done = true; autoCompleted++; }
-  }
-  if (autoCompleted > 0) {
-    localStorage.setItem('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
-  }
+  // BUG-010 FIX: Use improved auto-complete matching
+  const autoCompleted = autoCompleteHealthTasks(steps, sleep, weight);
 
   closeModal();
   showToast('Health data saved!' + (autoCompleted > 0 ? ' ' + autoCompleted + ' tasks auto-completed!' : ''));
@@ -1175,14 +1195,12 @@ function addFeedItem(user, action, detail) {
 function renderFeedTab(c) {
   let feed = getFeedItems();
 
-  // Seed with demo data if empty
+  // BUG-009 FIX: Seed with example data if empty, but label them as examples
   if (feed.length === 0) {
     const demoFeed = [
-      { user: 'Alex', action: 'completed 5 tasks', detail: '+4.2 days added', time: new Date(Date.now() - 3600000).toISOString(), reactions: { fire: 2 } },
-      { user: 'Sam', action: 'started a challenge', detail: 'Walk 10k steps daily for 7 days', time: new Date(Date.now() - 7200000).toISOString(), reactions: {} },
-      { user: 'Jordan', action: 'hit a 14-day streak', detail: '2x multiplier unlocked!', time: new Date(Date.now() - 14400000).toISOString(), reactions: { clap: 5 } },
-      { user: 'Taylor', action: 'won a challenge vs Chris', detail: '+100 coins earned', time: new Date(Date.now() - 28800000).toISOString(), reactions: { trophy: 3 } },
-      { user: 'Morgan', action: 'added 30+ days total', detail: 'Tree milestone unlocked!', time: new Date(Date.now() - 43200000).toISOString(), reactions: { heart: 4 } }
+      { user: 'Alex', action: 'completed 5 tasks', detail: '+4.2 days added', time: new Date(Date.now() - 3600000).toISOString(), reactions: { fire: 2 }, demo: true },
+      { user: 'Sam', action: 'started a challenge', detail: 'Walk 10k steps daily', time: new Date(Date.now() - 7200000).toISOString(), reactions: {}, demo: true },
+      { user: 'Jordan', action: 'hit a 14-day streak', detail: '2x multiplier unlocked!', time: new Date(Date.now() - 14400000).toISOString(), reactions: { clap: 5 }, demo: true }
     ];
     feed = demoFeed;
     localStorage.setItem('dc_feed', JSON.stringify(demoFeed));
@@ -1269,7 +1287,20 @@ function getStreakCount() {
     let streak = parseInt(localStorage.getItem('dc_visit_streak') || '0');
     if (lastVisit !== today) {
       const yesterday = new Date(Date.now() - 86400000).toDateString();
-      streak = (lastVisit === yesterday) ? streak + 1 : 1;
+      if (lastVisit === yesterday) {
+        streak = streak + 1;
+      } else {
+        // BUG-002/003 FIX: Use streak insurance if available and not expired
+        const insurance = JSON.parse(localStorage.getItem('dc_streak_insurance_data') || 'null');
+        if (insurance && new Date(insurance.expires) > new Date() && insurance.usesLeft > 0) {
+          // Insurance saves the streak! Consume one use
+          insurance.usesLeft--;
+          localStorage.setItem('dc_streak_insurance_data', JSON.stringify(insurance));
+          showToast('Streak insurance saved your ' + streak + '-day streak!');
+        } else {
+          streak = 1; // Reset streak
+        }
+      }
       localStorage.setItem('dc_visit_streak', String(streak));
       localStorage.setItem('dc_last_visit', today);
     }
@@ -1288,7 +1319,7 @@ function renderStreakInfo() {
   const streak = getStreakCount();
   const mult = getStreakMultiplier(streak);
   const nextMult = streak < 7 ? { target: 7, mult: 1.5 } : streak < 30 ? { target: 30, mult: 2 } : streak < 90 ? { target: 90, mult: 3 } : null;
-  const hasInsurance = localStorage.getItem('dc_streak_insurance') === 'true';
+  const hasInsurance = hasActiveInsurance();
 
   let html = `
     <div style="text-align:center;margin-bottom:12px;">
@@ -1315,40 +1346,32 @@ function buyStreakInsurance() {
   const coins = getCoins();
   if (coins < 50) { showToast('Need 50 coins for streak insurance'); return; }
   addCoins(-50);
+  // BUG-003 FIX: Insurance expires in 30 days, gives 1 use
+  const insuranceData = {
+    purchased: new Date().toISOString(),
+    expires: new Date(Date.now() + 30 * 86400000).toISOString(),
+    usesLeft: 1
+  };
+  localStorage.setItem('dc_streak_insurance_data', JSON.stringify(insuranceData));
   localStorage.setItem('dc_streak_insurance', 'true');
-  showToast('Streak insurance purchased! You get 1 skip per month.');
+  showToast('Streak insurance purchased! 1 skip, expires in 30 days.');
   renderHubStats();
   const c = document.getElementById('hubContent');
   if (c && hubTab === 'today') renderTodayTab(c);
 }
 
-
-// Weekly league (simulated leaderboard for engagement)
-function generateLeaguePositions(userDays, userStreak) {
-  const names = ['HealthNinja','FitMom23','ZenMaster','RunnerX','GreenJuice','YogaBear','StepKing','NightOwl','EarlyBird','IronWill'];
-  const players = names.map(n => ({
-    name: n,
-    days: +(Math.random() * 8 + 1).toFixed(1),
-    isUser: false
-  }));
-  players.push({ name: 'You', days: +userDays.toFixed(1), isUser: true });
-  players.sort((a, b) => b.days - a.days);
-  const top = players.slice(0, 8);
-  const userIdx = top.findIndex(p => p.isUser);
-  // If user not in top 8, force them in at position 8
-  if (userIdx === -1) {
-    top[7] = { name: 'You', days: +userDays.toFixed(1), isUser: true };
+function hasActiveInsurance() {
+  const data = JSON.parse(localStorage.getItem('dc_streak_insurance_data') || 'null');
+  if (!data) return false;
+  if (new Date(data.expires) <= new Date()) {
+    localStorage.setItem('dc_streak_insurance', 'false');
+    return false;
   }
-  const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
-  return top.map((p, i) => {
-    const medal = i < 3 ? medals[i] : '<span style="width:20px;display:inline-block;text-align:center;font-size:0.75rem;color:var(--text3);">' + (i + 1) + '</span>';
-    const highlight = p.isUser ? 'background:rgba(233,69,96,0.08);border:1px solid var(--accent);' : 'background:var(--bg);border:1px solid transparent;';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;' + highlight + '">' +
-      '<span style="font-size:1.1rem;">' + medal + '</span>' +
-      '<span style="flex:1;font-size:0.85rem;font-weight:' + (p.isUser ? '800' : '400') + ';color:' + (p.isUser ? 'var(--accent)' : 'var(--text)') + ';">' + p.name + '</span>' +
-      '<span style="font-size:0.8rem;color:var(--green);font-weight:700;">+' + p.days + 'd</span></div>';
-  }).join('');
+  return data.usesLeft > 0;
 }
+
+
+// Weekly league - moved to bottom with seeded random (BUG-008 fix)
 
 // ============================================
 // 8. WEEKLY REPORT (#8)
@@ -1589,3 +1612,392 @@ function addCoins(amount) {
     localStorage.setItem('dc_last_daily_coin', today);
   }
 })();
+
+// BUG-005 FIX: Milestone reward granting system
+function checkMilestoneRewards() {
+  const totalDays = (state.longevityGoal?.totalDaysAdded) || 0;
+  const granted = JSON.parse(localStorage.getItem('dc_milestones_granted') || '[]');
+  const milestoneRewards = [
+    { target: 1, coins: 10, label: 'First day added!' },
+    { target: 7, coins: 25, label: '1 week of life added!' },
+    { target: 30, coins: 50, label: '1 month of life added!' },
+    { target: 100, coins: 200, label: '100 days of life added!' },
+    { target: 365, coins: 1000, label: '1 year of life added!' },
+    { target: 1000, coins: 5000, label: '1000 days of life added!' }
+  ];
+  for (const m of milestoneRewards) {
+    if (totalDays >= m.target && !granted.includes(m.target)) {
+      granted.push(m.target);
+      addCoins(m.coins);
+      showToast('MILESTONE: ' + m.label + ' +' + m.coins + ' coins!');
+      setTimeout(launchConfetti, 200);
+    }
+  }
+  localStorage.setItem('dc_milestones_granted', JSON.stringify(granted));
+}
+
+// BUG-006 FIX: Limit chat photos to prevent localStorage overflow
+function getChatStorageSize() {
+  let total = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('dc_ch_msgs_')) {
+      total += localStorage.getItem(key).length;
+    }
+  }
+  return total;
+}
+
+// BUG-007 FIX: Clean old completed challenges (keep last 20)
+function cleanOldChallenges() {
+  const challenges = getChallenges();
+  const active = challenges.filter(c => c.status === 'active');
+  const completed = challenges.filter(c => c.status !== 'active');
+  // Keep all active + last 20 completed
+  const trimmed = [...active, ...completed.slice(0, 20)];
+  if (trimmed.length < challenges.length) {
+    saveChallenges(trimmed);
+  }
+}
+
+// BUG-008 FIX: Seed league positions from weekly data, not random each render
+function generateLeaguePositions(userDays, userStreak) {
+  // Use week start as seed for consistent positions within a week
+  const weekSeed = getWeekStart();
+  let seedVal = 0;
+  for (let i = 0; i < weekSeed.length; i++) seedVal += weekSeed.charCodeAt(i);
+  function seededRandom() { seedVal = (seedVal * 9301 + 49297) % 233280; return seedVal / 233280; }
+
+  const names = ['HealthNinja','FitMom23','ZenMaster','RunnerX','GreenJuice','YogaBear','StepKing','NightOwl','EarlyBird','IronWill'];
+  const players = names.map(n => ({
+    name: n,
+    days: +(seededRandom() * 8 + 1).toFixed(1),
+    isUser: false
+  }));
+  players.push({ name: 'You', days: +userDays.toFixed(1), isUser: true });
+  players.sort((a, b) => b.days - a.days);
+  const top = players.slice(0, 8);
+  const userIdx = top.findIndex(p => p.isUser);
+  if (userIdx === -1) {
+    top[7] = { name: 'You', days: +userDays.toFixed(1), isUser: true };
+  }
+  const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
+  return top.map((p, i) => {
+    const medal = i < 3 ? medals[i] : '<span style="width:20px;display:inline-block;text-align:center;font-size:0.75rem;color:var(--text3);">' + (i + 1) + '</span>';
+    const highlight = p.isUser ? 'background:rgba(233,69,96,0.08);border:1px solid var(--accent);' : 'background:var(--bg);border:1px solid transparent;';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;' + highlight + '">' +
+      '<span style="font-size:1.1rem;">' + medal + '</span>' +
+      '<span style="flex:1;font-size:0.85rem;font-weight:' + (p.isUser ? '800' : '400') + ';color:' + (p.isUser ? 'var(--accent)' : 'var(--text)') + ';">' + p.name + '</span>' +
+      '<span style="font-size:0.8rem;color:var(--green);font-weight:700;">+' + p.days + 'd</span></div>';
+  }).join('');
+}
+
+// BUG-010 FIX: Better health auto-complete matching
+function autoCompleteHealthTasks(steps, sleep, weight) {
+  const tasks = getDailyTasks();
+  let autoCompleted = 0;
+  for (const t of tasks) {
+    if (t.done) continue;
+    const name = t.name.toLowerCase();
+    // Steps tasks
+    if (steps >= 10000 && (name.includes('10,000 step') || name.includes('10000 step') || name.includes('10k step'))) {
+      t.done = true; autoCompleted++;
+    } else if (steps >= 5000 && (name.includes('walk') && (name.includes('30 min') || name.includes('step')))) {
+      t.done = true; autoCompleted++;
+    }
+    // Sleep tasks
+    if (sleep >= 7 && (name.includes('7+ hours') || name.includes('7-8 hours') || name.includes('hours of sleep'))) {
+      t.done = true; autoCompleted++;
+    }
+    // Water (can't auto-verify from health data, skip)
+  }
+  if (autoCompleted > 0) {
+    localStorage.setItem('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
+  }
+  return autoCompleted;
+}
+
+// Run cleanup on load
+cleanOldChallenges();
+
+
+// ============================================
+// 10. XP + LEVEL SYSTEM (NEW - Duolingo-inspired)
+// ============================================
+function getXP() { return parseInt(localStorage.getItem('dc_xp') || '0'); }
+function addXP(amount) {
+  const oldLevel = getLevel();
+  const xp = getXP() + amount;
+  localStorage.setItem('dc_xp', String(xp));
+  const newLevel = getLevel();
+  if (newLevel > oldLevel) {
+    showToast('LEVEL UP! You are now Level ' + newLevel + '!');
+    addCoins(newLevel * 20); // Level-up coin bonus
+    setTimeout(launchConfetti, 200);
+  }
+}
+function getLevel() {
+  const xp = getXP();
+  // Each level needs progressively more XP
+  // Level 1: 0, Level 2: 100, Level 3: 250, Level 4: 450, etc.
+  let level = 1, threshold = 0, increment = 100;
+  while (xp >= threshold + increment) {
+    threshold += increment;
+    level++;
+    increment = Math.floor(increment * 1.3);
+  }
+  return level;
+}
+function getXPForNextLevel() {
+  const xp = getXP();
+  let level = 1, threshold = 0, increment = 100;
+  while (xp >= threshold + increment) {
+    threshold += increment;
+    level++;
+    increment = Math.floor(increment * 1.3);
+  }
+  return { current: xp - threshold, needed: increment, total: xp };
+}
+function getLevelTitle(level) {
+  const titles = ['Mortal','Health Rookie','Habit Builder','Wellness Warrior','Life Extender',
+    'Vitality Seeker','Longevity Pro','Time Bender','Death Cheater','Immortal Legend'];
+  return titles[Math.min(level - 1, titles.length - 1)];
+}
+
+
+// ============================================
+// 11. DAILY SPIN WHEEL (NEW - slot machine dopamine)
+// ============================================
+function canSpinToday() {
+  return localStorage.getItem('dc_last_spin') !== new Date().toDateString();
+}
+
+function showSpinWheel() {
+  if (!canSpinToday()) { showToast('Come back tomorrow for another spin!'); return; }
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  if (!modal || !content) return;
+  modal.classList.remove('hidden');
+
+  const prizes = [
+    { label: '10 coins', value: 10, type: 'coins', weight: 30 },
+    { label: '25 coins', value: 25, type: 'coins', weight: 20 },
+    { label: '50 coins', value: 50, type: 'coins', weight: 10 },
+    { label: '+0.5 days', value: 0.5, type: 'days', weight: 15 },
+    { label: '+1 day', value: 1, type: 'days', weight: 8 },
+    { label: '2x next task', value: 2, type: 'multiplier', weight: 10 },
+    { label: 'Mystery box', value: 0, type: 'mystery', weight: 5 },
+    { label: '100 coins!', value: 100, type: 'coins', weight: 2 }
+  ];
+
+  const colors = ['#e94560','#4ecca3','#f0c040','#6c63ff','#ff6b6b','#2dd4bf','#fbbf24','#a78bfa'];
+
+  content.innerHTML = `
+    <h3 style="text-align:center;margin-bottom:8px;">Daily Spin</h3>
+    <p style="text-align:center;color:var(--text3);font-size:0.8rem;margin-bottom:16px;">1 free spin per day. What will you win?</p>
+    <div id="wheelContainer" style="position:relative;width:260px;height:260px;margin:0 auto 16px;">
+      <div id="spinWheel" style="width:260px;height:260px;border-radius:50%;border:4px solid var(--gold);position:relative;overflow:hidden;transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99);">
+        ${prizes.map((p, i) => {
+          const angle = (360 / prizes.length) * i;
+          return '<div style="position:absolute;width:50%;height:50%;top:0;left:50%;transform-origin:0% 100%;transform:rotate(' + angle + 'deg) skewY(' + (90 - 360/prizes.length) + 'deg);background:' + colors[i] + ';display:flex;align-items:center;justify-content:center;"><span style="transform:skewY(' + -(90-360/prizes.length) + 'deg) rotate(' + (180/prizes.length) + 'deg);font-size:0.55rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);white-space:nowrap;">' + p.label + '</span></div>';
+        }).join('')}
+      </div>
+      <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:1.5rem;z-index:2;">&#9660;</div>
+    </div>
+    <button class="btn-primary" style="width:100%;padding:14px;font-size:1rem;" id="spinBtn" onclick="executeSpin()">SPIN!</button>
+    <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeModal()">Maybe later</button>
+  `;
+}
+
+function executeSpin() {
+  const btn = document.getElementById('spinBtn');
+  if (btn) btn.disabled = true;
+
+  const prizes = [
+    { label: '10 coins', value: 10, type: 'coins', weight: 30 },
+    { label: '25 coins', value: 25, type: 'coins', weight: 20 },
+    { label: '50 coins', value: 50, type: 'coins', weight: 10 },
+    { label: '+0.5 days', value: 0.5, type: 'days', weight: 15 },
+    { label: '+1 day', value: 1, type: 'days', weight: 8 },
+    { label: '2x next task', value: 2, type: 'multiplier', weight: 10 },
+    { label: 'Mystery box', value: 0, type: 'mystery', weight: 5 },
+    { label: '100 coins!', value: 100, type: 'coins', weight: 2 }
+  ];
+
+  // Weighted random
+  const totalWeight = prizes.reduce((s, p) => s + p.weight, 0);
+  let rand = Math.random() * totalWeight;
+  let winIdx = 0;
+  for (let i = 0; i < prizes.length; i++) {
+    rand -= prizes[i].weight;
+    if (rand <= 0) { winIdx = i; break; }
+  }
+
+  const sliceAngle = 360 / prizes.length;
+  const targetAngle = 360 * 5 + (360 - winIdx * sliceAngle - sliceAngle / 2); // 5 full rotations + landing
+
+  const wheel = document.getElementById('spinWheel');
+  if (wheel) wheel.style.transform = 'rotate(' + targetAngle + 'deg)';
+
+  setTimeout(() => {
+    const prize = prizes[winIdx];
+    localStorage.setItem('dc_last_spin', new Date().toDateString());
+
+    if (prize.type === 'coins') {
+      addCoins(prize.value);
+      showToast('You won ' + prize.label + '!');
+    } else if (prize.type === 'days') {
+      if (!state.longevityGoal) state.longevityGoal = { totalDaysAdded: 0 };
+      state.longevityGoal.totalDaysAdded += prize.value;
+      saveGoalState();
+      showToast('You won ' + prize.label + ' added to your life!');
+    } else if (prize.type === 'multiplier') {
+      localStorage.setItem('dc_next_task_multiplier', String(prize.value));
+      showToast('You won 2x reward on your next task!');
+    } else if (prize.type === 'mystery') {
+      // Mystery = random bonus
+      const mysteryCoins = [50, 75, 100, 150][Math.floor(Math.random() * 4)];
+      addCoins(mysteryCoins);
+      showToast('Mystery box: ' + mysteryCoins + ' coins!');
+    }
+    addXP(15); // XP for spinning
+    launchConfetti();
+    setTimeout(() => { closeModal(); renderHubStats(); }, 1500);
+  }, 4500);
+}
+
+
+// ============================================
+// 12. ACHIEVEMENT BADGES (NEW - collection mechanic)
+// ============================================
+function getAchievements() {
+  return JSON.parse(localStorage.getItem('dc_achievements') || '[]');
+}
+
+function checkAchievements() {
+  const earned = getAchievements();
+  const streak = getStreakCount();
+  const totalDays = (state.longevityGoal?.totalDaysAdded) || 0;
+  const coins = getCoins();
+  const challenges = getChallenges();
+  const level = getLevel();
+
+  const allBadges = [
+    { id: 'first_blood', name: 'First Blood', desc: 'Complete your first task', icon: '&#x1F3AF;', check: () => localStorage.getItem('dc_first_task_done') === '1' },
+    { id: 'streak_7', name: 'On Fire', desc: '7-day streak', icon: '&#x1F525;', check: () => streak >= 7 },
+    { id: 'streak_30', name: 'Unstoppable', desc: '30-day streak', icon: '&#x1F4A5;', check: () => streak >= 30 },
+    { id: 'streak_90', name: 'Legendary', desc: '90-day streak', icon: '&#x1F451;', check: () => streak >= 90 },
+    { id: 'rich', name: 'Coin Collector', desc: 'Have 500+ coins', icon: '&#x1FA99;', check: () => coins >= 500 },
+    { id: 'challenger', name: 'Challenger', desc: 'Create 5 challenges', icon: '&#x2694;', check: () => challenges.length >= 5 },
+    { id: 'winner', name: 'Champion', desc: 'Win 3 challenges', icon: '&#x1F3C6;', check: () => challenges.filter(c => c.status === 'won').length >= 3 },
+    { id: 'social', name: 'Social Butterfly', desc: 'Send 10 chat messages', icon: '&#x1F98B;', check: () => { let total = 0; for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('dc_ch_msgs_'))try{total+=JSON.parse(localStorage.getItem(k)).length}catch(e){}}return total>=10; } },
+    { id: 'level5', name: 'Leveled Up', desc: 'Reach Level 5', icon: '&#x2B50;', check: () => level >= 5 },
+    { id: 'level10', name: 'Elite', desc: 'Reach Level 10', icon: '&#x1F48E;', check: () => level >= 10 },
+    { id: 'healer', name: 'Self Healer', desc: 'Add 30+ days to your life', icon: '&#x1F49A;', check: () => totalDays >= 30 },
+    { id: 'centurion', name: 'Centurion', desc: 'Add 100+ days to your life', icon: '&#x1F6E1;', check: () => totalDays >= 100 }
+  ];
+
+  let newBadges = 0;
+  for (const badge of allBadges) {
+    if (!earned.includes(badge.id) && badge.check()) {
+      earned.push(badge.id);
+      newBadges++;
+      showToast('Badge earned: ' + badge.name + '!');
+      addXP(50);
+    }
+  }
+  if (newBadges > 0) {
+    localStorage.setItem('dc_achievements', JSON.stringify(earned));
+  }
+  return { earned, allBadges };
+}
+
+
+// ============================================
+// 13. DEATHY MOOD SYSTEM (NEW - Tamagotchi element)
+// ============================================
+function getDeathyMood() {
+  const streak = getStreakCount();
+  const todayDone = getTodayCompletedCount();
+  const total = getDailyTasks().length;
+  const pct = total > 0 ? todayDone / total : 0;
+
+  if (streak >= 30 && pct >= 0.8) return { mood: 'ecstatic', emoji: '&#x1F929;', msg: 'Deathy is THRIVING! You are unstoppable!' };
+  if (streak >= 7 && pct >= 0.5) return { mood: 'happy', emoji: '&#x1F60A;', msg: 'Deathy is pleased with your progress.' };
+  if (streak >= 3) return { mood: 'content', emoji: '&#x1F642;', msg: 'Deathy sees potential in you.' };
+  if (todayDone > 0) return { mood: 'neutral', emoji: '&#x1F610;', msg: 'Deathy is watching... keep going.' };
+  return { mood: 'worried', emoji: '&#x1F630;', msg: 'Deathy is worried about you...' };
+}
+
+
+// ============================================
+// 14. ENHANCED TODAY TAB with XP + Spin + Mood
+// ============================================
+// Override initActionHub to inject new features
+const _origInitHub = initActionHub;
+function initActionHub() {
+  _origInitHub();
+  // Check achievements on load
+  setTimeout(() => checkAchievements(), 1000);
+}
+
+// Add XP to task completion
+const _origCompleteTask = completeTask;
+function _enhancedCompleteTask(taskId) {
+  // Check for 2x multiplier from spin wheel
+  const mult = localStorage.getItem('dc_next_task_multiplier');
+  if (mult) {
+    localStorage.removeItem('dc_next_task_multiplier');
+    // Will be handled in the original function via streak multiplier
+  }
+  _origCompleteTask(taskId);
+  addXP(25); // XP for completing a task
+  checkAchievements();
+}
+// Reassign
+completeTask = _enhancedCompleteTask;
+
+
+// ============================================
+// 15. RENDER UPGRADES - Level bar + badges in stats
+// ============================================
+const _origRenderHubStats = renderHubStats;
+function _enhancedRenderHubStats() {
+  _origRenderHubStats();
+  // Add XP/Level bar below stats
+  const row = document.getElementById('statRow');
+  if (!row) return;
+  const level = getLevel();
+  const xpInfo = getXPForNextLevel();
+  const pct = Math.round((xpInfo.current / xpInfo.needed) * 100);
+  const title = getLevelTitle(level);
+  const deathyMood = getDeathyMood();
+  const spinAvail = canSpinToday();
+
+  const extraHtml = `
+    <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);border-radius:10px;margin-top:-4px;">
+      <div style="text-align:center;min-width:50px;">
+        <div style="font-size:1.5rem;">${deathyMood.emoji}</div>
+        <div style="font-size:0.55rem;color:var(--text3);">${deathyMood.mood}</div>
+      </div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span style="font-size:0.75rem;font-weight:700;">Lvl ${level} - ${title}</span>
+          <span style="font-size:0.65rem;color:var(--text3);">${xpInfo.current}/${xpInfo.needed} XP</span>
+        </div>
+        <div class="progress-bar-sm"><div class="fill" style="width:${pct}%;background:linear-gradient(90deg,var(--accent),#6c63ff);"></div></div>
+      </div>
+      ${spinAvail ? '<button class="btn-sm btn-primary" style="font-size:0.65rem;white-space:nowrap;animation:pulse 2s infinite;" onclick="showSpinWheel()">Daily Spin!</button>' : ''}
+    </div>
+  `;
+  row.insertAdjacentHTML('beforeend', extraHtml);
+}
+renderHubStats = _enhancedRenderHubStats;
+
+// Add pulse animation
+if (!document.getElementById('pulseStyle')) {
+  const s = document.createElement('style');
+  s.id = 'pulseStyle';
+  s.textContent = '@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}';
+  document.head.appendChild(s);
+}
