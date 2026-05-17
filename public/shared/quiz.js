@@ -1357,6 +1357,9 @@ function calculateResult() {
   document.getElementById('navPrice').classList.remove('hidden');
   document.getElementById('navCta').textContent = 'Recalculate';
 
+  // Track quiz completion date for staleness nudge
+  localStorage.setItem('dc_last_quiz_date', new Date().toISOString());
+
   renderResult();
   // Run daily evolution
   evolveGhost();
@@ -1615,6 +1618,34 @@ function renderResult() {
       <div style="color:var(--text3); font-size:0.85rem">Based on ${r.factors.length} analyzed factors</div>
     </div>
 
+    <!-- ===== ACTION HUB ===== -->
+    <div style="margin-top:32px; padding:24px; background:linear-gradient(135deg, var(--surface) 0%, var(--bg2) 100%); border:1px solid var(--border); border-radius:16px;">
+      <h3 style="text-align:center; margin-bottom:4px; font-size:1.1rem; color:var(--text);">What Now?</h3>
+      <p style="text-align:center; color:var(--text3); font-size:0.8rem; margin-bottom:16px;">You've got ${r.remainingYears} years. Make them count.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <button onclick="showPage('dashboard'); setTimeout(()=>showTab('myplan'),100);" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 12px; background:var(--green)15; border:2px solid var(--green); border-radius:12px; cursor:pointer; transition:transform 0.15s;">
+          <span style="font-size:1.5rem;">🎯</span>
+          <span style="font-size:0.9rem; font-weight:700; color:var(--green);">Start My Plan</span>
+          <span style="font-size:0.7rem; color:var(--text3);">Daily habits to push back your death date</span>
+        </button>
+        <button onclick="showPage('mansion');" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 12px; background:#ff6b6b15; border:2px solid #ff6b6b; border-radius:12px; cursor:pointer; transition:transform 0.15s;">
+          <span style="font-size:1.5rem;">⚔️</span>
+          <span style="font-size:0.9rem; font-weight:700; color:#ff6b6b;">Challenge a Friend</span>
+          <span style="font-size:0.7rem; color:var(--text3);">Compare death dates. Loser buys dinner.</span>
+        </button>
+        <button onclick="document.getElementById('productRecsSection')?.scrollIntoView({behavior:'smooth'})" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 12px; background:var(--gold)15; border:2px solid var(--gold); border-radius:12px; cursor:pointer; transition:transform 0.15s;">
+          <span style="font-size:1.5rem;">🛒</span>
+          <span style="font-size:0.9rem; font-weight:700; color:var(--gold);">Shop Fixes</span>
+          <span style="font-size:0.7rem; color:var(--text3);">Products matched to your worst factors</span>
+        </button>
+        <button onclick="showPage('quiz'); state.currentQuestion=0; renderQuestion();" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px 12px; background:#54a0ff15; border:2px solid #54a0ff; border-radius:12px; cursor:pointer; transition:transform 0.15s;">
+          <span style="font-size:1.5rem;">🔄</span>
+          <span style="font-size:0.9rem; font-weight:700; color:#54a0ff;">Retake Quiz</span>
+          <span style="font-size:0.7rem; color:var(--text3);">Lifestyle changed? Update your score.</span>
+        </button>
+      </div>
+    </div>
+
     <!-- MEET YOUR DEATHY -->
     <div style="margin-top:32px; text-align:center;">
       <h3 style="color:var(--accent); margin-bottom:4px; font-size:1.3rem;">Meet Your Ghost</h3>
@@ -1627,13 +1658,17 @@ function renderResult() {
       <div>
         <h4 style="color:var(--accent); margin-bottom:12px;">Reducing Your Lifespan</h4>
         ${negFactors.length === 0 ? '<p style="color:var(--text3)">No major negative factors detected!</p>' :
-          negFactors.map(f => `
+          negFactors.map(f => {
+            const matchedProduct = (typeof products !== 'undefined' ? products : []).find(p => p.category && f.label.toLowerCase().includes(p.category.toLowerCase()));
+            const productHtml = matchedProduct ? `<a href="${matchedProduct.url}" target="_blank" rel="noopener" onclick="trackProductClick&&trackProductClick('${matchedProduct.name}')" style="display:inline-flex; align-items:center; gap:4px; margin-top:6px; padding:4px 10px; background:var(--gold)15; border:1px solid var(--gold); border-radius:6px; font-size:0.7rem; color:var(--gold); text-decoration:none; font-weight:600;">🛒 Fix this</a>` : '';
+            return `
             <div class="factor-card negative">
               <div class="factor-impact negative">${f.impact} years</div>
               <div class="factor-name">${f.label}</div>
               <div class="factor-tip">${f.tip}</div>
+              ${productHtml}
             </div>
-          `).join('')}
+          `}).join('')}
       </div>
       <div>
         <h4 style="color:var(--green); margin-bottom:12px;">Extending Your Lifespan</h4>
@@ -1716,18 +1751,14 @@ function renderResult() {
     <!-- REFERRAL -->
     ${renderReferralCard()}
 
-    <div class="goal-setup" style="margin-top:48px;">
-      <h3 style="color:var(--green)">Want to Change Your Death Date?</h3>
-      <p style="color:var(--text2)">Set a longevity goal and get a personalised daily action plan. Watch your death date move as you build healthy habits.</p>
-      <button class="btn-green" onclick="showPage('dashboard'); setTimeout(()=>showTab('myplan'),100);" style="margin-top:12px; font-size:1.1rem; padding:14px 32px;">
-        Set My Longevity Goal
-      </button>
-    </div>
-
-    <div style="margin-top:48px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-      <button class="btn-primary" onclick="showPage('dashboard')" style="font-size:1.1rem; padding:16px 32px;">View Full Dashboard</button>
-      <button class="btn-green" onclick="saveProfile()">Save My Profile</button>
-      <button class="btn-secondary" onclick="showPage('pricing')">Upgrade for More Insights</button>
+    <!-- BOTTOM ACTION BAR -->
+    <div style="margin-top:48px; padding:20px; background:var(--surface); border:1px solid var(--border); border-radius:12px; text-align:center;">
+      <p style="color:var(--text2); font-size:0.85rem; margin-bottom:12px;">Ready to fight back?</p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn-green" onclick="showPage('dashboard'); setTimeout(()=>showTab('myplan'),100);" style="font-size:1rem; padding:12px 24px;">🎯 My Plan</button>
+        <button class="btn-primary" onclick="showPage('mansion');" style="font-size:1rem; padding:12px 24px;">⚔️ Challenge Friends</button>
+        <button class="btn-secondary" onclick="saveProfile()">💾 Save Profile</button>
+      </div>
     </div>
 
     <p style="color:var(--text3); font-size:0.8rem; margin-top:32px;">

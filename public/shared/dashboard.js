@@ -3,6 +3,9 @@ function renderDashboard() {
   const r = state.result;
   const scoreColor = r.lifeScore > 70 ? 'var(--green)' : r.lifeScore > 40 ? 'var(--gold)' : 'var(--accent)';
 
+  // Nudge bar: habits due + stale quiz + challenge prompt
+  renderDashboardNudge();
+
   document.getElementById('dashStats').innerHTML = `
     <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${r.remainingYears}</div><div class="stat-label">Years Remaining</div></div>
     <div class="stat-card"><div class="stat-num" style="color:${scoreColor}">${r.lifeScore}</div><div class="stat-label">Life Score</div></div>
@@ -1032,5 +1035,92 @@ function getPersonalisedHabits() {
   // Sort by impact descending
   matched.sort((a,b) => b.dailyImpact - a.dailyImpact);
   return matched;
+}
+
+// ===== DASHBOARD NUDGE BAR =====
+function renderDashboardNudge() {
+  let nudgeEl = document.getElementById('dashNudge');
+  if (!nudgeEl) {
+    // Create nudge container above stats
+    const statsEl = document.getElementById('dashStats');
+    if (!statsEl) return;
+    nudgeEl = document.createElement('div');
+    nudgeEl.id = 'dashNudge';
+    statsEl.parentNode.insertBefore(nudgeEl, statsEl);
+  }
+
+  const nudges = [];
+  const g = state.longevityGoal;
+  const today = getTodayKey();
+
+  // 1. Habits due today
+  if (g && g.habits) {
+    const todayLog = g.dailyLog ? g.dailyLog[today] : null;
+    const completedToday = todayLog ? Object.keys(todayLog).length : 0;
+    const totalHabits = g.habits.length;
+    const remaining = totalHabits - completedToday;
+    if (remaining > 0) {
+      nudges.push({
+        icon: '🎯',
+        text: remaining + ' habit' + (remaining !== 1 ? 's' : '') + ' due today',
+        action: "showTab('myplan')",
+        color: 'var(--green)',
+        priority: 1
+      });
+    }
+  }
+
+  // 2. Stale quiz (30+ days)
+  const lastQuiz = localStorage.getItem('dc_last_quiz_date');
+  if (lastQuiz) {
+    const daysSince = Math.floor((Date.now() - new Date(lastQuiz).getTime()) / 86400000);
+    if (daysSince >= 30) {
+      nudges.push({
+        icon: '🔄',
+        text: 'Quiz is ' + daysSince + ' days old. Lifestyle changed?',
+        action: "showPage('quiz'); state.currentQuestion=0; renderQuestion()",
+        color: '#54a0ff',
+        priority: 2
+      });
+    }
+  }
+
+  // 3. Challenge prompt (if has no active challenges)
+  if (!state.activeChallenges || state.activeChallenges.length === 0) {
+    nudges.push({
+      icon: '⚔️',
+      text: 'Challenge a friend. Who dies first?',
+      action: "showPage('mansion')",
+      color: '#ff6b6b',
+      priority: 3
+    });
+  }
+
+  // 4. No goal set
+  if (!g) {
+    nudges.push({
+      icon: '🎯',
+      text: 'No longevity goal set yet!',
+      action: "showTab('myplan')",
+      color: 'var(--gold)',
+      priority: 0
+    });
+  }
+
+  if (nudges.length === 0) { nudgeEl.innerHTML = ''; return; }
+
+  // Show top 2 nudges max
+  nudges.sort((a,b) => a.priority - b.priority);
+  const show = nudges.slice(0, 2);
+
+  nudgeEl.innerHTML = '<div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">' +
+    show.map(n =>
+      '<button onclick="' + n.action + '" style="flex:1; min-width:200px; display:flex; align-items:center; gap:8px; padding:10px 16px; background:' + n.color + '10; border:1px solid ' + n.color + '40; border-radius:10px; cursor:pointer; transition:transform 0.1s;">' +
+      '<span style="font-size:1.2rem;">' + n.icon + '</span>' +
+      '<span style="font-size:0.85rem; color:var(--text); font-weight:600;">' + n.text + '</span>' +
+      '<span style="margin-left:auto; font-size:0.7rem; color:' + n.color + ';">Go &rarr;</span>' +
+      '</button>'
+    ).join('') +
+    '</div>';
 }
 
