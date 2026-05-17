@@ -15,6 +15,8 @@ function initActionHub() {
   renderHubTabs();
   switchHubTab('today');
   updateHubGreeting();
+  // Check achievements on load
+  setTimeout(function() { checkAchievements(); }, 1000);
 }
 
 function updateHubGreeting() {
@@ -62,6 +64,18 @@ function renderHubStats() {
     <div class="stat-card"><div class="num"><span class="streak-fire">${streak}</span></div><div class="lbl">Streak <span class="combo-badge ${multClass}">${mult}x</span></div></div>
     <div class="stat-card"><div class="num" style="color:var(--gold);">${coins}</div><div class="lbl">Coins</div></div>
   `;
+
+  // Level bar + Deathy mood
+  var level = getLevel();
+  var xpInfo = getXPForNextLevel();
+  var xpPct = Math.round((xpInfo.current / xpInfo.needed) * 100);
+  var title = getLevelTitle(level);
+  var deathyMood = getDeathyMood();
+
+  row.insertAdjacentHTML('beforeend', '<div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);border-radius:10px;margin-top:-4px;">' +
+    '<div style="text-align:center;min-width:50px;"><div style="font-size:1.5rem;">' + deathyMood.emoji + '</div><div style="font-size:0.55rem;color:var(--text3);">' + deathyMood.mood + '</div></div>' +
+    '<div style="flex:1;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;"><span style="font-size:0.75rem;font-weight:700;">Lvl ' + level + ' - ' + title + '</span><span style="font-size:0.65rem;color:var(--text3);">' + xpInfo.current + '/' + xpInfo.needed + ' XP</span></div>' +
+    '<div class="progress-bar-sm"><div class="fill" style="width:' + xpPct + '%;background:linear-gradient(90deg,var(--accent),#6c63ff);"></div></div></div></div>');
 }
 
 function renderHubTabs() {
@@ -269,6 +283,10 @@ function completeTask(taskId) {
 
   // Check if all done - confetti!
   const allDone = tasks.every(t => t.done);
+
+  // Award XP and check achievements
+  addXP(25);
+  checkAchievements();
 
   showToast('+' + daysReward.toFixed(1) + ' days | +' + coinReward + ' coins' + (comboBonus > 0 ? ' | COMBO +' + comboBonus : '') + (firstBonus > 0 ? ' | FIRST TASK BONUS +' + firstBonus : ''));
 
@@ -751,7 +769,7 @@ function showChallengeChat(chId) {
 
   const content = document.getElementById('modalContent');
   if (!content) return;
-  document.getElementById('hubModal').classList.add('active');
+  document.getElementById('modal').classList.remove('hidden');
 
   function renderChat() {
     const msgs = getChallengeMessages(chId);
@@ -1603,15 +1621,7 @@ function addCoins(amount) {
   localStorage.setItem('dc_coins', String(Math.max(0, coins)));
 }
 
-// Daily free coins
-(function checkDailyCoins() {
-  const today = new Date().toDateString();
-  const lastCoin = localStorage.getItem('dc_last_daily_coin');
-  if (lastCoin !== today) {
-    addCoins(10);
-    localStorage.setItem('dc_last_daily_coin', today);
-  }
-})();
+// Daily coins removed - rewards earned through tasks only
 
 // BUG-005 FIX: Milestone reward granting system
 function checkMilestoneRewards() {
@@ -1774,6 +1784,8 @@ function canSpinToday() {
 
 function showSpinWheel() {
   if (!canSpinToday()) { showToast('Come back tomorrow for another spin!'); return; }
+  // Must complete at least 1 task today to earn the spin
+  if (getTodayCompletedCount() < 1) { showToast('Complete at least 1 task to unlock today\'s spin!'); return; }
   const modal = document.getElementById('modal');
   const content = document.getElementById('modalContent');
   if (!modal || !content) return;
@@ -1931,73 +1943,8 @@ function getDeathyMood() {
 
 
 // ============================================
-// 14. ENHANCED TODAY TAB with XP + Spin + Mood
+// 14. XP + ACHIEVEMENTS HOOKED INTO EXISTING FUNCTIONS
 // ============================================
-// Override initActionHub to inject new features
-const _origInitHub = initActionHub;
-function initActionHub() {
-  _origInitHub();
-  // Check achievements on load
-  setTimeout(() => checkAchievements(), 1000);
-}
-
-// Add XP to task completion
-const _origCompleteTask = completeTask;
-function _enhancedCompleteTask(taskId) {
-  // Check for 2x multiplier from spin wheel
-  const mult = localStorage.getItem('dc_next_task_multiplier');
-  if (mult) {
-    localStorage.removeItem('dc_next_task_multiplier');
-    // Will be handled in the original function via streak multiplier
-  }
-  _origCompleteTask(taskId);
-  addXP(25); // XP for completing a task
-  checkAchievements();
-}
-// Reassign
-completeTask = _enhancedCompleteTask;
-
-
-// ============================================
-// 15. RENDER UPGRADES - Level bar + badges in stats
-// ============================================
-const _origRenderHubStats = renderHubStats;
-function _enhancedRenderHubStats() {
-  _origRenderHubStats();
-  // Add XP/Level bar below stats
-  const row = document.getElementById('statRow');
-  if (!row) return;
-  const level = getLevel();
-  const xpInfo = getXPForNextLevel();
-  const pct = Math.round((xpInfo.current / xpInfo.needed) * 100);
-  const title = getLevelTitle(level);
-  const deathyMood = getDeathyMood();
-  const spinAvail = canSpinToday();
-
-  const extraHtml = `
-    <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--surface);border-radius:10px;margin-top:-4px;">
-      <div style="text-align:center;min-width:50px;">
-        <div style="font-size:1.5rem;">${deathyMood.emoji}</div>
-        <div style="font-size:0.55rem;color:var(--text3);">${deathyMood.mood}</div>
-      </div>
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-          <span style="font-size:0.75rem;font-weight:700;">Lvl ${level} - ${title}</span>
-          <span style="font-size:0.65rem;color:var(--text3);">${xpInfo.current}/${xpInfo.needed} XP</span>
-        </div>
-        <div class="progress-bar-sm"><div class="fill" style="width:${pct}%;background:linear-gradient(90deg,var(--accent),#6c63ff);"></div></div>
-      </div>
-      ${spinAvail ? '<button class="btn-sm btn-primary" style="font-size:0.65rem;white-space:nowrap;animation:pulse 2s infinite;" onclick="showSpinWheel()">Daily Spin!</button>' : ''}
-    </div>
-  `;
-  row.insertAdjacentHTML('beforeend', extraHtml);
-}
-renderHubStats = _enhancedRenderHubStats;
-
-// Add pulse animation
-if (!document.getElementById('pulseStyle')) {
-  const s = document.createElement('style');
-  s.id = 'pulseStyle';
-  s.textContent = '@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}';
-  document.head.appendChild(s);
-}
+// NOTE: Instead of overriding functions (causes hoisting bugs),
+// XP and achievements are called directly inside completeTask (line ~254)
+// and initActionHub (line ~17). The enhanced stats are built into renderHubStats.
