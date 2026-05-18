@@ -40,18 +40,18 @@ const DataStore = {
       bucketList: state.bucketList,
       longevityGoal: state.longevityGoal,
       deathyState: getDeathyState(),
-      socialCircle: JSON.parse(localStorage.getItem('dc_social_circle') || '[]'),
-      inviteCode: localStorage.getItem('dc_invite_code') || '',
-      referralCount: parseInt(localStorage.getItem('dc_referral_count') || '0'),
-      emailPrefs: JSON.parse(localStorage.getItem('dc_email_prefs') || '{}'),
-      notifEnabled: localStorage.getItem('dc_notif_enabled') === 'true',
-      soundOff: localStorage.getItem('dc_sound_off') === 'true',
+      socialCircle: JSON.parse(dcSync.syncGet('dc_social_circle') || '[]'),
+      inviteCode: dcSync.syncGet('dc_invite_code') || '',
+      referralCount: parseInt(dcSync.syncGet('dc_referral_count') || '0'),
+      emailPrefs: JSON.parse(dcSync.syncGet('dc_email_prefs') || '{}'),
+      notifEnabled: dcSync.syncGet('dc_notif_enabled') === 'true',
+      soundOff: dcSync.syncGet('dc_sound_off') === 'true',
       tier: state.userTier,
       savedAt: new Date().toISOString()
     };
 
     // Always save to localStorage (offline fallback)
-    try { localStorage.setItem('deathclock_profile', JSON.stringify(data)); } catch(e) {}
+    try { dcSync.syncSet('deathclock_profile', JSON.stringify(data)); } catch(e) {}
 
     // If paid + authenticated, also sync to Supabase
     if (this.isCloud()) {
@@ -98,7 +98,7 @@ const DataStore = {
     }
     // Fallback to localStorage
     try {
-      const saved = localStorage.getItem('deathclock_profile');
+      const saved = dcSync.syncGet('deathclock_profile');
       if (!saved) return false;
       const profile = JSON.parse(saved);
       this._applyProfile(profile, false);
@@ -117,12 +117,12 @@ const DataStore = {
         if (state.result.factors) state.result.factors.sort((a, b) => a.impact - b.impact);
       }
       if (p.deathy_state) saveDeathyState(p.deathy_state);
-      if (p.social_circle) localStorage.setItem('dc_social_circle', JSON.stringify(p.social_circle));
-      if (p.invite_code) localStorage.setItem('dc_invite_code', p.invite_code);
-      if (p.referral_count) localStorage.setItem('dc_referral_count', String(p.referral_count));
-      if (p.email_prefs) localStorage.setItem('dc_email_prefs', JSON.stringify(p.email_prefs));
-      if (p.notification_enabled) localStorage.setItem('dc_notif_enabled', 'true');
-      localStorage.setItem('dc_sound_off', p.sound_enabled === false ? 'true' : 'false');
+      if (p.social_circle) dcSync.syncSet('dc_social_circle', JSON.stringify(p.social_circle));
+      if (p.invite_code) dcSync.syncSet('dc_invite_code', p.invite_code);
+      if (p.referral_count) dcSync.syncSet('dc_referral_count', String(p.referral_count));
+      if (p.email_prefs) dcSync.syncSet('dc_email_prefs', JSON.stringify(p.email_prefs));
+      if (p.notification_enabled) dcSync.syncSet('dc_notif_enabled', 'true');
+      dcSync.syncSet('dc_sound_off', p.sound_enabled === false ? 'true' : 'false');
     } else {
       state.answers = p.answers || {};
       state.bucketList = p.bucketList || [];
@@ -244,13 +244,13 @@ if (document.readyState === 'loading') {
 
 function acceptCookies(level) {
   const consent = { level, timestamp: new Date().toISOString() };
-  try { localStorage.setItem('dc_cookie_consent', JSON.stringify(consent)); } catch(e) {}
+  try { dcSync.syncSet('dc_cookie_consent', JSON.stringify(consent)); } catch(e) {}
   document.getElementById('cookieBanner').classList.add('hidden');
 }
 
 function checkCookieConsent() {
   try {
-    const consent = localStorage.getItem('dc_cookie_consent');
+    const consent = dcSync.syncGet('dc_cookie_consent');
     if (!consent) {
       document.getElementById('cookieBanner').classList.remove('hidden');
     }
@@ -420,7 +420,7 @@ function showToast(msg) {
 
 function loadUserTier() {
   try {
-    const tier = localStorage.getItem('deathclock_tier');
+    const tier = dcSync.syncGet('deathclock_tier');
     if (tier) state.userTier = tier;
   } catch(e) {}
 }
@@ -470,7 +470,7 @@ function startStripeCheckout(tier) {
     // Add client reference for webhook matching
     const email = localStorage.getItem('dc_user_email') || '';
     const sep = url.includes('?') ? '&' : '?';
-    window.location.href = url + sep + 'prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + (localStorage.getItem('dc_invite_code') || 'none');
+    window.location.href = url + sep + 'prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + (dcSync.syncGet('dc_invite_code') || 'none');
   } else {
     // Fallback: demo mode until Stripe links are configured
     upgradeTier(tier);
@@ -488,7 +488,7 @@ function startStripeCheckout(tier) {
     // Upgrade user
     if (!state.userTier || state.userTier === 'free') {
       state.userTier = 'premium';
-      try { localStorage.setItem('deathclock_tier', 'premium'); } catch(e) {}
+      try { dcSync.syncSet('deathclock_tier', 'premium'); } catch(e) {}
     }
     // Show success toast
     setTimeout(() => {
@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function upgradeTier(tier) {
   state.userTier = tier;
-  try { localStorage.setItem('deathclock_tier', tier); } catch(e) {}
+  try { dcSync.syncSet('deathclock_tier', tier); } catch(e) {}
   closeModal();
   // Show confirmation
   const existing = document.querySelector('.motivation-toast');
@@ -556,12 +556,12 @@ function upgradeTier(tier) {
 // PROFILE PERSISTENCE
 // ============================================
 function saveGoalState() {
-  try { localStorage.setItem('deathclock_goals', JSON.stringify(state.longevityGoal)); } catch(e) {}
+  try { dcSync.syncSet('deathclock_goals', JSON.stringify(state.longevityGoal)); } catch(e) {}
 }
 
 function loadGoalState() {
   try {
-    const saved = localStorage.getItem('deathclock_goals');
+    const saved = dcSync.syncGet('deathclock_goals');
     if (saved) state.longevityGoal = JSON.parse(saved);
   } catch(e) {}
 }
@@ -584,7 +584,7 @@ function saveProfile() {
 function loadProfile() {
   // Sync load from localStorage for initial render (async cloud load happens via DataStore)
   try {
-    const saved = localStorage.getItem('deathclock_profile');
+    const saved = dcSync.syncGet('deathclock_profile');
     if (!saved) return false;
     const profile = JSON.parse(saved);
     state.answers = profile.answers || {};
@@ -614,7 +614,7 @@ function loadProfile() {
   let exitShown = false;
   function showExitIntent() {
     if (exitShown) return;
-    if (localStorage.getItem('dc_exit_dismissed')) return;
+    if (dcSync.syncGet('dc_exit_dismissed')) return;
     if (state.result) return; // Don't show if they already have results
     exitShown = true;
     const modal = document.getElementById('modal');
@@ -639,7 +639,7 @@ function captureExitEmail() {
   const email = document.getElementById('exitEmail')?.value.trim();
   if (!email || !email.includes('@')) { showToast('Enter a valid email'); return; }
   localStorage.setItem('dc_exit_email', email);
-  localStorage.setItem('dc_exit_dismissed', '1');
+  dcSync.syncSet('dc_exit_dismissed', '1');
   if (supaClient) {
     supaClient.from('dc_email_captures').insert({ email, source: 'exit_intent', created_at: new Date().toISOString() }).then(() => {});
   }
@@ -652,8 +652,8 @@ function captureExitEmail() {
 // ============================================
 function checkRetakePrompt() {
   if (!state.result) return;
-  const lastCalc = localStorage.getItem('dc_last_calc_date');
-  if (!lastCalc) { localStorage.setItem('dc_last_calc_date', new Date().toISOString()); return; }
+  const lastCalc = dcSync.syncGet('dc_last_calc_date');
+  if (!lastCalc) { dcSync.syncSet('dc_last_calc_date', new Date().toISOString()); return; }
   const daysSince = (Date.now() - new Date(lastCalc).getTime()) / (1000*60*60*24);
   if (daysSince >= 30 && !sessionStorage.getItem('dc_retake_shown')) {
     sessionStorage.setItem('dc_retake_shown', '1');
@@ -671,13 +671,13 @@ function checkRetakePrompt() {
 // ============================================
 function updateStreak() {
   const today = new Date().toDateString();
-  const lastVisit = localStorage.getItem('dc_last_visit');
-  let streak = parseInt(localStorage.getItem('dc_visit_streak') || '0');
+  const lastVisit = dcSync.syncGet('dc_last_visit');
+  let streak = parseInt(dcSync.syncGet('dc_visit_streak') || '0');
   if (lastVisit !== today) {
     const yesterday = new Date(Date.now() - 86400000).toDateString();
     streak = (lastVisit === yesterday) ? streak + 1 : 1;
-    localStorage.setItem('dc_visit_streak', streak.toString());
-    localStorage.setItem('dc_last_visit', today);
+    dcSync.syncSet('dc_visit_streak', streak.toString());
+    dcSync.syncSet('dc_last_visit', today);
   }
   return streak;
 }
@@ -751,7 +751,7 @@ function updateNavDots() {
 function showDailyTopTip() {
   if (!state.result || !state.result.factors) return;
   var today = new Date().toDateString();
-  var lastShown = localStorage.getItem('dc_daily_tip_date');
+  var lastShown = dcSync.syncGet('dc_daily_tip_date');
   if (lastShown === today) return;
 
   // Find the worst factor (most negative impact)
@@ -759,7 +759,7 @@ function showDailyTopTip() {
   var worst = factors[0];
   if (!worst || worst.impact >= 0) return;
 
-  localStorage.setItem('dc_daily_tip_date', today);
+  dcSync.syncSet('dc_daily_tip_date', today);
 
   // Build upgrade suggestions per category
   var upgrades = {
