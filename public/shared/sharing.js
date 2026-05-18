@@ -414,10 +414,10 @@ function scheduleDeathyReminder() {
       if (!g) return;
       const today = getTodayKey();
       const logged = (g.logs[today] || []).length;
-      const lastNag = localStorage.getItem('dc_last_nag');
+      const lastNag = dcSync.syncGet('dc_last_nag');
       const now = Date.now();
       if (logged === 0 && (!lastNag || now - parseInt(lastNag) > 6*60*60*1000)) {
-        localStorage.setItem('dc_last_nag', now.toString());
+        dcSync.syncSet('dc_last_nag', now.toString());
       }
     }
   });
@@ -430,7 +430,7 @@ function saveInitialDeathy() {
   if (dcSync.syncGet('dc_initial_deathy')) return; // Already saved
   const params = getDeathyParams();
   const hScore = calcDeathyHealth(params);
-  localStorage.setItem('dc_initial_deathy', JSON.stringify({
+  dcSync.syncSet('dc_initial_deathy', JSON.stringify({
     params, hScore, date: new Date().toISOString().split('T')[0]
   }));
 }
