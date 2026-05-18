@@ -954,14 +954,14 @@ function submitClinicQuote() {
       console.log('Clinic quote saved to Supabase');
     }).catch(() => {
       // Fallback: store locally
-      const quotes = JSON.parse(localStorage.getItem('dc_clinic_quotes') || '[]');
+      const quotes = JSON.parse(dcSync.syncGet('dc_clinic_quotes') || '[]');
       quotes.push(quoteData);
-      localStorage.setItem('dc_clinic_quotes', JSON.stringify(quotes));
+      dcSync.syncSet('dc_clinic_quotes', JSON.stringify(quotes));
     });
   } else {
-    const quotes = JSON.parse(localStorage.getItem('dc_clinic_quotes') || '[]');
+    const quotes = JSON.parse(dcSync.syncGet('dc_clinic_quotes') || '[]');
     quotes.push(quoteData);
-    localStorage.setItem('dc_clinic_quotes', JSON.stringify(quotes));
+    dcSync.syncSet('dc_clinic_quotes', JSON.stringify(quotes));
   }
 
   // Show success
