@@ -374,13 +374,13 @@ function requestNotificationPermission() {
   if (Notification.permission === 'granted') {
     scheduleDeathyReminder();
     showToast('Deathy will haunt your notifications now.');
-    localStorage.setItem('dc_notif_enabled', 'true');
+    dcSync.syncSet('dc_notif_enabled', 'true');
   } else if (Notification.permission !== 'denied') {
     Notification.requestPermission().then(perm => {
       if (perm === 'granted') {
         scheduleDeathyReminder();
         showToast('Deathy will haunt your notifications now.');
-        localStorage.setItem('dc_notif_enabled', 'true');
+        dcSync.syncSet('dc_notif_enabled', 'true');
       }
     });
   }
@@ -409,7 +409,7 @@ function scheduleDeathyReminder() {
   
   // Also check on page visibility change
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && localStorage.getItem('dc_notif_enabled') === 'true') {
+    if (document.visibilityState === 'visible' && dcSync.syncGet('dc_notif_enabled') === 'true') {
       const g = state.longevityGoal;
       if (!g) return;
       const today = getTodayKey();
@@ -427,7 +427,7 @@ function scheduleDeathyReminder() {
 // BEFORE/AFTER DEATHY SLIDER
 // ============================================
 function saveInitialDeathy() {
-  if (localStorage.getItem('dc_initial_deathy')) return; // Already saved
+  if (dcSync.syncGet('dc_initial_deathy')) return; // Already saved
   const params = getDeathyParams();
   const hScore = calcDeathyHealth(params);
   localStorage.setItem('dc_initial_deathy', JSON.stringify({
@@ -436,7 +436,7 @@ function saveInitialDeathy() {
 }
 
 function renderBeforeAfter() {
-  const initial = localStorage.getItem('dc_initial_deathy');
+  const initial = dcSync.syncGet('dc_initial_deathy');
   if (!initial) return '';
   
   try {
@@ -524,7 +524,7 @@ const DeathySounds = {
   },
   
   play(type) {
-    if (!this._enabled || localStorage.getItem('dc_sound_off') === 'true') return;
+    if (!this._enabled || dcSync.syncGet('dc_sound_off') === 'true') return;
     const ctx = this.getCtx();
     if (!ctx) return;
     
@@ -603,7 +603,7 @@ const DeathySounds = {
 // ============================================
 function renderDeathPool() {
   const circle = getSocialCircle();
-  if (circle.length < 2 && !localStorage.getItem('dc_pool_joined')) return '';
+  if (circle.length < 2 && !dcSync.syncGet('dc_pool_joined')) return '';
   
   const poolMembers = [...circle];
   if (state.result) {
@@ -625,7 +625,7 @@ function renderDeathPool() {
       <p style="text-align:center; color:var(--text2); font-size:0.85rem; margin-bottom:4px;">Commit to living longer or pay up. $0.99/month.</p>
       <p style="text-align:center; color:var(--text3); font-size:0.75rem; margin-bottom:16px;">The person who improves the least subsidizes everyone else's subscription. You're going to die soon anyway - might as well fund someone who's actually trying.</p>
       
-      ${!localStorage.getItem('dc_pool_joined') ? `
+      ${!dcSync.syncGet('dc_pool_joined') ? `
         <div style="text-align:center; margin-bottom:16px;">
           <button class="btn-gold" onclick="joinDeathPool()" style="padding:12px 28px; font-size:1rem;">
             💀 Join the Death Pool - $0.99/mo
@@ -635,7 +635,7 @@ function renderDeathPool() {
       ` : `
         <div style="text-align:center; margin-bottom:16px; padding:8px; background:var(--surface); border-radius:8px;">
           <span style="color:var(--green);">✓ You're in the pool</span>
-          <span style="font-size:0.8rem; color:var(--text3);"> | Started ${localStorage.getItem('dc_pool_date') || 'today'}</span>
+          <span style="font-size:0.8rem; color:var(--text3);"> | Started ${dcSync.syncGet('dc_pool_date') || 'today'}</span>
         </div>
       `}
       
@@ -661,8 +661,8 @@ function renderDeathPool() {
 }
 
 function joinDeathPool() {
-  localStorage.setItem('dc_pool_joined', 'true');
-  localStorage.setItem('dc_pool_date', new Date().toISOString().split('T')[0]);
+  dcSync.syncSet('dc_pool_joined', 'true');
+  dcSync.syncSet('dc_pool_date', new Date().toISOString().split('T')[0]);
   showToast('Welcome to the Death Pool! Now improve or pay up.');
   // Re-render social circle area
   const el = document.getElementById('socialCircle');
@@ -754,22 +754,22 @@ function showEmailDigestPreview() {
 // REFERRAL REWARDS
 // ============================================
 function getReferralCount() {
-  return parseInt(localStorage.getItem('dc_referral_count') || '0');
+  return parseInt(dcSync.syncGet('dc_referral_count') || '0');
 }
 
 function addReferralCount() {
   const count = getReferralCount() + 1;
-  localStorage.setItem('dc_referral_count', count.toString());
+  dcSync.syncSet('dc_referral_count', count.toString());
   if (count >= 3 && state.userTier === 'free') {
     // Unlock one extra habit
-    localStorage.setItem('dc_referral_unlocked', 'true');
+    dcSync.syncSet('dc_referral_unlocked', 'true');
     showToast('🎉 3 referrals! You unlocked 1 bonus premium habit for free!');
   }
   return count;
 }
 
 function getReferralUnlocked() {
-  return localStorage.getItem('dc_referral_unlocked') === 'true';
+  return dcSync.syncGet('dc_referral_unlocked') === 'true';
 }
 
 function renderReferralCard() {
@@ -801,8 +801,8 @@ function renderReferralCard() {
 // ============================================
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 function creditReferrer() {
-  const referredBy = localStorage.getItem('dc_referred_by');
-  if (!referredBy || localStorage.getItem('dc_referral_credited')) return;
+  const referredBy = dcSync.syncGet('dc_referred_by');
+  if (!referredBy || dcSync.syncGet('dc_referral_credited')) return;
   // Log referral to Supabase if available
   if (supaClient) {
     supaClient.from('dc_profiles').select('id, referral_count').eq('invite_code', referredBy).single()
@@ -816,20 +816,20 @@ function creditReferrer() {
       }).catch(() => {});
   }
   // Also track locally for the referrer when they next load
-  localStorage.setItem('dc_referral_credited', 'true');
+  dcSync.syncSet('dc_referral_credited', 'true');
   // Store in a shared referral log (localStorage based for demo)
   try {
-    const log = JSON.parse(localStorage.getItem('dc_referral_log') || '[]');
+    const log = JSON.parse(dcSync.syncGet('dc_referral_log') || '[]');
     log.push({ code: referredBy, at: new Date().toISOString() });
-    localStorage.setItem('dc_referral_log', JSON.stringify(log));
+    dcSync.syncSet('dc_referral_log', JSON.stringify(log));
   } catch(e) {}
 }
 
 // Check referral code from URL
   const urlParams = new URLSearchParams(window.location.search);
   const refCode = urlParams.get('ref');
-  if (refCode && !localStorage.getItem('dc_referred_by')) {
-    localStorage.setItem('dc_referred_by', refCode);
+  if (refCode && !dcSync.syncGet('dc_referred_by')) {
+    dcSync.syncSet('dc_referred_by', refCode);
     // The referrer gets credit when this user completes the calculator
   }
   checkCookieConsent();
