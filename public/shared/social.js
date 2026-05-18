@@ -18,7 +18,7 @@ function captureEmail() {
     milestone_alerts: document.getElementById('emailPrefMilestone')?.checked || false,
     tips: document.getElementById('emailPrefTips')?.checked || false
   };
-  localStorage.setItem('dc_email_prefs', JSON.stringify(prefs));
+  dcSync.syncSet('dc_email_prefs', JSON.stringify(prefs));
   const container = document.getElementById('emailCaptureSection');
   if (container) container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--green);"><strong>&#10003; Locked in.</strong> We\'ll haunt your inbox at ' + escHtml(email) + '</div>';
 }
@@ -99,16 +99,16 @@ function generateInviteCode() {
 }
 
 function getOrCreateInviteCode() {
-  let code = localStorage.getItem('dc_invite_code');
-  if (!code) { code = generateInviteCode(); localStorage.setItem('dc_invite_code', code); }
+  let code = dcSync.syncGet('dc_invite_code');
+  if (!code) { code = generateInviteCode(); dcSync.syncSet('dc_invite_code', code); }
   return code;
 }
 function getSocialCircle() {
-  return JSON.parse(localStorage.getItem('dc_social_circle') || '[]');
+  return JSON.parse(dcSync.syncGet('dc_social_circle') || '[]');
 }
 
 function saveSocialCircle(circle) {
-  localStorage.setItem('dc_social_circle', JSON.stringify(circle));
+  dcSync.syncSet('dc_social_circle', JSON.stringify(circle));
 }
 
 function addFriendToCircle(name, deathYear, lifeScore) {
@@ -156,7 +156,7 @@ function renderSocialCircle() {
   // Show choice: global leaderboard or friends circle
   const circle = getSocialCircle();
   const hasCircle = circle.length > 0;
-  const showGlobal = localStorage.getItem('dc_leaderboard_pref') === 'global';
+  const showGlobal = dcSync.syncGet('dc_leaderboard_pref') === 'global';
 
   if (!hasCircle && !showGlobal) {
     return `
@@ -164,7 +164,7 @@ function renderSocialCircle() {
       <h3 style="color:var(--gold); margin-bottom:8px;">&#9760; Who Dies First?</h3>
       <p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px;">Competition makes everything better. Even death.</p>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-        <button class="btn-primary" onclick="localStorage.setItem('dc_leaderboard_pref','global'); document.getElementById('socialCircle').innerHTML = renderSocialCircle();" style="padding:12px 24px;">
+        <button class="btn-primary" onclick="dcSync.syncSet('dc_leaderboard_pref', 'global'); document.getElementById('socialCircle').innerHTML = renderSocialCircle();" style="padding:12px 24px;">
           &#127758; Global Leaderboard<br><span style="font-size:0.75rem; opacity:0.8;">Compete with the world</span>
         </button>
         <button class="btn-gold" onclick="showInviteModal()" style="padding:12px 24px;">
@@ -645,7 +645,7 @@ function checkJoinCodeInURL() {
   const joinCode = params.get('join');
   if (joinCode) {
     // Store for after login
-    localStorage.setItem('dc_pending_join', joinCode);
+    dcSync.syncSet('dc_pending_join', joinCode);
     showToast('Join code detected! Sign in to join the haunting group.');
     showPage('profile');
   }
@@ -653,9 +653,9 @@ function checkJoinCodeInURL() {
 
 // Process pending join after login
 async function processPendingJoin() {
-  const code = localStorage.getItem('dc_pending_join');
+  const code = dcSync.syncGet('dc_pending_join');
   if (!code) return;
-  localStorage.removeItem('dc_pending_join');
+  dcSync.syncRemove('dc_pending_join');
 
   const user = await getSocialSession();
   if (!user || !state.socialProfile) return;
