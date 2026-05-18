@@ -288,9 +288,7 @@ function deleteGoal(i) {
   showTab('goals');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.add('hidden');
-}
+// closeModal() defined in core.js - removed duplicate (BUG-021 FIX)
 
 // ============================================
 function generateCheatDeathPlan(result, targetAge) {
