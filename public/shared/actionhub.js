@@ -599,7 +599,9 @@ function renderChallengeCard(ch) {
         </div>
       </div>
       <div class="progress-bar-sm" style="margin-top:8px;"><div class="fill" style="width:${pct}%;background:var(--green);"></div></div>
-      ${ch.status === 'active' ? '<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm btn-green" style="flex:1;font-size:0.7rem;" onclick="logChallengeProgress(\'' + ch.id + '\')">Log Progress</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="showChallengeChat(\'' + ch.id + '\')">Chat</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="nudgeChallenger(\'' + ch.id + '\')">Nudge</button></div>' : ''}
+      ${ch.photos && ch.photos.length > 0 ? '<div style="display:flex;gap:4px;margin-top:8px;overflow-x:auto;">' + ch.photos.slice(0,4).map(p => '<img src="' + p + '" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">').join('') + (ch.photos.length > 4 ? '<div style="width:40px;height:40px;background:var(--bg);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text3);">+' + (ch.photos.length-4) + '</div>' : '') + '</div>' : ''}
+      ${ch.notes ? '<div style="font-size:0.7rem;color:var(--text2);margin-top:6px;padding:6px 8px;background:var(--bg);border-radius:6px;border-left:3px solid var(--gold);max-height:40px;overflow:hidden;">' + escHtml(ch.notes.substring(0,80)) + (ch.notes.length > 80 ? '...' : '') + '</div>' : ''}
+      ${ch.status === 'active' ? '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;"><button class="btn-sm btn-green" style="flex:1;font-size:0.7rem;" onclick="logChallengeProgress(\'' + ch.id + '\')">Log Progress</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="showChallengeChat(\'' + ch.id + '\')">Chat</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="nudgeChallenger(\'' + ch.id + '\')">Nudge</button><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="showEditChallenge(\'' + ch.id + '\')">Edit</button></div>' : ''}
       ${ch.status === 'lost' && ch.pendingAccept ? '<div style="margin-top:8px;padding:8px;background:rgba(233,69,96,0.1);border-radius:8px;text-align:center;"><div style="font-size:0.75rem;color:var(--accent);margin-bottom:6px;">' + ch.stake + ' coins transferred to ' + escHtml(ch.opponent) + '</div><button class="btn-sm btn-secondary" style="font-size:0.7rem;" onclick="acceptChallengeLoss(\'' + ch.id + '\')">Accept Loss</button></div>' : ''}
       ${ch.status === 'won' ? '<div style="margin-top:8px;padding:8px;background:rgba(78,204,163,0.1);border-radius:8px;text-align:center;font-size:0.75rem;color:var(--green);font-weight:700;">+' + ch.pot + ' coins won!</div>' : ''}
       ${ch.status !== 'active' ? '<button class="btn-sm btn-secondary" style="font-size:0.7rem;margin-top:6px;width:100%;" onclick="showChallengeChat(\'' + ch.id + '\')">View Chat</button>' : ''}
@@ -751,6 +753,132 @@ function acceptChallengeLoss(chId) {
 
 function nudgeChallenger(chId) {
   showToast('Nudge sent! Your opponent has been poked.');
+}
+
+// ===== EDIT CHALLENGE =====
+function showEditChallenge(chId) {
+  const challenges = getChallenges();
+  const ch = challenges.find(c => c.id === chId);
+  if (!ch) return;
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  if (!modal || !content) return;
+  modal.classList.remove('hidden');
+
+  const notes = ch.notes || '';
+  const photos = ch.photos || [];
+
+  content.innerHTML = `
+    <h3 style="margin-bottom:4px;">Edit Challenge</h3>
+    <div style="font-size:0.75rem;color:var(--text3);margin-bottom:16px;">${escHtml(ch.type)}</div>
+
+    <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Challenge description</label>
+    <input type="text" id="editChType" value="${escHtml(ch.type)}" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);margin-bottom:12px;font-size:0.85rem;">
+
+    <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Target</label>
+    <input type="number" id="editChTarget" value="${ch.target || 7}" min="1" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);margin-bottom:12px;font-size:0.85rem;">
+
+    <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Adjust your progress</label>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+      <button class="btn-sm btn-secondary" onclick="adjustChallengeProgress('${chId}', -1)" style="font-size:1rem;padding:8px 16px;">-</button>
+      <div style="flex:1;text-align:center;font-size:1.3rem;font-weight:800;color:var(--green);" id="editChProgress">${ch.progress || 0}</div>
+      <button class="btn-sm btn-green" onclick="adjustChallengeProgress('${chId}', 1)" style="font-size:1rem;padding:8px 16px;">+</button>
+    </div>
+
+    <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Notes</label>
+    <textarea id="editChNotes" rows="3" placeholder="Add notes about your progress..." style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);margin-bottom:12px;font-size:0.85rem;resize:vertical;">${escHtml(notes)}</textarea>
+
+    <label style="font-size:0.8rem;color:var(--text3);display:block;margin-bottom:4px;">Photos (proof)</label>
+    <div id="editChPhotos" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      ${photos.map((p, i) => '<div style="position:relative;"><img src="' + p + '" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"><button onclick="removeChallengePhoto(\'' + chId + '\',' + i + ')" style="position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:0.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">X</button></div>').join('')}
+    </div>
+    <label style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:0.8rem;color:var(--text2);margin-bottom:16px;">
+      &#128247; Add Photo
+      <input type="file" accept="image/*" style="display:none;" onchange="addChallengePhoto('${chId}', this)">
+    </label>
+
+    <button class="btn-primary" style="width:100%;padding:12px;" onclick="saveEditChallenge('${chId}')">Save Changes</button>
+    <button class="btn-secondary" style="width:100%;margin-top:8px;color:var(--accent);" onclick="confirmDeleteChallenge('${chId}')">Delete Challenge</button>
+    <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeModal()">Cancel</button>
+  `;
+}
+
+var _tempChallengeProgress = {};
+
+function adjustChallengeProgress(chId, delta) {
+  const challenges = getChallenges();
+  const ch = challenges.find(c => c.id === chId);
+  if (!ch) return;
+  if (_tempChallengeProgress[chId] === undefined) _tempChallengeProgress[chId] = ch.progress || 0;
+  _tempChallengeProgress[chId] = Math.max(0, _tempChallengeProgress[chId] + delta);
+  var el = document.getElementById('editChProgress');
+  if (el) el.textContent = _tempChallengeProgress[chId];
+}
+
+function addChallengePhoto(chId, input) {
+  if (!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    // Resize to max 400px for storage
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var maxW = 400;
+      var scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+      var challenges = getChallenges();
+      var ch = challenges.find(c => c.id === chId);
+      if (!ch) return;
+      if (!ch.photos) ch.photos = [];
+      ch.photos.push(dataUrl);
+      saveChallenges(challenges);
+      showEditChallenge(chId); // re-render
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function removeChallengePhoto(chId, idx) {
+  var challenges = getChallenges();
+  var ch = challenges.find(c => c.id === chId);
+  if (!ch || !ch.photos) return;
+  ch.photos.splice(idx, 1);
+  saveChallenges(challenges);
+  showEditChallenge(chId);
+}
+
+function saveEditChallenge(chId) {
+  var challenges = getChallenges();
+  var ch = challenges.find(c => c.id === chId);
+  if (!ch) return;
+  ch.type = document.getElementById('editChType')?.value || ch.type;
+  ch.target = parseInt(document.getElementById('editChTarget')?.value) || ch.target;
+  ch.notes = document.getElementById('editChNotes')?.value || '';
+  if (_tempChallengeProgress[chId] !== undefined) {
+    ch.progress = _tempChallengeProgress[chId];
+    delete _tempChallengeProgress[chId];
+  }
+  saveChallenges(challenges);
+  closeModal();
+  showToast('Challenge updated!');
+  var c = document.getElementById('hubContent');
+  if (c) renderChallengesTab(c);
+}
+
+function confirmDeleteChallenge(chId) {
+  if (!confirm('Delete this challenge? Any staked coins will be lost.')) return;
+  var challenges = getChallenges();
+  challenges = challenges.filter(c => c.id !== chId);
+  saveChallenges(challenges);
+  closeModal();
+  showToast('Challenge deleted.');
+  var c = document.getElementById('hubContent');
+  if (c) renderChallengesTab(c);
 }
 
 // Challenge chat/proof system
@@ -987,62 +1115,128 @@ function getHealthData() {
   try { return JSON.parse(localStorage.getItem('dc_health_data') || '{}'); } catch(e) { return {}; }
 }
 
+function getHealthHistory() {
+  try { return JSON.parse(localStorage.getItem('dc_health_history') || '[]'); } catch(e) { return []; }
+}
+
 function renderHealthTab(c) {
   const hd = getHealthData();
-  const connected = hd.provider || null;
+  const history = getHealthHistory();
+  const today = new Date().toISOString().slice(0,10);
+  const hasToday = hd.lastSync && hd.lastSync.slice(0,10) === today;
+
+  // 7-day sparkline data
+  const last7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000).toISOString().slice(0,10);
+    const entry = history.find(h => h.date === d) || {};
+    last7.push({ date: d, steps: entry.steps || 0, sleep: entry.sleep || 0, water: entry.water || 0, exercise: entry.exercise || 0 });
+  }
+  const maxSteps = Math.max(10000, ...last7.map(d => d.steps));
 
   c.innerHTML = `
+    <div class="hub-panel" style="margin-bottom:16px; border: ${hasToday ? '1px solid var(--border)' : '2px solid var(--accent)'};">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3>${hasToday ? "Today's Log" : "Log Today's Health"}</h3>
+        ${hasToday ? '<span style="font-size:0.7rem;color:var(--green);font-weight:600;">Logged today</span>' : '<span style="font-size:0.7rem;color:var(--accent);font-weight:600;animation:dotPulse 2s infinite;">Not logged yet</span>'}
+      </div>
+      ${!hasToday ? '<p style="color:var(--accent);font-size:0.8rem;margin-bottom:16px;font-weight:600;">Logging daily health data helps auto-complete tasks and adds days to your life!</p>' : ''}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);display:block;margin-bottom:4px;">Steps</label>
+          <input type="number" id="hlSteps" value="${hd.steps || ''}" placeholder="e.g. 8500" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);display:block;margin-bottom:4px;">Hours slept</label>
+          <input type="number" id="hlSleep" value="${hd.sleep || ''}" placeholder="e.g. 7.5" step="0.5" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);display:block;margin-bottom:4px;">Weight (kg)</label>
+          <input type="number" id="hlWeight" value="${hd.weight || ''}" placeholder="e.g. 75" step="0.1" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);display:block;margin-bottom:4px;">Water (glasses)</label>
+          <input type="number" id="hlWater" value="${hd.water || ''}" placeholder="e.g. 8" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);display:block;margin-bottom:4px;">Exercise (mins)</label>
+          <input type="number" id="hlExercise" value="${hd.exercise || ''}" placeholder="e.g. 30" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);display:block;margin-bottom:4px;">Mood (1-10)</label>
+          <input type="number" id="hlMood" value="${hd.mood || ''}" placeholder="1-10" min="1" max="10" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;">
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:16px;font-size:1rem;padding:14px;" onclick="saveHealthInline()">
+        ${hasToday ? 'Update Health Log' : 'Log Today'}
+      </button>
+    </div>
+
     <div class="hub-panel" style="margin-bottom:16px;">
-      <h3>Connect Health Tracker</h3>
-      <p style="color:var(--text3);font-size:0.8rem;margin-bottom:16px;">Auto-complete tasks and verify challenges with real health data.</p>
-
-      <div class="health-row ${connected === 'google_fit' ? 'connected' : ''}" onclick="connectGoogleFit()">
-        <div class="health-icon">&#x1F3C3;</div>
-        <div style="flex:1;">
-          <div style="font-weight:600;font-size:0.85rem;">Google Fit</div>
-          <div style="font-size:0.7rem;color:var(--text3);">Steps, heart rate, sleep, weight</div>
+      <h3>Health Dashboard</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
+        <div style="text-align:center;padding:12px 8px;background:var(--bg);border-radius:8px;">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--green);">${hd.steps ? hd.steps.toLocaleString() : '--'}</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Steps</div>
+          <div class="progress-bar-sm" style="margin-top:4px;"><div class="fill" style="width:${Math.min(100,((hd.steps||0)/10000)*100)}%;background:var(--green);"></div></div>
         </div>
-        <span style="font-size:0.7rem;color:${connected === 'google_fit' ? 'var(--green)' : 'var(--text3)'};">${connected === 'google_fit' ? 'Connected' : 'Connect'}</span>
+        <div style="text-align:center;padding:12px 8px;background:var(--bg);border-radius:8px;">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--accent);">${hd.sleep || '--'}</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Hrs sleep</div>
+          <div class="progress-bar-sm" style="margin-top:4px;"><div class="fill" style="width:${Math.min(100,((hd.sleep||0)/8)*100)}%;background:var(--accent);"></div></div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:var(--bg);border-radius:8px;">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--gold);">${hd.water || '--'}</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Glasses H2O</div>
+          <div class="progress-bar-sm" style="margin-top:4px;"><div class="fill" style="width:${Math.min(100,((hd.water||0)/8)*100)}%;background:var(--gold);"></div></div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:var(--bg);border-radius:8px;">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--green);">${hd.exercise || '--'}</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Mins exercise</div>
+          <div class="progress-bar-sm" style="margin-top:4px;"><div class="fill" style="width:${Math.min(100,((hd.exercise||0)/30)*100)}%;background:var(--green);"></div></div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:var(--bg);border-radius:8px;">
+          <div style="font-size:1.3rem;font-weight:800;color:${hd.mood >= 7 ? 'var(--green)' : hd.mood >= 4 ? 'var(--gold)' : 'var(--accent)'};">${hd.mood || '--'}</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Mood</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:var(--bg);border-radius:8px;">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--gold);">${hd.weight ? hd.weight + 'kg' : '--'}</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Weight</div>
+        </div>
       </div>
+      ${hd.lastSync ? '<p style="font-size:0.65rem;color:var(--text3);margin-top:8px;text-align:center;">Last logged: ' + new Date(hd.lastSync).toLocaleString() + '</p>' : ''}
+    </div>
 
-      <div class="health-row" onclick="showManualImport()">
-        <div class="health-icon">&#x1F4CB;</div>
-        <div style="flex:1;">
-          <div style="font-weight:600;font-size:0.85rem;">Apple Health (CSV)</div>
-          <div style="font-size:0.7rem;color:var(--text3);">Export from Apple Health app</div>
-        </div>
-        <span style="font-size:0.7rem;color:var(--text3);">Import</span>
-      </div>
-
-      <div class="health-row" onclick="showManualEntry()">
-        <div class="health-icon">&#x270D;</div>
-        <div style="flex:1;">
-          <div style="font-weight:600;font-size:0.85rem;">Manual Entry</div>
-          <div style="font-size:0.7rem;color:var(--text3);">Log steps, sleep, weight manually</div>
-        </div>
-        <span style="font-size:0.7rem;color:var(--text3);">Enter</span>
+    <div class="hub-panel" style="margin-bottom:16px;">
+      <h3>7-Day Steps</h3>
+      <div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:12px;">
+        ${last7.map(d => {
+          const pct = Math.max(5, (d.steps / maxSteps) * 100);
+          const isToday = d.date === today;
+          return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:0.55rem;color:var(--text3);">' + (d.steps > 0 ? (d.steps/1000).toFixed(1) + 'k' : '-') + '</div><div style="width:100%;height:' + pct + '%;background:' + (isToday ? 'var(--green)' : 'var(--border)') + ';border-radius:4px;min-height:4px;"></div><div style="font-size:0.5rem;color:var(--text3);">' + d.date.slice(8) + '</div></div>';
+        }).join('')}
       </div>
     </div>
 
     <div class="hub-panel">
-      <h3>Today's Health Summary</h3>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;">
-        <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px;">
-          <div style="font-size:1.5rem;font-weight:800;color:var(--green);">${hd.steps || '--'}</div>
-          <div style="font-size:0.7rem;color:var(--text3);">Steps</div>
-          <div class="progress-bar-sm" style="margin-top:4px;"><div class="fill" style="width:${Math.min(100,((hd.steps||0)/10000)*100)}%;background:var(--green);"></div></div>
+      <h3 style="font-size:0.85rem;color:var(--text3);">Data Sources</h3>
+      <div class="health-row" onclick="connectGoogleFit()" style="opacity:0.6;">
+        <div class="health-icon">&#x1F3C3;</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:0.8rem;">Google Fit</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Coming soon</div>
         </div>
-        <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px;">
-          <div style="font-size:1.5rem;font-weight:800;color:var(--accent);">${hd.sleep || '--'}</div>
-          <div style="font-size:0.7rem;color:var(--text3);">Hours slept</div>
-          <div class="progress-bar-sm" style="margin-top:4px;"><div class="fill" style="width:${Math.min(100,((hd.sleep||0)/8)*100)}%;background:var(--accent);"></div></div>
-        </div>
-        <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px;">
-          <div style="font-size:1.5rem;font-weight:800;color:var(--gold);">${hd.weight ? hd.weight + 'kg' : '--'}</div>
-          <div style="font-size:0.7rem;color:var(--text3);">Weight</div>
-        </div>
+        <span style="font-size:0.65rem;color:var(--text3);">Soon</span>
       </div>
-      ${hd.lastSync ? '<p style="font-size:0.7rem;color:var(--text3);margin-top:12px;text-align:center;">Last synced: ' + new Date(hd.lastSync).toLocaleString() + '</p>' : ''}
+      <div class="health-row" onclick="showManualImport()" style="opacity:0.6;">
+        <div class="health-icon">&#x1F4CB;</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:0.8rem;">Apple Health CSV</div>
+          <div style="font-size:0.65rem;color:var(--text3);">Coming soon</div>
+        </div>
+        <span style="font-size:0.65rem;color:var(--text3);">Soon</span>
+      </div>
     </div>
   `;
 }
@@ -1083,16 +1277,40 @@ function showManualEntry() {
   `;
 }
 
+function saveHealthInline() {
+  const steps = parseInt(document.getElementById('hlSteps')?.value) || 0;
+  const sleep = parseFloat(document.getElementById('hlSleep')?.value) || 0;
+  const weight = parseFloat(document.getElementById('hlWeight')?.value) || 0;
+  const water = parseInt(document.getElementById('hlWater')?.value) || 0;
+  const exercise = parseInt(document.getElementById('hlExercise')?.value) || 0;
+  const mood = parseInt(document.getElementById('hlMood')?.value) || 0;
+  const today = new Date().toISOString().slice(0,10);
+  const hd = { steps, sleep, weight, water, exercise, mood, lastSync: new Date().toISOString(), provider: 'manual' };
+  localStorage.setItem('dc_health_data', JSON.stringify(hd));
+
+  // Save to history
+  var history = getHealthHistory();
+  var idx = history.findIndex(h => h.date === today);
+  var entry = { date: today, steps, sleep, weight, water, exercise, mood };
+  if (idx >= 0) history[idx] = entry; else history.push(entry);
+  // Keep last 90 days
+  history = history.filter(h => (Date.now() - new Date(h.date).getTime()) < 90 * 86400000);
+  localStorage.setItem('dc_health_history', JSON.stringify(history));
+
+  const autoCompleted = autoCompleteHealthTasks(steps, sleep, weight);
+  showToast('Health logged!' + (autoCompleted > 0 ? ' ' + autoCompleted + ' tasks auto-completed!' : ''));
+  if (typeof playSound === 'function') playSound('complete');
+  renderHubStats();
+  switchHubTab('health');
+}
+
 function saveHealthEntry() {
   const steps = parseInt(document.getElementById('healthSteps')?.value) || 0;
   const sleep = parseFloat(document.getElementById('healthSleep')?.value) || 0;
   const weight = parseFloat(document.getElementById('healthWeight')?.value) || 0;
   const hd = { steps, sleep, weight, lastSync: new Date().toISOString(), provider: 'manual' };
   localStorage.setItem('dc_health_data', JSON.stringify(hd));
-
-  // BUG-010 FIX: Use improved auto-complete matching
   const autoCompleted = autoCompleteHealthTasks(steps, sleep, weight);
-
   closeModal();
   showToast('Health data saved!' + (autoCompleted > 0 ? ' ' + autoCompleted + ' tasks auto-completed!' : ''));
   renderHubStats();
