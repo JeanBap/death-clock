@@ -468,7 +468,7 @@ function startStripeCheckout(tier) {
   const url = links[tier];
   if (url && !url.includes('PLACEHOLDER')) {
     // Add client reference for webhook matching
-    const email = localStorage.getItem('dc_user_email') || '';
+    const email = dcSync.syncGet('dc_user_email') || '';
     const sep = url.includes('?') ? '&' : '?';
     window.location.href = url + sep + 'prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + (dcSync.syncGet('dc_invite_code') || 'none');
   } else {
@@ -627,7 +627,7 @@ function loadProfile() {
       '<p style="color:var(--text2); margin-bottom:16px;">Get your personalised death date + a free longevity plan sent to your inbox.</p>' +
       '<input type="email" id="exitEmail" placeholder="your@email.com" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:12px; font-size:1rem;">' +
       '<button class="btn-primary" style="width:100%; padding:14px;" onclick="captureExitEmail()">Send Me My Results</button>' +
-      '<p style="margin-top:12px; font-size:0.75rem; color:var(--text3); cursor:pointer;" onclick="closeModal(); localStorage.setItem(\'dc_exit_dismissed\',\'1\');">No thanks, I prefer ignorance</p>' +
+      '<p style="margin-top:12px; font-size:0.75rem; color:var(--text3); cursor:pointer;" onclick="closeModal(); dcSync.syncSet(\'dc_exit_dismissed\',\'1\');">No thanks, I prefer ignorance</p>' +
       '</div>';
   }
   document.addEventListener('mouseout', function(e) {
@@ -638,7 +638,7 @@ function loadProfile() {
 function captureExitEmail() {
   const email = document.getElementById('exitEmail')?.value.trim();
   if (!email || !email.includes('@')) { showToast('Enter a valid email'); return; }
-  localStorage.setItem('dc_exit_email', email);
+  dcSync.syncSet('dc_exit_email', email);
   dcSync.syncSet('dc_exit_dismissed', '1');
   if (supaClient) {
     supaClient.from('dc_email_captures').insert({ email, source: 'exit_intent', created_at: new Date().toISOString() }).then(() => {});
