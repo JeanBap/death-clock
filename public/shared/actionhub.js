@@ -439,10 +439,10 @@ function launchConfetti() {
 // 3. CHALLENGE SYSTEM - Polymarket style (#2, #9)
 // ============================================
 function getChallenges() {
-  try { return JSON.parse(localStorage.getItem('dc_challenges') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(dcSync.syncGet('dc_challenges') || '[]'); } catch(e) { return []; }
 }
 function saveChallenges(ch) {
-  localStorage.setItem('dc_challenges', JSON.stringify(ch));
+  dcSync.syncSet('dc_challenges', JSON.stringify(ch));
 }
 
 // Challenge pricing: 1 free/week, coins after, referral = 4 weeks free
@@ -1007,7 +1007,7 @@ function sendChallengePhoto(chId, fileInput) {
 
 // Group challenges (#9)
 function getGroupChallenges() {
-  try { return JSON.parse(localStorage.getItem('dc_group_challenges') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(dcSync.syncGet('dc_group_challenges') || '[]'); } catch(e) { return []; }
 }
 
 function renderGroupChallenges() {
@@ -1045,7 +1045,7 @@ function logGroupProgress(groupId) {
   } else {
     showToast('Progress logged! ' + g.progress + '/' + g.target + ' ' + g.unit);
   }
-  localStorage.setItem('dc_group_challenges', JSON.stringify(groups));
+  dcSync.syncSet('dc_group_challenges', JSON.stringify(groups));
   switchHubTab('challenges');
 }
 
@@ -1087,7 +1087,7 @@ function createGroupChallenge() {
     members: [state.supaUser?.email?.split('@')[0] || 'You'],
     created: new Date().toISOString()
   });
-  localStorage.setItem('dc_group_challenges', JSON.stringify(groups));
+  dcSync.syncSet('dc_group_challenges', JSON.stringify(groups));
   closeModal();
   showToast('Team "' + name + '" created!');
   switchHubTab('challenges');
