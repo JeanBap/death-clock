@@ -53,6 +53,7 @@ if ('serviceWorker' in navigator) {
       <a class="nav-tab" href="/about.html">About</a>
       <a class="nav-tab" href="/blog/">Blog</a>
       <a class="nav-tab hidden" id="navDash" href="/dashboard.html">Action Hub</a>
+      <a class="nav-tab hidden" id="navAI" href="/ai-assistant.html">AI Coach</a>
       <a class="nav-tab hidden" id="navPrice" href="/pricing.html">Upgrade</a>
       <a class="nav-tab" id="profileBtn" href="/profile.html">Sign In</a>
       <a class="nav-tab hidden" id="navMansion" href="/mansion.html">Mansion</a>
@@ -70,6 +71,10 @@ if ('serviceWorker' in navigator) {
     <div style="text-align:center;">
       <div class="timer-label">Time remaining</div>
       <div class="timer-text" id="navTimer">--:--:--:--</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="timer-label">Death age</div>
+      <div id="navDeathAge" style="font-size:0.8rem; font-weight:700; color:var(--accent);">--</div>
     </div>
     <div style="text-align:right;">
       <div class="timer-label">Ghost</div>
@@ -178,7 +183,13 @@ function pageInit() {
   if (state.result) {
     document.getElementById('navDash')?.classList.remove('hidden');
     document.getElementById('navPrice')?.classList.remove('hidden');
+    // Show AI Coach for paid users or whitelisted emails
+    var email = state.supaUser?.email || '';
+    if (state.userTier !== 'free' || email === 'papoutsis89@gmail.com' || email === 'yanni@indeedflex.com') {
+      document.getElementById('navAI')?.classList.remove('hidden');
+    }
     showStreakWelcome();
+    showDailyTopTip();
   }
   // Show notification dots
   updateNavDots();

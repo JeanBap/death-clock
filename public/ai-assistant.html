@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Longevity Assistant - Death Clock</title>
+<meta name="description" content="Your personal AI longevity advisor. Get tailored recommendations to extend your lifespan based on your quiz results.">
+<meta name="theme-color" content="#e94560">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://www.googleapis.com https://oauth2.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src https://js.stripe.com;">
+<link rel="canonical" href="https://death-clock.app/ai-assistant.html">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="AI Longevity Assistant - Death Clock">
+<meta property="og:description" content="Your personal AI longevity advisor. Personalised recommendations to live longer.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://death-clock.app/ai-assistant.html">
+<link rel="stylesheet" href="/shared/styles.css">
+<script>
+if ("serviceWorker" in navigator) { navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(reg){reg.unregister();});}); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* === AI ASSISTANT CHAT === */
+.chat-container{max-width:720px;margin:0 auto;display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:400px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 0;scroll-behavior:smooth}
+.chat-messages::-webkit-scrollbar{width:6px}
+.chat-messages::-webkit-scrollbar-track{background:transparent}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.msg{display:flex;gap:12px;margin-bottom:20px;animation:msgIn 0.3s ease}
+.msg.user{flex-direction:row-reverse}
+@keyframes msgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.msg-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.msg-avatar.bot{background:linear-gradient(135deg,#1a1a2e,#2a1a2e);border:2px solid var(--accent)}
+.msg-avatar.user{background:var(--surface);border:2px solid var(--green)}
+
+.msg-bubble{max-width:80%;padding:16px 20px;border-radius:16px;line-height:1.6;font-size:0.9rem}
+.msg.bot .msg-bubble{background:var(--surface);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text)}
+.msg.user .msg-bubble{background:linear-gradient(135deg,rgba(233,69,96,0.15),rgba(233,69,96,0.08));border:1px solid rgba(233,69,96,0.3);border-top-right-radius:4px;color:var(--text)}
+
+.msg-bubble h4{color:var(--accent);font-size:0.95rem;margin-bottom:8px}
+.msg-bubble ul{margin:8px 0;padding-left:20px}
+.msg-bubble li{margin-bottom:6px}
+.msg-bubble strong{color:var(--text)}
+.msg-bubble .year-gain{display:inline-block;background:rgba(78,204,163,0.15);color:var(--green);padding:2px 10px;border-radius:12px;font-weight:700;font-size:0.85rem;margin:2px 0}
+.msg-bubble .year-loss{display:inline-block;background:rgba(233,69,96,0.15);color:var(--accent);padding:2px 10px;border-radius:12px;font-weight:700;font-size:0.85rem;margin:2px 0}
+.msg-bubble .callout{background:rgba(78,204,163,0.08);border:1px solid rgba(78,204,163,0.2);border-radius:12px;padding:12px 16px;margin:12px 0}
+.msg-bubble .callout-warn{background:rgba(233,69,96,0.08);border:1px solid rgba(233,69,96,0.2);border-radius:12px;padding:12px 16px;margin:12px 0}
+.msg-bubble .callout h5,.msg-bubble .callout-warn h5{font-size:0.85rem;margin-bottom:4px}
+.msg-bubble .week-plan{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:10px 0}
+.msg-bubble .week-plan h5{color:var(--gold);font-size:0.85rem;margin-bottom:6px}
+.msg-bubble .week-plan p{font-size:0.82rem;color:var(--text2);margin:4px 0}
+
+/* Typing indicator */
+.typing-indicator{display:flex;gap:12px;margin-bottom:20px}
+.typing-dots{display:flex;gap:5px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:16px;border-top-left-radius:4px}
+.typing-dots span{width:8px;height:8px;background:var(--text3);border-radius:50%;animation:bounce 1.4s infinite}
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+
+/* Input area */
+.chat-input-area{padding:16px 0;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end}
+.chat-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:12px 20px;color:var(--text);font-size:0.9rem;outline:none;resize:none;max-height:100px;min-height:46px;line-height:1.5;transition:border-color 0.2s}
+.chat-input:focus{border-color:var(--accent)}
+.chat-input::placeholder{color:var(--text3)}
+.chat-send{width:46px;height:46px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0}
+.chat-send:hover{background:#d13a52;transform:scale(1.05)}
+.chat-send:active{transform:scale(0.95)}
+.chat-send:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+/* Suggestion chips */
+.suggestions{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
+.chip{padding:8px 16px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text2);font-size:0.8rem;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.chip:hover{border-color:var(--accent);color:var(--text);background:rgba(233,69,96,0.05)}
+
+/* Upgrade gate */
+.gate-overlay{position:fixed;inset:0;z-index:1000;background:rgba(10,10,15,0.95);display:flex;align-items:center;justify-content:center}
+.gate-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;text-align:center;max-width:420px;width:90%}
+.gate-card h2{font-size:1.5rem;margin-bottom:8px}
+.gate-card p{color:var(--text2);margin-bottom:24px;line-height:1.6}
+.gate-card .btn-primary{display:inline-block;text-decoration:none}
+
+@media(max-width:600px){
+  .chat-container{height:calc(100vh - 180px)}
+  .msg-bubble{max-width:88%;padding:12px 16px}
+  .msg-avatar{width:34px;height:34px;font-size:1.1rem}
+  .suggestions{gap:6px}
+  .chip{padding:6px 12px;font-size:0.75rem}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link" style="position:absolute;left:-9999px;">Skip to main content</a>
+<nav id="mainNav">
+  <div class="container">
+    <div class="logo" onclick="window.location.href='/'" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36" style="flex-shrink:0" aria-hidden="true"><defs><radialGradient id="lgG" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#e8e8e8"/></radialGradient></defs><path d="M100 20C55 20 30 60 30 100c0 30 0 60 0 80q15-15 25 0 10 15 20 0 10-15 25 0 15-15 25 0 10 15 20 0 10-15 25 0c0-20 0-50 0-80 0-40-25-80-70-80z" fill="url(#lgG)"/><ellipse cx="75" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="80" cy="80" rx="6" ry="7" fill="#fff"/><ellipse cx="125" cy="85" rx="18" ry="20" fill="#1a1a2e"/><ellipse cx="130" cy="80" rx="6" ry="7" fill="#fff"/><path d="M80 120Q100 145 120 120" fill="none" stroke="#1a1a2e" stroke-width="3" stroke-linecap="round"/><ellipse cx="108" cy="132" rx="10" ry="14" fill="#e94560"/><path d="M108 125Q108 146 108 146" fill="none" stroke="#c4304d" stroke-width="1.5"/></svg><span>Death</span>Clock</div>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-tab" href="/">Home</a>
+      <a class="nav-tab" href="/about.html">About</a>
+      <a class="nav-tab" href="/blog/">Blog</a>
+      <a class="nav-tab" id="navDash" href="/dashboard.html">Action Hub</a>
+      <a class="nav-tab hidden" id="navPrice" href="/pricing.html">Upgrade</a>
+      <a class="nav-tab" id="profileBtn" href="/profile.html">Sign In</a>
+      <a class="nav-tab hidden" id="navMansion" href="/mansion.html">Mansion</a>
+    </div>
+  </div>
+</nav>
+<div aria-live="polite" id="srAnnounce" style="position:absolute;left:-9999px;"></div>
+<div class="deathy-timer-bar" id="deathyTimerBar">
+  <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+    <div class="deathy-walking" id="deathyWalker"></div>
+    <div id="deathySpeechBubble" style="font-size:0.7rem;color:var(--text2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.8;font-style:italic;"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div style="text-align:center;"><div class="timer-label">Time remaining</div><div class="timer-text" id="navTimer">--:--:--:--</div></div>
+    <div style="text-align:right;"><div class="timer-label">Ghost</div><div id="navGhostHealth" style="font-size:0.8rem;font-weight:700;">--</div></div>
+  </div>
+</div>
+
+<main id="main">
+<section style="padding-top:24px;padding-bottom:60px;">
+  <div class="container" style="max-width:800px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+      <div>
+        <h1 style="font-size:clamp(1.3rem,3.5vw,1.7rem);margin-bottom:2px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4em;">💀</span> Deathy - AI Longevity Assistant
+        </h1>
+        <p style="color:var(--text3);font-size:0.82rem;">Personalised longevity advice based on your quiz results</p>
+      </div>
+      <a href="/dashboard.html" class="btn-secondary btn-sm" style="text-decoration:none;">Back to Action Hub</a>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="suggestions" id="suggestions"></div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chatInput" placeholder="Ask Deathy about your longevity..." rows="1" maxlength="500"></textarea>
+        <button class="chat-send" id="sendBtn" onclick="handleSend()" aria-label="Send message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="gateOverlay" class="gate-overlay" style="display:none;">
+  <div class="gate-card">
+    <div style="font-size:3rem;margin-bottom:16px;">💀🔒</div>
+    <h2>Unlock Your AI Longevity Advisor</h2>
+    <p>Deathy's personalised AI analysis is available for premium members. Upgrade to get tailored longevity recommendations, actionable plans, and year-by-year improvement strategies.</p>
+    <a href="/pricing.html" class="btn-primary" style="padding:12px 32px;font-size:1rem;">Upgrade Now</a>
+    <p style="margin-top:16px;font-size:0.8rem;color:var(--text3);">Redirecting to pricing in <span id="gateCountdown">5</span>s...</p>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p><strong>Disclaimer:</strong> Death Clock is for educational and motivational purposes only. Not medical advice.</p>
+    <div style="margin-top:12px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap;">
+      <a href="/blog/">Blog</a><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a>
+    </div>
+    <p style="margin-top:12px;">&copy; 2026 Death Clock.</p>
+  </div>
+</footer>
+
+<script src="/shared/core.js"></script>
+<script src="/shared/quiz.js"></script>
+<script src="/shared/deathy.js"></script>
+<script>
+
+/* ============================================================
+   KNOWLEDGE BASE - Detailed recommendations per category
+   ============================================================ */
+const KNOWLEDGE_BASE = {
+  fitness: {
+    tips: [
+      { text: 'Walk at least 7,000 steps daily - associated with 50-70% lower mortality risk.', difficulty: 'easy', source: 'JAMA 2021' },
+      { text: 'Do 150 minutes of moderate aerobic exercise per week (brisk walking, cycling, swimming).', difficulty: 'moderate', source: 'WHO Guidelines 2020' },
+      { text: 'Include 2+ sessions of resistance/strength training per week to maintain muscle mass and bone density.', difficulty: 'moderate', source: 'British Journal of Sports Medicine 2022' },
+      { text: 'High-intensity interval training (HIIT) 1-2x/week can improve cardiovascular fitness by 15-20% in 8 weeks.', difficulty: 'hard', source: 'Circulation 2019' },
+      { text: 'Stand and move for 5 minutes every hour to counteract sedentary damage.', difficulty: 'easy', source: 'American Journal of Epidemiology 2018' },
+      { text: 'Flexibility and balance work (yoga, tai chi) 2-3x/week reduces fall risk by 30% as you age.', difficulty: 'easy', source: 'Cochrane Review 2019' },
+      { text: 'Zone 2 cardio (conversational pace) for 30+ min builds mitochondrial health and fat-burning capacity.', difficulty: 'moderate', source: 'Dr Peter Attia / Outlive 2023' },
+      { text: 'Grip strength is one of the strongest predictors of longevity. Train it with farmer carries and dead hangs.', difficulty: 'easy', source: 'BMJ 2018' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Walk 20 min daily. Do 2 sets of bodyweight squats, push-ups, and planks every other day.' },
+      { week: 2, plan: 'Walk 30 min daily. Add resistance bands or light weights. Try one yoga session.' },
+      { week: 3, plan: 'Walk 30 min + add one 20-min jog or cycle. Strength train 3x this week.' },
+      { week: 4, plan: 'Hit 7,000 steps daily. Strength train 3x, add one HIIT session (15 min). Active recovery with stretching.' }
+    ]
+  },
+  diet: {
+    tips: [
+      { text: 'Adopt a Mediterranean-style diet: olive oil, fish, vegetables, legumes, whole grains, nuts. Linked to 25% lower mortality.', difficulty: 'moderate', source: 'PREDIMED Trial, NEJM 2018' },
+      { text: 'Eat 5+ servings of vegetables and fruits daily. Each extra serving beyond 5 adds diminishing but real benefit.', difficulty: 'easy', source: 'The Lancet 2017' },
+      { text: 'Limit ultra-processed foods (packaged snacks, sugary drinks, processed meats). Each 10% increase in UPF raises mortality risk 14%.', difficulty: 'moderate', source: 'BMJ 2019' },
+      { text: 'Eat fatty fish (salmon, sardines, mackerel) 2-3x per week for omega-3s. Linked to 15% lower cardiovascular mortality.', difficulty: 'easy', source: 'JAMA Internal Medicine 2020' },
+      { text: 'Practice time-restricted eating: eat within a 10-12 hour window. Benefits metabolic health markers.', difficulty: 'moderate', source: 'Cell Metabolism 2020' },
+      { text: 'Consume 25-30g of fibre daily from whole foods. Most people get only half this amount.', difficulty: 'easy', source: 'The Lancet 2019' },
+      { text: 'Drink green tea or coffee (3-5 cups daily) - both associated with lower all-cause mortality.', difficulty: 'easy', source: 'European Heart Journal 2020' },
+      { text: 'Reduce sodium to <2,300mg/day and increase potassium from fruits and vegetables.', difficulty: 'moderate', source: 'AHA Guidelines 2021' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Replace one processed meal daily with a whole-food meal. Add a handful of nuts as a snack. Cook with olive oil.' },
+      { week: 2, plan: 'Add 2 servings of vegetables to lunch and dinner. Eat fish twice this week. Cut sugary drinks.' },
+      { week: 3, plan: 'Try meal prepping Mediterranean bowls. Add legumes (beans, lentils) 3x this week. Increase fibre.' },
+      { week: 4, plan: 'Full Mediterranean pattern most days. 5+ veg/fruit servings. Fish 2-3x. Minimal ultra-processed food.' }
+    ]
+  },
+  sleep: {
+    tips: [
+      { text: 'Aim for 7-9 hours of sleep. Both short (<6h) and long (>9h) sleep increase mortality risk significantly.', difficulty: 'moderate', source: 'Sleep 2017' },
+      { text: 'Keep a consistent sleep schedule - same bedtime and wake time, even on weekends. Irregular sleep raises cardiovascular risk 27%.', difficulty: 'moderate', source: 'JACC 2020' },
+      { text: 'Keep your bedroom cool (18-19C / 65-67F) for optimal deep sleep quality.', difficulty: 'easy', source: 'Sleep Medicine Reviews 2019' },
+      { text: 'Avoid screens 1 hour before bed or use blue-light filtering. Blue light suppresses melatonin by up to 50%.', difficulty: 'easy', source: 'PNAS 2014' },
+      { text: 'Get morning sunlight within 30 min of waking - sets your circadian clock and improves sleep onset by 20+ minutes.', difficulty: 'easy', source: 'Journal of Clinical Sleep Medicine 2019' },
+      { text: 'Avoid caffeine after 2pm. Its half-life is 5-7 hours, meaning half is still active at bedtime.', difficulty: 'easy', source: 'Sleep Medicine Reviews 2018' },
+      { text: 'A hot shower or bath 1-2 hours before bed lowers core body temperature and speeds sleep onset by 36%.', difficulty: 'easy', source: 'Sleep Medicine Reviews 2019' },
+      { text: 'Limit alcohol before bed - even 1-2 drinks reduce REM sleep by 20-40% and fragment deep sleep.', difficulty: 'moderate', source: 'JMIR Mental Health 2018' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Set a fixed bedtime and wake time. Remove phone from bedroom. Get morning sunlight.' },
+      { week: 2, plan: 'No caffeine after 2pm. Start a wind-down routine: dim lights 1hr before bed, light reading or stretching.' },
+      { week: 3, plan: 'Optimise bedroom: cool temperature, blackout curtains or sleep mask, earplugs if needed.' },
+      { week: 4, plan: 'Track your sleep quality. Maintain all habits. Aim for 7.5+ hours consistently.' }
+    ]
+  },
+  mental: {
+    tips: [
+      { text: 'Practice mindfulness meditation 10-20 min daily. Reduces cortisol by 25% and improves telomere length.', difficulty: 'easy', source: 'Psychoneuroendocrinology 2019' },
+      { text: 'Maintain a gratitude journal - write 3 things you are grateful for each night. Linked to better sleep and lower inflammation.', difficulty: 'easy', source: 'Journal of Personality and Social Psychology 2018' },
+      { text: 'Seek professional help for persistent anxiety or depression. Treatment can add 3-7 years of healthy life.', difficulty: 'moderate', source: 'The Lancet Psychiatry 2020' },
+      { text: 'Spend time in nature 2+ hours per week. Significantly reduces cortisol and blood pressure.', difficulty: 'easy', source: 'Scientific Reports 2019' },
+      { text: 'Learn something new regularly - learning a language or instrument builds cognitive reserve against dementia.', difficulty: 'moderate', source: 'Neurology 2021' },
+      { text: 'Practice deep breathing (4-7-8 technique) when stressed: inhale 4s, hold 7s, exhale 8s. Activates parasympathetic nervous system.', difficulty: 'easy', source: 'Journal of Alternative Medicine 2019' },
+      { text: 'Limit news and social media consumption to fixed times. Doom-scrolling elevates cortisol and anxiety.', difficulty: 'easy', source: 'Health Communication 2021' },
+      { text: 'Purpose in life is a longevity predictor. Volunteer, mentor, or pursue meaningful projects.', difficulty: 'moderate', source: 'JAMA Network Open 2019' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Download a meditation app. Do 5 min daily. Start a gratitude journal before bed.' },
+      { week: 2, plan: 'Increase meditation to 10 min. Schedule one nature walk. Set social media time limits.' },
+      { week: 3, plan: 'Try deep breathing during stressful moments. Plan a new learning activity. Connect with a friend.' },
+      { week: 4, plan: '15-20 min meditation daily. Nature time 2x/week. Reflect on your sense of purpose.' }
+    ]
+  },
+  social: {
+    tips: [
+      { text: 'Social isolation increases mortality risk by 26% - equivalent to smoking 15 cigarettes a day.', difficulty: 'easy', source: 'PLOS Medicine 2010' },
+      { text: 'Maintain 3-5 close relationships. Quality matters more than quantity for longevity.', difficulty: 'moderate', source: 'PNAS 2016' },
+      { text: 'Join a group activity: sports club, book club, volunteer org, religious/spiritual community. Structured social time is most protective.', difficulty: 'moderate', source: 'BMC Public Health 2020' },
+      { text: 'Have meaningful conversations (not just small talk) at least 3x per week. Deep conversations boost wellbeing significantly.', difficulty: 'easy', source: 'Psychological Science 2019' },
+      { text: 'Marriage or long-term partnership is associated with 10-15% lower mortality, particularly for men.', difficulty: 'hard', source: 'Annals of Behavioral Medicine 2019' },
+      { text: 'Pet ownership (especially dogs) increases physical activity and reduces loneliness. Dog owners walk 22 min more per day.', difficulty: 'moderate', source: 'Circulation 2019' },
+      { text: 'Schedule regular social check-ins - a weekly phone/video call with a friend or family member.', difficulty: 'easy', source: 'Journals of Gerontology 2020' },
+      { text: 'Volunteering 2+ hours per week reduces mortality risk by 40% in older adults.', difficulty: 'moderate', source: 'BMC Public Health 2020' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Reach out to one old friend. Schedule a catch-up call or coffee. Text 2 people you care about.' },
+      { week: 2, plan: 'Join one group activity (class, club, volunteer shift). Have one deep conversation this week.' },
+      { week: 3, plan: 'Host or attend a small gathering. Make your social time a recurring calendar event.' },
+      { week: 4, plan: 'Maintain weekly social commitments. Plan a group activity for next month. Consider volunteering.' }
+    ]
+  },
+  substances: {
+    tips: [
+      { text: 'Quitting smoking adds 6-10 years of life expectancy. Benefits begin within 20 minutes of your last cigarette.', difficulty: 'hard', source: 'NEJM 2013' },
+      { text: 'Limit alcohol to 1 drink/day (women) or 2/day (men). Even moderate drinking has recently been linked to increased cancer risk.', difficulty: 'moderate', source: 'The Lancet 2018' },
+      { text: 'If you smoke, nicotine replacement therapy (patches, gum) doubles your chance of quitting successfully.', difficulty: 'moderate', source: 'Cochrane Review 2018' },
+      { text: 'Heavy drinking (>14 drinks/week) reduces life expectancy by 1-5 years depending on consumption level.', difficulty: 'hard', source: 'The Lancet 2018' },
+      { text: 'Cannabis smoke contains many of the same carcinogens as tobacco. Consider edibles or vaporising if you use cannabis.', difficulty: 'moderate', source: 'European Respiratory Journal 2018' },
+      { text: 'Binge drinking (5+ drinks in one session) is more damaging than the same amount spread over a week.', difficulty: 'moderate', source: 'BMC Medicine 2019' },
+      { text: 'E-cigarettes/vaping are less harmful than smoking but not harmless. Long-term effects are still unknown.', difficulty: 'moderate', source: 'NASEM Report 2018' },
+      { text: 'Combine quitting strategies: medication + counselling has 3x the success rate of willpower alone.', difficulty: 'moderate', source: 'Cochrane Review 2019' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Track current usage honestly. Set a quit date or reduction target. Tell someone your goal.' },
+      { week: 2, plan: 'Reduce intake by 25%. Replace triggers with alternatives (chewing gum, sparkling water, walks).' },
+      { week: 3, plan: 'Reduce by another 25%. Consider professional support (GP, quitline, counsellor).' },
+      { week: 4, plan: 'Maintain reduced level or attempt full quit. Reward yourself for progress. Plan for setbacks.' }
+    ]
+  },
+  medical: {
+    tips: [
+      { text: 'Get regular health screenings: blood pressure, cholesterol, blood glucose. Early detection adds years.', difficulty: 'easy', source: 'USPSTF Guidelines 2021' },
+      { text: 'Manage chronic conditions actively. Controlled hypertension reduces stroke risk by 40% and heart attack by 25%.', difficulty: 'moderate', source: 'The Lancet 2021' },
+      { text: 'Stay up to date on vaccinations including flu and pneumonia as you age.', difficulty: 'easy', source: 'CDC Guidelines 2023' },
+      { text: 'Know your family medical history and share it with your doctor for personalised screening.', difficulty: 'easy', source: 'AMA Guidelines 2020' },
+      { text: 'Dental health matters - gum disease is linked to heart disease and systemic inflammation.', difficulty: 'easy', source: 'Journal of Clinical Periodontology 2020' },
+      { text: 'Monitor your blood pressure at home. Home readings are often more accurate than clinic readings.', difficulty: 'easy', source: 'Hypertension 2020' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Book a general health check-up if overdue. List your family health history.' },
+      { week: 2, plan: 'Get blood work done (lipids, glucose, vitamin D, thyroid). Book a dental cleaning.' },
+      { week: 3, plan: 'Review results with your doctor. Discuss any risk factors and screening schedule.' },
+      { week: 4, plan: 'Set up reminders for ongoing screenings. Start tracking any key metrics (BP, weight).' }
+    ]
+  },
+  environment: {
+    tips: [
+      { text: 'Air pollution (PM2.5) reduces global life expectancy by 2.2 years on average. Use HEPA filters at home if in a polluted area.', difficulty: 'moderate', source: 'Cardiovascular Research 2020' },
+      { text: 'Spend 2+ hours per week in green spaces. Reduces cortisol, blood pressure, and all-cause mortality.', difficulty: 'easy', source: 'Scientific Reports 2019' },
+      { text: 'Reduce screen time outside of work to <2 hours/day. Excessive sitting and screen use increase mortality.', difficulty: 'moderate', source: 'JAMA Pediatrics 2019' },
+      { text: 'If your job involves prolonged sitting, use a sit-stand desk or take walking breaks every 30 minutes.', difficulty: 'easy', source: 'British Journal of Sports Medicine 2020' },
+      { text: 'Test your home for radon, especially if you live in a high-radon area. Second leading cause of lung cancer.', difficulty: 'easy', source: 'EPA Guidelines 2020' },
+      { text: 'Reduce exposure to household chemicals: switch to natural cleaning products and ventilate when cleaning.', difficulty: 'easy', source: 'Environmental Health 2020' }
+    ],
+    fourWeekPlan: [
+      { week: 1, plan: 'Audit your environment: air quality (check AQI), screen time, sitting time. Identify the biggest issue.' },
+      { week: 2, plan: 'Address air quality (HEPA filter, open windows in low-pollution hours). Add a daily nature walk.' },
+      { week: 3, plan: 'Set up a standing desk or take hourly movement breaks. Reduce evening screen time.' },
+      { week: 4, plan: 'Maintain changes. Track your daily nature time and screen time. Consider a radon test.' }
+    ]
+  }
+};
+
+/* Category mapping from factor cat to knowledge base key */
+const CAT_MAP = {
+  fitness: 'fitness', exercise: 'fitness', activity: 'fitness',
+  diet: 'diet', nutrition: 'diet',
+  sleep: 'sleep',
+  mental: 'mental', mental_health: 'mental', stress: 'mental',
+  social: 'social', relationships: 'social',
+  substances: 'substances', smoking: 'substances', alcohol: 'substances',
+  medical: 'medical', healthcare: 'medical',
+  environment: 'environment', occupation: 'environment',
+  genetics: 'medical'
+};
+
+/* ============================================================
+   CHAT ENGINE
+   ============================================================ */
+const chatEl = document.getElementById('chatMessages');
+const inputEl = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+let isTyping = false;
+
+function getFactors() {
+  return (state.result && state.result.factors) ? state.result.factors : [];
+}
+function getNegFactors() {
+  return getFactors().filter(f => f.impact < 0).sort((a,b) => a.impact - b.impact);
+}
+function getPosFactors() {
+  return getFactors().filter(f => f.impact > 0).sort((a,b) => b.impact - a.impact);
+}
+function totalImpact() {
+  return getFactors().reduce((s,f) => s + f.impact, 0);
+}
+
+/* Format helpers */
+function yearBadge(val) {
+  if (val > 0) return '<span class="year-gain">+' + val + ' years</span>';
+  if (val < 0) return '<span class="year-loss">' + val + ' years</span>';
+  return '<span class="year-gain">0 years</span>';
+}
+
+function formatMsg(text) {
+  // Bold
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Bullet lists
+  text = text.replace(/^- (.+)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>\n?)+/gs, function(m) { return '<ul>' + m + '</ul>'; });
+  // Callout boxes
+  text = text.replace(/\[GAIN\]([\s\S]*?)\[\/GAIN\]/g, '<div class="callout">$1</div>');
+  text = text.replace(/\[WARN\]([\s\S]*?)\[\/WARN\]/g, '<div class="callout-warn">$1</div>');
+  text = text.replace(/\[PLAN\]([\s\S]*?)\[\/PLAN\]/g, '<div class="week-plan">$1</div>');
+  // Line breaks
+  text = text.replace(/\n/g, '<br>');
+  return text;
+}
+
+function addMessage(content, isUser) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + (isUser ? 'user' : 'bot');
+  div.innerHTML = `
+    <div class="msg-avatar ${isUser ? 'user' : 'bot'}">${isUser ? '🧑' : '💀'}</div>
+    <div class="msg-bubble">${isUser ? escapeHtml(content) : formatMsg(content)}</div>
+  `;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function showTyping() {
+  isTyping = true;
+  sendBtn.disabled = true;
+  const div = document.createElement('div');
+  div.className = 'typing-indicator';
+  div.id = 'typingIndicator';
+  div.innerHTML = `
+    <div class="msg-avatar bot">💀</div>
+    <div class="typing-dots"><span></span><span></span><span></span></div>
+  `;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function hideTyping() {
+  isTyping = false;
+  sendBtn.disabled = false;
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function botReply(content) {
+  showTyping();
+  const delay = 800 + Math.random() * 700;
+  setTimeout(() => {
+    hideTyping();
+    addMessage(content, false);
+  }, delay);
+}
+
+/* ============================================================
+   RESPONSE GENERATORS
+   ============================================================ */
+
+function generateWelcome() {
+  const r = state.result;
+  if (!r) {
+    botReply("**Hey there!** I'm Deathy, your AI longevity assistant. 💀\n\nIt looks like you haven't taken the quiz yet. Head to the homepage and complete your life expectancy calculation first, then come back and I'll give you a full analysis!\n\n[Go take the quiz](/) to get started.");
+    return;
+  }
+
+  const negF = getNegFactors();
+  const posF = getPosFactors();
+  const expectedAge = r.expectedAge || r.adjustedLE;
+  const score = r.lifeScore || 0;
+
+  let msg = "**Welcome! I'm Deathy, your AI longevity assistant.** 💀\n\nI've analysed your quiz results and here's your personalised breakdown:\n\n";
+
+  // Summary
+  msg += "**📊 Your Life Expectancy: " + expectedAge + " years** (Life Score: " + score + "/100)\n\n";
+
+  // Biggest risks
+  if (negF.length > 0) {
+    msg += "**🚨 Your Biggest Risk Factors:**\n";
+    const topRisks = negF.slice(0, 4);
+    topRisks.forEach(f => {
+      msg += "- **" + f.label + "** " + yearBadge(f.impact) + (f.tip ? " — " + f.tip.split('.')[0] + "." : "") + "\n";
+    });
+    msg += "\n";
+  }
+
+  // Top 3 improvements
+  if (negF.length > 0) {
+    msg += "[GAIN]<h5>🎯 Top 3 Improvements (by potential years gained)</h5>\n";
+    const topFixes = negF.slice(0, 3);
+    let totalGain = 0;
+    topFixes.forEach((f, i) => {
+      const gain = Math.abs(f.impact);
+      totalGain += gain;
+      msg += "**" + (i+1) + ". " + f.label + "** — Fix this to potentially gain " + yearBadge(gain) + "\n";
+    });
+    msg += "\n**Combined potential gain: " + yearBadge(totalGain) + "**[/GAIN]\n\n";
+  }
+
+  // Quick wins
+  const quickWins = negF.filter(f => Math.abs(f.impact) <= 2);
+  if (quickWins.length > 0) {
+    msg += "**⚡ Quick Wins** (small changes, real impact):\n";
+    quickWins.slice(0, 3).forEach(f => {
+      msg += "- " + f.label + " " + yearBadge(f.impact) + " — " + (f.tip || "Address this for a quick boost.") + "\n";
+    });
+    msg += "\n";
+  }
+
+  // Positives
+  if (posF.length > 0) {
+    msg += "**✅ What you're doing right:**\n";
+    posF.slice(0, 3).forEach(f => {
+      msg += "- " + f.label + " " + yearBadge(f.impact) + "\n";
+    });
+    msg += "\n";
+  }
+
+  msg += "Ask me anything about improving your longevity! Use the suggestions below or type your own question.";
+  botReply(msg);
+}
+
+function respondToKeyword(input) {
+  const q = input.toLowerCase().trim();
+  const r = state.result;
+  const factors = getFactors();
+  const negF = getNegFactors();
+
+  // Exercise / Fitness
+  if (/exercis|fitness|workout|gym|run|jog|walk|cardio|strength|train/i.test(q)) {
+    return generateCategoryResponse('fitness', 'Fitness & Exercise');
+  }
+
+  // Diet / Food
+  if (/diet|food|eat|nutrition|mediterran|vegan|vegetarian|fruit|vegetable|cook/i.test(q)) {
+    return generateCategoryResponse('diet', 'Diet & Nutrition');
+  }
+
+  // Sleep
+  if (/sleep|insomnia|tired|rest|bed|nap|circadian/i.test(q)) {
+    return generateCategoryResponse('sleep', 'Sleep Quality');
+  }
+
+  // Stress / Mental health
+  if (/stress|mental|anxi|depress|meditat|mindful|therapy|brain|cognitive|purpose/i.test(q)) {
+    return generateCategoryResponse('mental', 'Mental Health & Stress');
+  }
+
+  // Smoking / Alcohol / Drugs
+  if (/smok|cigarette|tobacco|alcohol|drink|beer|wine|drug|cannabis|vap|quit/i.test(q)) {
+    return generateCategoryResponse('substances', 'Substances');
+  }
+
+  // Social / Loneliness
+  if (/social|lonely|friend|isolat|relationship|communit|volunteer|connect|married|partner/i.test(q)) {
+    return generateCategoryResponse('social', 'Social Connection');
+  }
+
+  // Weight / BMI
+  if (/weight|bmi|obes|overweight|fat|thin|body mass/i.test(q)) {
+    return generateWeightResponse();
+  }
+
+  // What can I improve / help
+  if (/what.*improv|help me|what should|where.*start|biggest.*change|most important/i.test(q)) {
+    return generateImprovementList();
+  }
+
+  // Compare / Average
+  if (/compare|average|normal|how.*do.*i.*stack|percentile|relative|vs|versus/i.test(q)) {
+    return generateCompareResponse();
+  }
+
+  // Challenge
+  if (/challenge|dare|goal|commit|pledge|30.day|week.*challenge/i.test(q)) {
+    return generateChallengeResponse();
+  }
+
+  // Killing me / worst factors
+  if (/kill|worst|dying|biggest.*risk|what.*hurting|danger|harmful/i.test(q)) {
+    return generateKillingResponse();
+  }
+
+  // Add 5 years / gain years
+  if (/add.*year|gain.*year|live.*longer|extend|more.*year|5 year|extra year/i.test(q)) {
+    return generateAddYearsResponse();
+  }
+
+  // Quick wins
+  if (/quick.*win|easy.*change|simple|low.*effort|fast.*fix|start.*small/i.test(q)) {
+    return generateQuickWinsResponse();
+  }
+
+  // Fallback
+  return generateFallbackResponse(q);
+}
+
+function generateCategoryResponse(catKey, catName) {
+  const kb = KNOWLEDGE_BASE[catKey];
+  if (!kb) return generateFallbackResponse('');
+
+  const factors = getFactors();
+  const catFactors = factors.filter(f => {
+    const mapped = CAT_MAP[f.cat] || f.cat;
+    return mapped === catKey;
+  });
+  const negCatFactors = catFactors.filter(f => f.impact < 0).sort((a,b) => a.impact - b.impact);
+  const posCatFactors = catFactors.filter(f => f.impact > 0).sort((a,b) => b.impact - a.impact);
+
+  let msg = "**" + catName + " Analysis** 💀\n\n";
+
+  if (catFactors.length === 0) {
+    msg += "I don't have specific data for this category from your quiz, but here are expert recommendations:\n\n";
+  } else {
+    // Show their factors
+    if (negCatFactors.length > 0) {
+      msg += "**Your risk factors in this area:**\n";
+      negCatFactors.forEach(f => {
+        msg += "- " + f.label + " " + yearBadge(f.impact) + "\n";
+      });
+      const totalLoss = negCatFactors.reduce((s,f) => s + Math.abs(f.impact), 0);
+      msg += "\n[WARN]<h5>⚠️ Total impact: " + yearBadge(-totalLoss) + " from " + catName.toLowerCase() + "</h5>\nAddressing these could significantly extend your lifespan.[/WARN]\n\n";
+    }
+    if (posCatFactors.length > 0) {
+      msg += "**What you're doing well:**\n";
+      posCatFactors.forEach(f => {
+        msg += "- ✅ " + f.label + " " + yearBadge(f.impact) + "\n";
+      });
+      msg += "\n";
+    }
+  }
+
+  // Tips from knowledge base
+  msg += "**Expert Recommendations:**\n";
+  const tips = kb.tips.slice(0, 5);
+  tips.forEach(t => {
+    const diff = t.difficulty === 'easy' ? '🟢 Easy' : t.difficulty === 'moderate' ? '🟡 Moderate' : '🔴 Hard';
+    msg += "- " + t.text + " (" + diff + ", " + t.source + ")\n";
+  });
+
+  // Potential gain callout
+  if (negCatFactors.length > 0) {
+    const gain = negCatFactors.reduce((s,f) => s + Math.abs(f.impact), 0);
+    msg += "\n[GAIN]<h5>🎯 Potential gain: " + yearBadge(gain) + "</h5>\nIf you fully address your " + catName.toLowerCase() + " risk factors, you could add up to " + gain + " years to your life expectancy.[/GAIN]\n\n";
+  }
+
+  // 4-week plan
+  msg += "**📅 Your 4-Week " + catName + " Plan:**\n";
+  kb.fourWeekPlan.forEach(w => {
+    msg += "[PLAN]<h5>Week " + w.week + "</h5><p>" + w.plan + "</p>[/PLAN]\n";
+  });
+
+  return msg;
+}
+
+function generateWeightResponse() {
+  const factors = getFactors();
+  const bmiFactors = factors.filter(f => /bmi|obes|overweight|underweight|healthy_weight/i.test(f.key));
+
+  let msg = "**Weight & BMI Analysis** 💀\n\n";
+
+  if (bmiFactors.length > 0) {
+    bmiFactors.forEach(f => {
+      msg += "**Your status:** " + f.label + " " + yearBadge(f.impact) + "\n";
+      if (f.tip) msg += f.tip + "\n\n";
+    });
+  } else {
+    msg += "Your BMI appears to be in the healthy range based on your quiz results.\n\n";
+  }
+
+  msg += "**Key facts about weight and longevity:**\n";
+  msg += "- A BMI of 18.5-24.9 is associated with the lowest mortality risk.\n";
+  msg += "- Obesity (BMI 30+) reduces life expectancy by 3-10 years depending on severity.\n";
+  msg += "- Waist circumference matters more than BMI alone. Men: aim for <94cm, Women: <80cm.\n";
+  msg += "- Losing just 5-10% of body weight yields significant health improvements.\n";
+  msg += "- Muscle mass matters - don't just focus on the scale. Body composition is key.\n\n";
+
+  msg += "[PLAN]<h5>4-Week Healthy Weight Plan</h5>";
+  msg += "<p>**Week 1:** Track what you eat (no changes, just awareness). Walk 20 min daily.</p>";
+  msg += "<p>**Week 2:** Cut processed snacks. Add vegetables to every meal. Walk 30 min daily.</p>";
+  msg += "<p>**Week 3:** Reduce portions by 15-20%. Add 2 strength training sessions.</p>";
+  msg += "<p>**Week 4:** Maintain changes. Weigh yourself once weekly. Aim for 0.5kg/week loss if overweight.</p>[/PLAN]";
+
+  return msg;
+}
+
+function generateImprovementList() {
+  const negF = getNegFactors();
+  const r = state.result;
+
+  let msg = "**Full Improvement Analysis** 💀\n\n";
+
+  if (negF.length === 0) {
+    msg += "Impressive! You have no significant negative factors. You're already optimising well.\n\nFocus on maintaining your current habits and consider:\n";
+    msg += "- Regular health screenings\n- Ongoing social connections\n- Continuous learning and purpose\n";
+    return msg;
+  }
+
+  msg += "Here are **all your negative factors**, sorted by impact (worst first):\n\n";
+
+  let totalPotentialGain = 0;
+  negF.forEach((f, i) => {
+    const gain = Math.abs(f.impact);
+    totalPotentialGain += gain;
+    const catLabel = f.cat ? f.cat.charAt(0).toUpperCase() + f.cat.slice(1) : 'General';
+    msg += "**" + (i+1) + ". " + f.label + "** " + yearBadge(f.impact) + " [" + catLabel + "]\n";
+    if (f.tip) msg += "   → " + f.tip + "\n";
+    msg += "\n";
+  });
+
+  msg += "[GAIN]<h5>🎯 Total potential gain if all addressed: " + yearBadge(totalPotentialGain) + "</h5>\n";
+  msg += "Realistically, addressing even your top 3 factors could add **" + Math.abs(negF.slice(0,3).reduce((s,f)=>s+f.impact,0)) + " years** to your life.[/GAIN]\n\n";
+
+  msg += "**Where to start?** Ask me about any specific area (exercise, diet, sleep, stress, social, etc.) for a detailed plan!";
+
+  return msg;
+}
+
+function generateCompareResponse() {
+  const r = state.result;
+  if (!r) return "I need your quiz results to compare. Please take the quiz first!";
+
+  const expectedAge = parseFloat(r.expectedAge || r.adjustedLE);
+  const baseLE = r.baseLE || 78;
+  const score = r.lifeScore || 0;
+  const diff = (expectedAge - baseLE).toFixed(1);
+  const factors = getFactors();
+  const posCount = factors.filter(f => f.impact > 0).length;
+  const negCount = factors.filter(f => f.impact < 0).length;
+
+  let msg = "**How You Compare** 💀📊\n\n";
+
+  msg += "**Your life expectancy:** " + expectedAge + " years\n";
+  msg += "**National average:** ~" + baseLE + " years\n";
+  msg += "**Difference:** " + (diff > 0 ? "+" : "") + diff + " years " + (diff > 0 ? "above" : "below") + " average\n\n";
+
+  msg += "**Your Life Score:** " + score + "/100\n";
+  if (score >= 80) msg += "🏆 **Outstanding!** You're in the top tier of health optimisation.\n";
+  else if (score >= 60) msg += "👍 **Good.** Above average, with room for improvement.\n";
+  else if (score >= 40) msg += "⚖️ **Average.** Several opportunities to improve.\n";
+  else msg += "⚠️ **Below average.** Significant improvements possible - and that's actually good news, because you have the most to gain.\n";
+
+  msg += "\n**Factor breakdown:**\n";
+  msg += "- ✅ Positive factors: " + posCount + "\n";
+  msg += "- ❌ Negative factors: " + negCount + "\n";
+  msg += "- ⚖️ Neutral factors: " + (factors.length - posCount - negCount) + "\n\n";
+
+  // Percentile estimate
+  let percentile;
+  if (score >= 90) percentile = "top 5%";
+  else if (score >= 75) percentile = "top 20%";
+  else if (score >= 60) percentile = "top 35%";
+  else if (score >= 45) percentile = "middle 30%";
+  else if (score >= 30) percentile = "bottom 35%";
+  else percentile = "bottom 20%";
+
+  msg += "[GAIN]<h5>📈 Estimated percentile: " + percentile + "</h5>\nBased on your life score of " + score + "/100, you rank in the **" + percentile + "** of people your age.[/GAIN]";
+
+  return msg;
+}
+
+function generateChallengeResponse() {
+  const negF = getNegFactors();
+  const r = state.result;
+
+  let msg = "**💪 Longevity Challenge Ideas** 💀\n\n";
+  msg += "Based on your profile, here are personalised challenges that could genuinely extend your life:\n\n";
+
+  const challenges = [];
+
+  // Generate challenges based on their actual risk factors
+  negF.forEach(f => {
+    const cat = CAT_MAP[f.cat] || f.cat;
+    if (cat === 'fitness' && !challenges.find(c => c.cat === 'fitness')) {
+      challenges.push({ cat: 'fitness', name: '30-Day Movement Challenge', desc: 'Walk 7,000+ steps every day for 30 days. Track with your phone.', gain: Math.abs(f.impact), difficulty: 'Moderate' });
+    }
+    if (cat === 'diet' && !challenges.find(c => c.cat === 'diet')) {
+      challenges.push({ cat: 'diet', name: 'Mediterranean Month', desc: 'Follow a Mediterranean diet for 30 days. No ultra-processed food.', gain: Math.abs(f.impact), difficulty: 'Moderate' });
+    }
+    if (cat === 'sleep' && !challenges.find(c => c.cat === 'sleep')) {
+      challenges.push({ cat: 'sleep', name: '21-Day Sleep Reset', desc: 'Fixed bed/wake time, no screens 1hr before bed, cool dark room.', gain: Math.abs(f.impact), difficulty: 'Easy' });
+    }
+    if (cat === 'mental' && !challenges.find(c => c.cat === 'mental')) {
+      challenges.push({ cat: 'mental', name: 'Mindfulness Month', desc: '10 minutes of meditation daily for 30 days using a free app.', gain: Math.abs(f.impact), difficulty: 'Easy' });
+    }
+    if (cat === 'substances' && !challenges.find(c => c.cat === 'substances')) {
+      challenges.push({ cat: 'substances', name: 'Clean Living Challenge', desc: 'No smoking/drinking for 30 days. Track cravings and savings.', gain: Math.abs(f.impact), difficulty: 'Hard' });
+    }
+    if (cat === 'social' && !challenges.find(c => c.cat === 'social')) {
+      challenges.push({ cat: 'social', name: 'Connection Challenge', desc: 'Reach out to one person daily for 30 days. Mix calls, texts, meetups.', gain: Math.abs(f.impact), difficulty: 'Easy' });
+    }
+  });
+
+  // Always add these general ones
+  if (!challenges.find(c => c.cat === 'fitness')) {
+    challenges.push({ cat: 'fitness', name: '30-Day Step Challenge', desc: '10,000 steps every day for 30 days.', gain: 1, difficulty: 'Moderate' });
+  }
+  if (challenges.length < 4) {
+    challenges.push({ cat: 'general', name: 'Cold Shower Challenge', desc: 'End every shower with 30 seconds of cold water for 30 days. Builds resilience and improves circulation.', gain: 0.5, difficulty: 'Moderate' });
+  }
+
+  challenges.slice(0, 5).forEach((c, i) => {
+    const diffEmoji = c.difficulty === 'Easy' ? '🟢' : c.difficulty === 'Moderate' ? '🟡' : '🔴';
+    msg += "**" + (i+1) + ". " + c.name + "** " + diffEmoji + " " + c.difficulty + "\n";
+    msg += c.desc + "\n";
+    msg += "Potential gain: " + yearBadge(c.gain) + "\n\n";
+  });
+
+  msg += "[GAIN]<h5>🎯 Pro tip: Challenge a friend!</h5>\nHead to the **Action Hub** to create challenges with friends. Social accountability doubles your chance of success.[/GAIN]\n\n";
+  msg += "Which challenge interests you? I can give you a detailed plan for any of them.";
+
+  return msg;
+}
+
+function generateKillingResponse() {
+  const negF = getNegFactors();
+
+  let msg = "**🚨 What's Hurting You Most** 💀\n\n";
+
+  if (negF.length === 0) {
+    msg += "Actually... nothing major is hurting you! Your factors are all neutral or positive. That's exceptional.\n\nFocus on maintaining what you're doing and staying consistent.";
+    return msg;
+  }
+
+  msg += "Here are your deadliest factors, ranked by years they're stealing from you:\n\n";
+
+  negF.slice(0, 6).forEach((f, i) => {
+    const severity = Math.abs(f.impact) >= 4 ? '🔴 CRITICAL' : Math.abs(f.impact) >= 2 ? '🟠 HIGH' : '🟡 MODERATE';
+    msg += "**" + (i+1) + ". " + f.label + "** " + yearBadge(f.impact) + " — " + severity + "\n";
+    if (f.tip) msg += "   " + f.tip + "\n";
+    msg += "\n";
+  });
+
+  const totalLoss = negF.reduce((s,f) => s + Math.abs(f.impact), 0);
+  msg += "[WARN]<h5>☠️ Total life years lost: " + yearBadge(-totalLoss) + "</h5>\nThese factors are collectively reducing your life expectancy by " + totalLoss + " years.[/WARN]\n\n";
+
+  msg += "**But here's the good news:** most of these are modifiable. Ask me about any specific factor for a detailed improvement plan.";
+
+  return msg;
+}
+
+function generateAddYearsResponse() {
+  const negF = getNegFactors();
+  const r = state.result;
+
+  let msg = "**How to Add 5+ Years to Your Life** 💀\n\n";
+
+  if (negF.length === 0) {
+    msg += "You're already highly optimised! Your best bet for additional years:\n";
+    msg += "- Maintain all current positive habits\n";
+    msg += "- Stay up to date on medical screenings\n";
+    msg += "- Focus on emerging longevity research (rapamycin, NMN, etc.)\n";
+    msg += "- Strengthen social connections - the #1 predictor of healthy aging\n";
+    return msg;
+  }
+
+  let yearsRunning = 0;
+  let steps = [];
+
+  for (const f of negF) {
+    const gain = Math.abs(f.impact);
+    yearsRunning += gain;
+    const cat = CAT_MAP[f.cat] || f.cat || 'general';
+    const kb = KNOWLEDGE_BASE[cat];
+    const topTip = kb ? kb.tips[0].text : (f.tip || 'Address this factor.');
+    steps.push({ label: f.label, gain, runningTotal: yearsRunning, tip: topTip });
+    if (yearsRunning >= 5) break;
+  }
+
+  msg += "Here's your **fastest path to 5+ extra years**, starting with the highest-impact changes:\n\n";
+
+  steps.forEach((s, i) => {
+    msg += "**Step " + (i+1) + ": Fix " + s.label + "** " + yearBadge(s.gain) + "\n";
+    msg += "→ " + s.tip + "\n";
+    msg += "Running total: **+" + s.runningTotal + " years**\n\n";
+  });
+
+  if (yearsRunning >= 5) {
+    msg += "[GAIN]<h5>🎯 That's " + yearBadge(yearsRunning) + " from just " + steps.length + " changes!</h5>\nYou don't need to overhaul everything. These " + steps.length + " targeted changes get you past the 5-year mark.[/GAIN]";
+  } else {
+    msg += "[GAIN]<h5>🎯 Potential gain from all changes: " + yearBadge(yearsRunning) + "</h5>\nEvery factor you improve adds up. Even partial improvements count.[/GAIN]";
+  }
+
+  return msg;
+}
+
+function generateQuickWinsResponse() {
+  const negF = getNegFactors();
+
+  let msg = "**⚡ Quick Wins - Easy Changes, Real Impact** 💀\n\n";
+
+  // Sort by absolute impact (smallest first = easiest wins)
+  const easyWins = negF.filter(f => Math.abs(f.impact) <= 2).sort((a,b) => a.impact - b.impact);
+  const allSorted = [...negF].sort((a,b) => Math.abs(a.impact) - Math.abs(b.impact));
+
+  if (easyWins.length === 0 && negF.length === 0) {
+    msg += "You're already in great shape! No quick fixes needed.\n\nFocus on consistency and maintaining your positive habits.";
+    return msg;
+  }
+
+  const wins = easyWins.length > 0 ? easyWins : allSorted.slice(0, 4);
+  let totalQuickGain = 0;
+
+  msg += "These are changes you can start **today** with minimal effort:\n\n";
+
+  wins.slice(0, 5).forEach((f, i) => {
+    const gain = Math.abs(f.impact);
+    totalQuickGain += gain;
+    const cat = CAT_MAP[f.cat] || f.cat || 'general';
+    const kb = KNOWLEDGE_BASE[cat];
+    const easyTip = kb ? kb.tips.find(t => t.difficulty === 'easy') : null;
+    msg += "**" + (i+1) + ". " + f.label + "** " + yearBadge(f.impact) + "\n";
+    if (easyTip) msg += "   🟢 Easy fix: " + easyTip.text + "\n";
+    else if (f.tip) msg += "   💡 " + f.tip + "\n";
+    msg += "\n";
+  });
+
+  msg += "[GAIN]<h5>🎯 Combined quick-win potential: " + yearBadge(totalQuickGain) + "</h5>\nThese small changes add up to **" + totalQuickGain + " extra years**. Start with #1 this week.[/GAIN]\n\n";
+
+  msg += "**This week's micro-challenge:** Pick ONE quick win above and commit to it for 7 days. Then come back and tell me how it went!";
+
+  return msg;
+}
+
+function generateFallbackResponse(q) {
+  const negF = getNegFactors();
+  const r = state.result;
+
+  let msg = "**Great question!** 💀\n\n";
+  msg += "I specialise in analysing your specific longevity factors. Here's what I can help you with:\n\n";
+  msg += "- **\"What's killing me fastest?\"** — Your worst risk factors ranked\n";
+  msg += "- **\"How do I add 5 years?\"** — Step-by-step plan to extend your life\n";
+  msg += "- **\"Quick wins\"** — Easy changes you can start today\n";
+  msg += "- **\"Compare me to average\"** — How you stack up\n";
+  msg += "- **Exercise, Diet, Sleep, Stress, Social** — Deep dive into any area\n";
+  msg += "- **\"Challenge\"** — Get a personalised longevity challenge\n\n";
+
+  if (negF.length > 0) {
+    msg += "Based on your results, I'd suggest asking about **" + negF[0].label.toLowerCase() + "** first — that's your biggest opportunity for improvement.";
+  }
+
+  return msg;
+}
+
+/* ============================================================
+   INPUT HANDLING
+   ============================================================ */
+function handleSend() {
+  const text = inputEl.value.trim();
+  if (!text || isTyping) return;
+
+  addMessage(text, true);
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+
+  const response = respondToKeyword(text);
+  botReply(response);
+}
+
+inputEl.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    handleSend();
+  }
+});
+
+// Auto-resize textarea
+inputEl.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+/* ============================================================
+   SUGGESTION CHIPS
+   ============================================================ */
+const SUGGESTIONS = [
+  "What's killing me fastest?",
+  "How do I add 5 years?",
+  "Quick wins",
+  "Compare me to average",
+  "Exercise plan",
+  "Diet advice",
+  "Sleep tips",
+  "Stress help"
+];
+
+function renderSuggestions() {
+  const el = document.getElementById('suggestions');
+  el.innerHTML = SUGGESTIONS.map(s =>
+    '<button class="chip" onclick="askSuggestion(this)">' + s + '</button>'
+  ).join('');
+}
+
+function askSuggestion(btn) {
+  const text = btn.textContent;
+  addMessage(text, true);
+  const response = respondToKeyword(text);
+  botReply(response);
+}
+
+/* ============================================================
+   ACCESS GATING
+   ============================================================ */
+function checkAccess() {
+  const email = state.supaUser && state.supaUser.email ? state.supaUser.email.toLowerCase() : '';
+  const allowedEmails = ['papoutsis89@gmail.com', 'yanni@indeedflex.com'];
+
+  if (state.userTier !== 'free' || allowedEmails.includes(email)) {
+    return true;
+  }
+
+  // Show gate
+  document.getElementById('gateOverlay').style.display = 'flex';
+  let count = 5;
+  const countEl = document.getElementById('gateCountdown');
+  const interval = setInterval(() => {
+    count--;
+    if (countEl) countEl.textContent = count;
+    if (count <= 0) {
+      clearInterval(interval);
+      window.location.href = '/pricing.html';
+    }
+  }, 1000);
+  return false;
+}
+
+/* ============================================================
+   PAGE INIT
+   ============================================================ */
+function pageInit() {
+  loadProfile();
+
+  if (!state.result) {
+    window.location.href = '/#quiz';
+    return;
+  }
+
+  if (!checkAccess()) return;
+
+  renderSuggestions();
+
+  // Auto-generate welcome analysis after a short delay
+  setTimeout(() => {
+    generateWelcome();
+  }, 400);
+
+  if (typeof updateNavDots === 'function') updateNavDots();
+}
+</script>
+</body>
+</html>

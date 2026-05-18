@@ -295,6 +295,8 @@ function completeTask(taskId) {
     const c = document.getElementById('hubContent');
     if (c && hubTab === 'today') renderTodayTab(c);
     if (allDone) launchConfetti();
+    // Refresh nav dots
+    if (typeof updateNavDots === 'function') updateNavDots();
   }, 500);
 }
 
@@ -1524,10 +1526,6 @@ function renderShopTab(c) {
   const coins = getCoins();
 
   const shopItems = [
-    { id: 'gym_trial', name: 'Free gym day pass', cost: 200, type: 'partner', desc: 'Redeem at partner gyms near you', cat: 'fitness' },
-    { id: 'meal_plan', name: '7-day meal plan PDF', cost: 100, type: 'partner', desc: 'Personalised nutrition guide', cat: 'diet' },
-    { id: 'meditation_app', name: 'Meditation app trial (30 days)', cost: 150, type: 'partner', desc: 'Premium meditation access', cat: 'mind' },
-    { id: 'supplement_sample', name: 'Vitamin D sample pack', cost: 75, type: 'partner', desc: 'Free supplement samples', cat: 'diet' },
     { id: 'plant_tree', name: 'Plant a tree', cost: 500, type: 'charity', desc: 'We plant a tree through One Tree Planted', cat: 'charity' },
     { id: 'donate_meal', name: 'Donate a meal', cost: 300, type: 'charity', desc: 'Feed someone through local food banks', cat: 'charity' },
     { id: 'ghost_hat', name: 'Top hat for Deathy', cost: 50, type: 'cosmetic', desc: 'Your ghost wears a fancy hat', cat: 'cosmetic' },
@@ -1549,14 +1547,6 @@ function renderShopTab(c) {
     </div>
 
     <div class="hub-panel" style="margin-bottom:16px;">
-      <h3 style="color:var(--green);">Partner Rewards</h3>
-      <p style="color:var(--text3);font-size:0.8rem;margin-bottom:12px;">Real rewards from real brands. Earn coins, spend on health.</p>
-      <div style="display:grid;gap:8px;">
-        ${shopItems.filter(i => i.type === 'partner').map(i => renderShopItem(i, coins, purchased)).join('')}
-      </div>
-    </div>
-
-    <div class="hub-panel" style="margin-bottom:16px;">
       <h3 style="color:var(--accent);">Charity</h3>
       <p style="color:var(--text3);font-size:0.8rem;margin-bottom:12px;">Turn your health gains into good deeds.</p>
       <div style="display:grid;gap:8px;">
@@ -1572,7 +1562,7 @@ function renderShopTab(c) {
     </div>
 
     <div style="text-align:center;padding:12px;font-size:0.7rem;color:var(--text3);border-top:1px solid var(--border);margin-top:8px;">
-      Coins are earned through daily tasks, streaks, and challenge wins. Coins can only be redeemed for in-app rewards, partner offers, and charitable donations. Coins have no cash value and cannot be exchanged for money.
+      Coins are earned through daily tasks, streaks, and challenge wins. Coins can only be redeemed for in-app rewards, charitable donations, and ghost cosmetics. Coins have no cash value and cannot be exchanged for money.
     </div>
   `;
 }

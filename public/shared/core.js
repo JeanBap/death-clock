@@ -291,6 +291,16 @@ function updateNavTimer() {
   document.getElementById('navTimer').textContent =
     d.toLocaleString() + 'd ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
 
+  // Death age display
+  var deathAgeEl = document.getElementById('navDeathAge');
+  if (deathAgeEl && state.result.dob) {
+    var deathDate = state.result.deathDate;
+    var dob = state.result.dob;
+    var ageAtDeath = (deathDate - dob) / (365.25 * 86400000);
+    deathAgeEl.textContent = 'Age ' + ageAtDeath.toFixed(1);
+    deathAgeEl.style.color = ageAtDeath >= 80 ? 'var(--green)' : ageAtDeath >= 70 ? 'var(--gold)' : 'var(--accent)';
+  }
+
   // Ghost health display
   const params = getDeathyParams();
   const hScore = calcDeathyHealth(params);
@@ -735,5 +745,57 @@ function updateNavDots() {
       cta.appendChild(cdot);
     }
   }
+}
+
+// ===== DAILY TOP-1 TIP POPUP =====
+function showDailyTopTip() {
+  if (!state.result || !state.result.factors) return;
+  var today = new Date().toDateString();
+  var lastShown = localStorage.getItem('dc_daily_tip_date');
+  if (lastShown === today) return;
+
+  // Find the worst factor (most negative impact)
+  var factors = state.result.factors.slice().sort(function(a, b) { return a.impact - b.impact; });
+  var worst = factors[0];
+  if (!worst || worst.impact >= 0) return;
+
+  localStorage.setItem('dc_daily_tip_date', today);
+
+  // Build upgrade suggestions per category
+  var upgrades = {
+    substances: 'Reducing or quitting could add back up to ' + Math.abs(worst.impact).toFixed(1) + ' years. Start with cutting usage by 25% this week.',
+    fitness: 'Adding just 30 minutes of walking per day can add 3+ years. Start today with a post-meal walk.',
+    diet: 'Switching to a Mediterranean-style diet adds 4-5 years on average. Start by adding one extra serving of vegetables today.',
+    sleep: 'Fixing your sleep schedule to 7-8 hours can reclaim ' + Math.abs(worst.impact).toFixed(1) + ' years. Set a consistent bedtime tonight.',
+    mental: 'Just 10 minutes of daily meditation measurably reduces cortisol and mortality risk. Try a breathing exercise right now.',
+    social: 'Social connection is as powerful as quitting smoking. Reach out to one friend or family member today.',
+    body: 'Even a 5% weight loss significantly reduces health risks. Start with portion control at one meal today.',
+    medical: 'Booking a health screening could catch issues early. Schedule one this week.',
+    environment: 'An air purifier and daily time outdoors in green space can add over a year. Take a 15-minute park walk today.',
+    genetics: 'You cannot change genetics, but proactive screening and lifestyle optimisation can offset inherited risks significantly.'
+  };
+
+  var tipText = upgrades[worst.cat] || 'Focus on improving: ' + worst.label;
+  var yearsBack = Math.abs(worst.impact).toFixed(1);
+
+  setTimeout(function() {
+    var modal = document.getElementById('modal');
+    var content = document.getElementById('modalContent');
+    if (!modal || !content) return;
+    modal.classList.remove('hidden');
+    content.innerHTML = '<div style="text-align:center; padding:24px;">' +
+      '<div style="font-size:3rem; margin-bottom:8px;">🎯</div>' +
+      '<h3 style="margin-bottom:4px; font-size:1.1rem;">Your #1 action today</h3>' +
+      '<div style="background:rgba(233,69,96,0.1); border:1px solid rgba(233,69,96,0.3); border-radius:12px; padding:16px; margin:16px 0;">' +
+        '<div style="font-size:0.8rem; color:var(--accent); font-weight:700; margin-bottom:4px;">BIGGEST RISK: ' + worst.label + '</div>' +
+        '<div style="font-size:1.4rem; font-weight:800; color:var(--accent);">-' + yearsBack + ' years</div>' +
+      '</div>' +
+      '<p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px; line-height:1.5;">' + tipText + '</p>' +
+      '<div style="display:flex; gap:8px;">' +
+        '<button class="btn-primary" style="flex:1; padding:12px;" onclick="closeModal(); window.location.href=\'/dashboard.html\';">Go to Action Hub</button>' +
+        '<button style="flex:1; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text2); cursor:pointer;" onclick="closeModal()">Got it</button>' +
+      '</div>' +
+    '</div>';
+  }, 1500);
 }
 
