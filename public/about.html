@@ -21,7 +21,7 @@
 <meta name="twitter:title" content="About - Death Clock">
 <meta name="twitter:description" content="The story behind Death Clock. Built on 53M+ participants and 1,200+ studies.">
 <meta name="twitter:image" content="https://death-clock.app/og-image.png">
-<link rel="stylesheet" href="/shared/styles.css?v=5">
+<link rel="stylesheet" href="/shared/styles.css?v=6">
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(reg){reg.unregister();});});
@@ -140,12 +140,13 @@ if ("serviceWorker" in navigator) {
   </div>
 </footer>
 
-<script src="/shared/core.js?v=5"></script>
-<script src="/shared/social.js?v=5"></script>
+<script src="/shared/core.js?v=6"></script>
+<script src="/shared/social.js?v=6"></script>
 <script>
 
 function pageInit() { loadProfile(); if (typeof updateNavDots === 'function') updateNavDots(); }
 
 </script>
+<script>if(window.dcSync)dcSync.init();</script>
 </body>
 </html>
