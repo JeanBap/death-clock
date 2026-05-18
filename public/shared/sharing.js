@@ -315,14 +315,7 @@ function downloadGhostCard(blob) {
   showToast('Ghost card downloaded! Share it everywhere.');
 }
 
-function showToast(msg) {
-  const sr = document.getElementById('srAnnounce'); if (sr) sr.textContent = msg;
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--green);color:var(--green);padding:12px 24px;border-radius:8px;z-index:99999;font-size:0.9rem;animation:deathyFadeIn 0.3s ease;';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
+// showToast() defined in core.js - removed duplicate (BUG-021 FIX)
 
 // ============================================
 // GHOST GRAVEYARD - "Recently Deceased"
