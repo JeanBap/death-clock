@@ -446,6 +446,21 @@ function getGhostAccessories() {
     accessories += '<line x1="58" y1="55" x2="70" y2="52" stroke="#ccc" stroke-width="1.5"/><circle cx="71" cy="51" r="1.5" fill="#ff6b00" opacity="0.8"/>';
   }
 
+  // BUG-020 FIX: Apply purchased shop cosmetics from dc_deathy_state
+  try {
+    const ds = JSON.parse(localStorage.getItem('dc_deathy_state') || '{}');
+    const shopItems = ds.accessories || [];
+    if (shopItems.includes('ghost_hat')) {
+      accessories += '<rect x="32" y="4" width="36" height="10" rx="2" fill="#1a1a2e"/><rect x="38" y="0" width="24" height="6" rx="1" fill="#1a1a2e"/>';
+    }
+    if (shopItems.includes('ghost_crown')) {
+      accessories += '<path d="M32,10 L38,2 L44,8 L50,0 L56,8 L62,2 L68,10 Z" fill="#f0c040" stroke="#daa520" stroke-width="0.5"/>';
+    }
+    if (shopItems.includes('ghost_fire')) {
+      accessories += '<g opacity="0.6"><ellipse cx="50" cy="90" rx="20" ry="8" fill="#ff4500"/><ellipse cx="45" cy="88" rx="8" ry="12" fill="#ff6600"/><ellipse cx="55" cy="86" rx="6" ry="10" fill="#ff8c00"/></g>';
+    }
+  } catch(e) {}
+
   return accessories;
 }
 
