@@ -121,7 +121,7 @@ function switchHubTab(tab) {
 // 2. DAILY TASK ENGINE (Feature #4)
 // ============================================
 function getDailyTasks() {
-  const saved = localStorage.getItem('dc_daily_tasks');
+  const saved = dcSync.syncGet('dc_daily_tasks');
   const today = new Date().toDateString();
   if (saved) {
     try {
@@ -131,7 +131,7 @@ function getDailyTasks() {
   }
   // Generate new tasks for today based on risk factors
   const tasks = generateDailyTasks();
-  localStorage.setItem('dc_daily_tasks', JSON.stringify({ date: today, tasks }));
+  dcSync.syncSet('dc_daily_tasks', JSON.stringify({ date: today, tasks }));
   return tasks;
 }
 
@@ -238,15 +238,15 @@ function completeTask(taskId) {
   const streak = getStreakCount();
   const mult = getStreakMultiplier(streak);
   // BUG-019 FIX: Apply spin wheel multiplier if available
-  let spinMult = parseFloat(localStorage.getItem('dc_next_task_multiplier') || '1');
-  if (spinMult > 1) localStorage.removeItem('dc_next_task_multiplier');
+  let spinMult = parseFloat(dcSync.syncGet('dc_next_task_multiplier') || '1');
+  if (spinMult > 1) dcSync.syncRemove('dc_next_task_multiplier');
   const coinReward = Math.round(10 * mult * spinMult);
   const daysReward = task.days;
 
   // First-ever task bonus (early win strategy)
   let firstBonus = 0;
-  if (!localStorage.getItem('dc_first_task_done')) {
-    localStorage.setItem('dc_first_task_done', '1');
+  if (!dcSync.syncGet('dc_first_task_done')) {
+    dcSync.syncSet('dc_first_task_done', '1');
     firstBonus = 25;
     addCoins(firstBonus);
   }
@@ -260,7 +260,7 @@ function completeTask(taskId) {
   saveGoalState();
 
   // Save tasks
-  localStorage.setItem('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
+  dcSync.syncSet('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
 
   // Log to habit history
   logDailyCompletion(task);
@@ -314,12 +314,12 @@ function getTodayCompletedCount() {
 
 function logDailyCompletion(task) {
   try {
-    const log = JSON.parse(localStorage.getItem('dc_task_log') || '[]');
+    const log = JSON.parse(dcSync.syncGet('dc_task_log') || '[]');
     log.push({ date: new Date().toISOString(), task: task.name, days: task.days, cat: task.cat });
     // Keep last 90 days
     const cutoff = Date.now() - 90 * 86400000;
     const trimmed = log.filter(l => new Date(l.date).getTime() > cutoff);
-    localStorage.setItem('dc_task_log', JSON.stringify(trimmed));
+    dcSync.syncSet('dc_task_log', JSON.stringify(trimmed));
   } catch(e) {}
 }
 
@@ -331,14 +331,14 @@ function renderTodayTab(c) {
   const cats = new Set(tasks.filter(t => t.done).map(t => t.cat));
   const comboActive = cats.size >= 3;
   const streak = getStreakCount();
-  const isFirstVisit = !localStorage.getItem('dc_hub_visited');
+  const isFirstVisit = !dcSync.syncGet('dc_hub_visited');
 
   // Mark first visit
-  if (isFirstVisit) localStorage.setItem('dc_hub_visited', '1');
+  if (isFirstVisit) dcSync.syncSet('dc_hub_visited', '1');
 
   // Streak at risk warning (Duolingo-style)
   const hour = new Date().getHours();
-  const hasInsurance = localStorage.getItem('dc_streak_insurance') === 'true';
+  const hasInsurance = dcSync.syncGet('dc_streak_insurance') === 'true';
   let streakWarning = '';
   if (streak >= 3 && done === 0 && hour >= 18) {
     streakWarning = `
@@ -459,22 +459,22 @@ function getWeeklyChallengeCount() {
 }
 
 function hasReferralBonus() {
-  const exp = localStorage.getItem('dc_referral_bonus_expires');
+  const exp = dcSync.syncGet('dc_referral_bonus_expires');
   if (!exp) return false;
   return new Date(exp) > new Date();
 }
 
 function getReferralDaysLeft() {
-  const exp = localStorage.getItem('dc_referral_bonus_expires');
+  const exp = dcSync.syncGet('dc_referral_bonus_expires');
   if (!exp) return 0;
   return Math.max(0, Math.ceil((new Date(exp) - Date.now()) / 86400000));
 }
 
 function getReferralCode() {
-  let code = localStorage.getItem('dc_referral_code');
+  let code = dcSync.syncGet('dc_referral_code');
   if (!code) {
     code = 'DC' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    localStorage.setItem('dc_referral_code', code);
+    dcSync.syncSet('dc_referral_code', code);
   }
   return code;
 }
@@ -482,13 +482,13 @@ function getReferralCode() {
 function redeemReferralCode(code) {
   if (!code || code.length < 4) { showToast('Invalid referral code'); return false; }
   if (code === getReferralCode()) { showToast("Can't use your own code!"); return false; }
-  const used = JSON.parse(localStorage.getItem('dc_referrals_used') || '[]');
+  const used = JSON.parse(dcSync.syncGet('dc_referrals_used') || '[]');
   if (used.includes(code)) { showToast('Already used this code'); return false; }
   used.push(code);
-  localStorage.setItem('dc_referrals_used', JSON.stringify(used));
+  dcSync.syncSet('dc_referrals_used', JSON.stringify(used));
   // Grant 4 weeks free challenges
   const expires = new Date(Date.now() + 28 * 86400000).toISOString();
-  localStorage.setItem('dc_referral_bonus_expires', expires);
+  dcSync.syncSet('dc_referral_bonus_expires', expires);
   showToast('Referral accepted! Free challenges for 4 weeks!');
   addCoins(50); // bonus coins for referral
   return true;
@@ -1135,11 +1135,11 @@ const GOOGLE_FIT_CLIENT_ID = '';  // Set when OAuth is configured
 const GOOGLE_FIT_SCOPES = 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.body.read https://www.googleapis.com/auth/fitness.sleep.read';
 
 function getHealthData() {
-  try { return JSON.parse(localStorage.getItem('dc_health_data') || '{}'); } catch(e) { return {}; }
+  try { return JSON.parse(dcSync.syncGet('dc_health_data') || '{}'); } catch(e) { return {}; }
 }
 
 function getHealthHistory() {
-  try { return JSON.parse(localStorage.getItem('dc_health_history') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(dcSync.syncGet('dc_health_history') || '[]'); } catch(e) { return []; }
 }
 
 function renderHealthTab(c) {
@@ -1309,7 +1309,7 @@ function saveHealthInline() {
   const mood = parseInt(document.getElementById('hlMood')?.value) || 0;
   const today = new Date().toISOString().slice(0,10);
   const hd = { steps, sleep, weight, water, exercise, mood, lastSync: new Date().toISOString(), provider: 'manual' };
-  localStorage.setItem('dc_health_data', JSON.stringify(hd));
+  dcSync.syncSet('dc_health_data', JSON.stringify(hd));
 
   // Save to history
   var history = getHealthHistory();
@@ -1318,7 +1318,7 @@ function saveHealthInline() {
   if (idx >= 0) history[idx] = entry; else history.push(entry);
   // Keep last 90 days
   history = history.filter(h => (Date.now() - new Date(h.date).getTime()) < 90 * 86400000);
-  localStorage.setItem('dc_health_history', JSON.stringify(history));
+  dcSync.syncSet('dc_health_history', JSON.stringify(history));
 
   const autoCompleted = autoCompleteHealthTasks(steps, sleep, weight);
   showToast('Health logged!' + (autoCompleted > 0 ? ' ' + autoCompleted + ' tasks auto-completed!' : ''));
@@ -1332,7 +1332,7 @@ function saveHealthEntry() {
   const sleep = parseFloat(document.getElementById('healthSleep')?.value) || 0;
   const weight = parseFloat(document.getElementById('healthWeight')?.value) || 0;
   const hd = { steps, sleep, weight, lastSync: new Date().toISOString(), provider: 'manual' };
-  localStorage.setItem('dc_health_data', JSON.stringify(hd));
+  dcSync.syncSet('dc_health_data', JSON.stringify(hd));
   const autoCompleted = autoCompleteHealthTasks(steps, sleep, weight);
   closeModal();
   showToast('Health data saved!' + (autoCompleted > 0 ? ' ' + autoCompleted + ' tasks auto-completed!' : ''));
@@ -1347,7 +1347,7 @@ function saveHealthEntry() {
 function renderProgressTab(c) {
   const goal = state.longevityGoal || {};
   const totalDays = goal.totalDaysAdded || 0;
-  const taskLog = JSON.parse(localStorage.getItem('dc_task_log') || '[]');
+  const taskLog = JSON.parse(dcSync.syncGet('dc_task_log') || '[]');
 
   // Calculate milestones
   const milestones = [
@@ -1443,13 +1443,13 @@ function shareProgressCard() {
 // 6. FRIEND ACTIVITY FEED (#6)
 // ============================================
 function getFeedItems() {
-  try { return JSON.parse(localStorage.getItem('dc_feed') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(dcSync.syncGet('dc_feed') || '[]'); } catch(e) { return []; }
 }
 
 function addFeedItem(user, action, detail) {
   const feed = getFeedItems();
   feed.unshift({ user, action, detail, time: new Date().toISOString(), reactions: {} });
-  localStorage.setItem('dc_feed', JSON.stringify(feed.slice(0, 50)));
+  dcSync.syncSet('dc_feed', JSON.stringify(feed.slice(0, 50)));
 }
 
 function renderFeedTab(c) {
@@ -1463,7 +1463,7 @@ function renderFeedTab(c) {
       { user: 'Jordan', action: 'hit a 14-day streak', detail: '2x multiplier unlocked!', time: new Date(Date.now() - 14400000).toISOString(), reactions: { clap: 5 }, demo: true }
     ];
     feed = demoFeed;
-    localStorage.setItem('dc_feed', JSON.stringify(demoFeed));
+    dcSync.syncSet('dc_feed', JSON.stringify(demoFeed));
   }
 
   const you = state.supaUser?.email?.split('@')[0] || 'You';
@@ -1507,7 +1507,7 @@ function reactFeed(idx, type) {
   if (!feed[idx]) return;
   if (!feed[idx].reactions) feed[idx].reactions = {};
   feed[idx].reactions[type] = (feed[idx].reactions[type] || 0) + 1;
-  localStorage.setItem('dc_feed', JSON.stringify(feed.slice(0, 50)));
+  dcSync.syncSet('dc_feed', JSON.stringify(feed.slice(0, 50)));
   const c = document.getElementById('hubContent');
   if (c) renderFeedTab(c);
 }
@@ -1543,26 +1543,26 @@ function timeAgo(dateStr) {
 function getStreakCount() {
   try {
     const today = new Date().toDateString();
-    const lastVisit = localStorage.getItem('dc_last_visit');
-    let streak = parseInt(localStorage.getItem('dc_visit_streak') || '0');
+    const lastVisit = dcSync.syncGet('dc_last_visit');
+    let streak = parseInt(dcSync.syncGet('dc_visit_streak') || '0');
     if (lastVisit !== today) {
       const yesterday = new Date(Date.now() - 86400000).toDateString();
       if (lastVisit === yesterday) {
         streak = streak + 1;
       } else {
         // BUG-002/003 FIX: Use streak insurance if available and not expired
-        const insurance = JSON.parse(localStorage.getItem('dc_streak_insurance_data') || 'null');
+        const insurance = JSON.parse(dcSync.syncGet('dc_streak_insurance_data') || 'null');
         if (insurance && new Date(insurance.expires) > new Date() && insurance.usesLeft > 0) {
           // Insurance saves the streak! Consume one use
           insurance.usesLeft--;
-          localStorage.setItem('dc_streak_insurance_data', JSON.stringify(insurance));
+          dcSync.syncSet('dc_streak_insurance_data', JSON.stringify(insurance));
           showToast('Streak insurance saved your ' + streak + '-day streak!');
         } else {
           streak = 1; // Reset streak
         }
       }
-      localStorage.setItem('dc_visit_streak', String(streak));
-      localStorage.setItem('dc_last_visit', today);
+      dcSync.syncSet('dc_visit_streak', String(streak));
+      dcSync.syncSet('dc_last_visit', today);
     }
     return streak;
   } catch(e) { return 0; }
@@ -1612,8 +1612,8 @@ function buyStreakInsurance() {
     expires: new Date(Date.now() + 30 * 86400000).toISOString(),
     usesLeft: 1
   };
-  localStorage.setItem('dc_streak_insurance_data', JSON.stringify(insuranceData));
-  localStorage.setItem('dc_streak_insurance', 'true');
+  dcSync.syncSet('dc_streak_insurance_data', JSON.stringify(insuranceData));
+  dcSync.syncSet('dc_streak_insurance', 'true');
   showToast('Streak insurance purchased! 1 skip, expires in 30 days.');
   renderHubStats();
   const c = document.getElementById('hubContent');
@@ -1621,10 +1621,10 @@ function buyStreakInsurance() {
 }
 
 function hasActiveInsurance() {
-  const data = JSON.parse(localStorage.getItem('dc_streak_insurance_data') || 'null');
+  const data = JSON.parse(dcSync.syncGet('dc_streak_insurance_data') || 'null');
   if (!data) return false;
   if (new Date(data.expires) <= new Date()) {
-    localStorage.setItem('dc_streak_insurance', 'false');
+    dcSync.syncSet('dc_streak_insurance', 'false');
     return false;
   }
   return data.usesLeft > 0;
@@ -1637,7 +1637,7 @@ function hasActiveInsurance() {
 // 8. WEEKLY REPORT (#8)
 // ============================================
 function renderReportTab(c) {
-  const taskLog = JSON.parse(localStorage.getItem('dc_task_log') || '[]');
+  const taskLog = JSON.parse(dcSync.syncGet('dc_task_log') || '[]');
   const now = Date.now();
 
   // This week's data
@@ -1738,7 +1738,7 @@ function renderReportTab(c) {
 }
 
 function shareWeeklyReport() {
-  const taskLog = JSON.parse(localStorage.getItem('dc_task_log') || '[]');
+  const taskLog = JSON.parse(dcSync.syncGet('dc_task_log') || '[]');
   const now = Date.now();
   const weekLog = taskLog.filter(l => now - new Date(l.date).getTime() < 7 * 86400000);
   const weekDays = weekLog.reduce((sum, l) => sum + (l.days || 0), 0);
@@ -1775,7 +1775,7 @@ function renderShopTab(c) {
     { id: 'streak_insurance', name: 'Streak insurance', cost: 50, type: 'utility', desc: 'Skip 1 day without losing your streak', cat: 'utility' }
   ];
 
-  const purchased = JSON.parse(localStorage.getItem('dc_shop_purchased') || '[]');
+  const purchased = JSON.parse(dcSync.syncGet('dc_shop_purchased') || '[]');
 
   c.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -1827,18 +1827,18 @@ function buyShopItem(id, cost) {
   const coins = getCoins();
   if (coins < cost) { showToast('Not enough coins!'); return; }
   addCoins(-cost);
-  const purchased = JSON.parse(localStorage.getItem('dc_shop_purchased') || '[]');
+  const purchased = JSON.parse(dcSync.syncGet('dc_shop_purchased') || '[]');
   if (!purchased.includes(id)) {
     purchased.push(id);
-    localStorage.setItem('dc_shop_purchased', JSON.stringify(purchased));
+    dcSync.syncSet('dc_shop_purchased', JSON.stringify(purchased));
   }
   // BUG-020 FIX: Sync cosmetic purchases to dc_deathy_state for deathy.js
   if (id === 'ghost_hat' || id === 'ghost_crown' || id === 'ghost_fire') {
     try {
-      const ds = JSON.parse(localStorage.getItem('dc_deathy_state') || '{}');
+      const ds = JSON.parse(dcSync.syncGet('dc_deathy_state') || '{}');
       if (!ds.accessories) ds.accessories = [];
       if (!ds.accessories.includes(id)) ds.accessories.push(id);
-      localStorage.setItem('dc_deathy_state', JSON.stringify(ds));
+      dcSync.syncSet('dc_deathy_state', JSON.stringify(ds));
     } catch(e) {}
   }
   showToast('Purchased! Check your inventory.');
@@ -1852,12 +1852,12 @@ function buyShopItem(id, cost) {
 // COIN SYSTEM
 // ============================================
 function getCoins() {
-  return parseInt(localStorage.getItem('dc_coins') || '0');
+  return parseInt(dcSync.syncGet('dc_coins') || '0');
 }
 
 function addCoins(amount) {
   const coins = getCoins() + amount;
-  localStorage.setItem('dc_coins', String(Math.max(0, coins)));
+  dcSync.syncSet('dc_coins', String(Math.max(0, coins)));
 }
 
 // Daily coins removed - rewards earned through tasks only
@@ -1865,7 +1865,7 @@ function addCoins(amount) {
 // BUG-005 FIX: Milestone reward granting system
 function checkMilestoneRewards() {
   const totalDays = (state.longevityGoal?.totalDaysAdded) || 0;
-  const granted = JSON.parse(localStorage.getItem('dc_milestones_granted') || '[]');
+  const granted = JSON.parse(dcSync.syncGet('dc_milestones_granted') || '[]');
   const milestoneRewards = [
     { target: 1, coins: 10, label: 'First day added!' },
     { target: 7, coins: 25, label: '1 week of life added!' },
@@ -1882,7 +1882,7 @@ function checkMilestoneRewards() {
       setTimeout(launchConfetti, 200);
     }
   }
-  localStorage.setItem('dc_milestones_granted', JSON.stringify(granted));
+  dcSync.syncSet('dc_milestones_granted', JSON.stringify(granted));
 }
 
 // BUG-006 FIX: Limit chat photos to prevent localStorage overflow
@@ -1961,7 +1961,7 @@ function autoCompleteHealthTasks(steps, sleep, weight) {
     // Water (can't auto-verify from health data, skip)
   }
   if (autoCompleted > 0) {
-    localStorage.setItem('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
+    dcSync.syncSet('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
   }
   return autoCompleted;
 }
@@ -1973,11 +1973,11 @@ cleanOldChallenges();
 // ============================================
 // 10. XP + LEVEL SYSTEM (NEW - Duolingo-inspired)
 // ============================================
-function getXP() { return parseInt(localStorage.getItem('dc_xp') || '0'); }
+function getXP() { return parseInt(dcSync.syncGet('dc_xp') || '0'); }
 function addXP(amount) {
   const oldLevel = getLevel();
   const xp = getXP() + amount;
-  localStorage.setItem('dc_xp', String(xp));
+  dcSync.syncSet('dc_xp', String(xp));
   const newLevel = getLevel();
   if (newLevel > oldLevel) {
     showToast('LEVEL UP! You are now Level ' + newLevel + '!');
@@ -2018,7 +2018,7 @@ function getLevelTitle(level) {
 // 11. DAILY SPIN WHEEL (NEW - slot machine dopamine)
 // ============================================
 function canSpinToday() {
-  return localStorage.getItem('dc_last_spin') !== new Date().toDateString();
+  return dcSync.syncGet('dc_last_spin') !== new Date().toDateString();
 }
 
 function showSpinWheel() {
@@ -2092,7 +2092,7 @@ function executeSpin() {
 
   setTimeout(() => {
     const prize = prizes[winIdx];
-    localStorage.setItem('dc_last_spin', new Date().toDateString());
+    dcSync.syncSet('dc_last_spin', new Date().toDateString());
 
     if (prize.type === 'coins') {
       addCoins(prize.value);
@@ -2103,7 +2103,7 @@ function executeSpin() {
       saveGoalState();
       showToast('You won ' + prize.label + ' added to your life!');
     } else if (prize.type === 'multiplier') {
-      localStorage.setItem('dc_next_task_multiplier', String(prize.value));
+      dcSync.syncSet('dc_next_task_multiplier', String(prize.value));
       showToast('You won 2x reward on your next task!');
     } else if (prize.type === 'mystery') {
       // Mystery = random bonus
@@ -2122,7 +2122,7 @@ function executeSpin() {
 // 12. ACHIEVEMENT BADGES (NEW - collection mechanic)
 // ============================================
 function getAchievements() {
-  return JSON.parse(localStorage.getItem('dc_achievements') || '[]');
+  return JSON.parse(dcSync.syncGet('dc_achievements') || '[]');
 }
 
 function checkAchievements() {
@@ -2134,7 +2134,7 @@ function checkAchievements() {
   const level = getLevel();
 
   const allBadges = [
-    { id: 'first_blood', name: 'First Blood', desc: 'Complete your first task', icon: '&#x1F3AF;', check: () => localStorage.getItem('dc_first_task_done') === '1' },
+    { id: 'first_blood', name: 'First Blood', desc: 'Complete your first task', icon: '&#x1F3AF;', check: () => dcSync.syncGet('dc_first_task_done') === '1' },
     { id: 'streak_7', name: 'On Fire', desc: '7-day streak', icon: '&#x1F525;', check: () => streak >= 7 },
     { id: 'streak_30', name: 'Unstoppable', desc: '30-day streak', icon: '&#x1F4A5;', check: () => streak >= 30 },
     { id: 'streak_90', name: 'Legendary', desc: '90-day streak', icon: '&#x1F451;', check: () => streak >= 90 },
@@ -2158,7 +2158,7 @@ function checkAchievements() {
     }
   }
   if (newBadges > 0) {
-    localStorage.setItem('dc_achievements', JSON.stringify(earned));
+    dcSync.syncSet('dc_achievements', JSON.stringify(earned));
   }
   return { earned, allBadges };
 }
