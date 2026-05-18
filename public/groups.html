@@ -154,6 +154,7 @@
 function pageInit() {
   loadProfile();
   renderGroupsList();
+  if (typeof updateNavDots === "function") updateNavDots();
 }
 
 </script>

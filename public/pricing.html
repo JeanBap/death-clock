@@ -391,6 +391,7 @@ function setPricingPeriod(period) {
 
 function pageInit() {
   loadProfile();
+  if (typeof updateNavDots === "function") updateNavDots();
 }
 
 </script>

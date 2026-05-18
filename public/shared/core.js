@@ -689,3 +689,51 @@ function showStreakWelcome() {
   checkRetakePrompt();
 }
 
+// ===== NAV NOTIFICATION DOTS =====
+function updateNavDots() {
+  document.querySelectorAll('.nav-dot, .nav-dot-count').forEach(function(d) { d.remove(); });
+
+  if (state.result) {
+    // Action Hub: count of incomplete daily tasks
+    var dash = document.getElementById('navDash');
+    if (dash && typeof getDailyTasks === 'function') {
+      var tasks = getDailyTasks();
+      var pending = tasks.filter(function(t) { return !t.done; }).length;
+      if (pending > 0) {
+        var dot = document.createElement('span');
+        dot.className = 'nav-dot-count';
+        dot.textContent = pending;
+        dash.appendChild(dot);
+      }
+    }
+    // Mansion: coins to spend
+    var mansion = document.getElementById('navMansion');
+    if (mansion && typeof getCoins === 'function' && getCoins() >= 50) {
+      var mdot = document.createElement('span');
+      mdot.className = 'nav-dot';
+      mansion.appendChild(mdot);
+    }
+    // Upgrade: free-tier users
+    var price = document.getElementById('navPrice');
+    if (price) {
+      var tier = (state.profile && state.profile.tier) || 'free';
+      if (tier === 'free') {
+        var pdot = document.createElement('span');
+        pdot.className = 'nav-dot';
+        price.appendChild(pdot);
+      }
+    }
+  } else {
+    // No result: dot on Calculate button
+    var cta = document.getElementById('navCta');
+    if (cta) {
+      cta.style.position = 'relative';
+      var cdot = document.createElement('span');
+      cdot.className = 'nav-dot';
+      cdot.style.top = '-2px';
+      cdot.style.right = '-2px';
+      cta.appendChild(cdot);
+    }
+  }
+}
+

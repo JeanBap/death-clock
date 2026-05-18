@@ -180,6 +180,10 @@ function pageInit() {
     document.getElementById('navPrice')?.classList.remove('hidden');
     showStreakWelcome();
   }
+  // Show notification dots
+  updateNavDots();
+  // Refresh dots every 30s (tasks may complete)
+  setInterval(updateNavDots, 30000);
 }
 
 </script>

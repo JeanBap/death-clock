@@ -207,6 +207,7 @@ function pageInit() {
   renderProfilePage();
   // Load groups if logged in
   if (state.supaUser && typeof loadGroups === 'function') loadGroups();
+  if (typeof updateNavDots === "function") updateNavDots();
 }
 
 </script>

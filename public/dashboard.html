@@ -83,7 +83,7 @@ if ("serviceWorker" in navigator) { navigator.serviceWorker.getRegistrations().t
 .grade-c{background:rgba(240,192,64,0.2);color:var(--gold)}
 .grade-d{background:rgba(233,69,96,0.12);color:var(--accent)}
 .grade-f{background:rgba(233,69,96,0.2);color:var(--accent)}
-.tab-hub{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.tab-hub{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;position:sticky;top:60px;z-index:98;background:var(--bg);padding-top:8px}
 .tab-hub button{padding:10px 16px;border:1px solid var(--border);border-radius:20px;background:none;color:var(--text2);font-size:0.85rem;cursor:pointer;white-space:nowrap;transition:all 0.15s;min-height:40px}
 .tab-hub button:hover{border-color:var(--accent);color:var(--text)}
 .tab-hub button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -182,6 +182,8 @@ function pageInit() {
   loadProfile();
   if (!state.result) { window.location.href = '/#quiz'; return; }
   initActionHub();
+  updateNavDots();
+  setInterval(updateNavDots, 30000);
 }
 </script>
 </body>
