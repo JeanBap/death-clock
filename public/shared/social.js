@@ -1,7 +1,7 @@
 function joinWaitlist() {
   const email = prompt('Enter your email to join the consultation waiting list:');
   if (!email || !email.includes('@')) return;
-  localStorage.setItem('dc_waitlist_email', email);
+  dcSync.syncSet('dc_waitlist_email', email);
   const el = document.getElementById('waitlistCount');
   if (el) el.innerHTML = '&#10003; You\'re on the list! We\'ll email you at <strong>' + escHtml(email) + '</strong> when a slot opens.';
   alert('You\'re in! Position #128 on the waiting list. We\'ll reach out when a healthspan specialist is available.');
@@ -12,7 +12,7 @@ function captureEmail() {
   if (!input) return;
   const email = input.value.trim();
   if (!email || !email.includes('@')) { input.style.borderColor = 'var(--accent)'; return; }
-  localStorage.setItem('dc_user_email', email);
+  dcSync.syncSet('dc_user_email', email);
   const prefs = {
     weekly_report: document.getElementById('emailPrefWeekly')?.checked || false,
     milestone_alerts: document.getElementById('emailPrefMilestone')?.checked || false,
