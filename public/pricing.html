@@ -21,7 +21,7 @@
 <meta name="twitter:title" content="Pricing - Death Clock Premium">
 <meta name="twitter:description" content="Unlock all habits, cloud sync, and advanced longevity insights.">
 <meta name="twitter:image" content="https://death-clock.app/og-image.png">
-<link rel="stylesheet" href="/shared/styles.css?v=5">
+<link rel="stylesheet" href="/shared/styles.css?v=6">
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(reg){reg.unregister();});});
@@ -282,9 +282,9 @@ if ("serviceWorker" in navigator) {
   </div>
 </footer>
 
-<script src="/shared/core.js?v=5"></script>
-<script src="/shared/quiz.js?v=5"></script>
-<script src="/shared/dashboard.js?v=5"></script>
+<script src="/shared/core.js?v=6"></script>
+<script src="/shared/quiz.js?v=6"></script>
+<script src="/shared/dashboard.js?v=6"></script>
 <script>
 
 const clinicStates = {
@@ -396,5 +396,6 @@ function pageInit() {
 }
 
 </script>
+<script>if(window.dcSync)dcSync.init();</script>
 </body>
 </html>
