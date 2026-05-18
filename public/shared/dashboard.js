@@ -648,10 +648,10 @@ function renderMyPlanTab(el) {
 }
 
 function getGoalTrackers() {
-  try { return JSON.parse(localStorage.getItem('dc_goal_trackers') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(dcSync.syncGet('dc_goal_trackers') || '[]'); } catch(e) { return []; }
 }
 function saveGoalTrackers(trackers) {
-  localStorage.setItem('dc_goal_trackers', JSON.stringify(trackers));
+  dcSync.syncSet('dc_goal_trackers', JSON.stringify(trackers));
 }
 
 function addGoalTracker(name, cadence, target) {
@@ -1069,7 +1069,7 @@ function renderDashboardNudge() {
   }
 
   // 2. Stale quiz (30+ days)
-  const lastQuiz = localStorage.getItem('dc_last_quiz_date');
+  const lastQuiz = dcSync.syncGet('dc_last_quiz_date');
   if (lastQuiz) {
     const daysSince = Math.floor((Date.now() - new Date(lastQuiz).getTime()) / 86400000);
     if (daysSince >= 30) {
