@@ -33,7 +33,12 @@ function updateHubGreeting() {
 
 function renderHubStats() {
   const row = document.getElementById('statRow');
-  if (!row || !state.result) return;
+  if (!row) return;
+  if (!state.result) {
+    // BUG-025 FIX: Show placeholder instead of silent return
+    row.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:0.85rem;">Take the quiz to see your stats!</div>';
+    return;
+  }
   const r = state.result;
   const daysLeft = Math.max(0, Math.floor((r.deathDate - new Date()) / 86400000));
   const goal = state.longevityGoal || {};
@@ -232,7 +237,10 @@ function completeTask(taskId) {
   task.done = true;
   const streak = getStreakCount();
   const mult = getStreakMultiplier(streak);
-  const coinReward = Math.round(10 * mult);
+  // BUG-019 FIX: Apply spin wheel multiplier if available
+  let spinMult = parseFloat(localStorage.getItem('dc_next_task_multiplier') || '1');
+  if (spinMult > 1) localStorage.removeItem('dc_next_task_multiplier');
+  const coinReward = Math.round(10 * mult * spinMult);
   const daysReward = task.days;
 
   // First-ever task bonus (early win strategy)
@@ -696,14 +704,14 @@ function submitChallenge() {
 
   if (tier.free) {
     // Free challenge - no stake required
-    createChallenge(challenge, duration, 0, duration, opponent);
+    createChallenge(challenge, parseInt(document.getElementById('betTarget')?.value || String(duration)), 0, duration, opponent);
   } else {
     // Must pay coins
     const stake = parseInt(document.getElementById('betStake')?.value || '50');
     const coins = getCoins();
     if (stake > coins) { showToast('Not enough coins! You have ' + coins); return; }
     if (stake < 10) { showToast('Minimum stake is 10 coins'); return; }
-    createChallenge(challenge, duration, stake, duration, opponent);
+    createChallenge(challenge, parseInt(document.getElementById('betTarget')?.value || String(duration)), stake, duration, opponent);
   }
   closeModal();
   switchHubTab('challenges');
@@ -714,9 +722,22 @@ function logChallengeProgress(chId) {
   const ch = challenges.find(c => c.id === chId);
   if (!ch) return;
   ch.progress = (ch.progress || 0) + 1;
+  // BUG-016 FIX: Simulate opponent progress (30-70% chance per log)
+  if (ch.status === 'active' && ch.opponent !== 'Anyone') {
+    if (Math.random() < 0.5) {
+      ch.opponentProgress = (ch.opponentProgress || 0) + 1;
+    }
+  }
   // Check if challenge ended
-  if (new Date(ch.expires) < new Date()) {
-    ch.status = ch.progress > ch.opponentProgress ? 'won' : ch.progress < ch.opponentProgress ? 'lost' : 'draw';
+  if (ch.progress >= ch.target || new Date(ch.expires) < new Date()) {
+    // BUG-018 FIX: Complete when target reached OR time expired
+    if (ch.progress >= ch.target && ch.opponentProgress < ch.target) {
+      ch.status = 'won';
+    } else if (ch.opponentProgress >= ch.target && ch.progress < ch.target) {
+      ch.status = 'lost';
+    } else {
+      ch.status = ch.progress > ch.opponentProgress ? 'won' : ch.progress < ch.opponentProgress ? 'lost' : 'draw';
+    }
     ch.pendingAccept = ch.status !== 'draw'; // loser must accept
     if (ch.status === 'won') {
       // Winner gets the full pot (both stakes)
@@ -875,6 +896,8 @@ function confirmDeleteChallenge(chId) {
   var challenges = getChallenges();
   challenges = challenges.filter(c => c.id !== chId);
   saveChallenges(challenges);
+  // BUG-024 FIX: Clean orphaned chat messages
+  localStorage.removeItem('dc_ch_msgs_' + chId);
   closeModal();
   showToast('Challenge deleted.');
   var c = document.getElementById('hubContent');
@@ -1484,7 +1507,7 @@ function reactFeed(idx, type) {
   if (!feed[idx]) return;
   if (!feed[idx].reactions) feed[idx].reactions = {};
   feed[idx].reactions[type] = (feed[idx].reactions[type] || 0) + 1;
-  localStorage.setItem('dc_feed', JSON.stringify(feed));
+  localStorage.setItem('dc_feed', JSON.stringify(feed.slice(0, 50)));
   const c = document.getElementById('hubContent');
   if (c) renderFeedTab(c);
 }
@@ -1808,6 +1831,15 @@ function buyShopItem(id, cost) {
   if (!purchased.includes(id)) {
     purchased.push(id);
     localStorage.setItem('dc_shop_purchased', JSON.stringify(purchased));
+  }
+  // BUG-020 FIX: Sync cosmetic purchases to dc_deathy_state for deathy.js
+  if (id === 'ghost_hat' || id === 'ghost_crown' || id === 'ghost_fire') {
+    try {
+      const ds = JSON.parse(localStorage.getItem('dc_deathy_state') || '{}');
+      if (!ds.accessories) ds.accessories = [];
+      if (!ds.accessories.includes(id)) ds.accessories.push(id);
+      localStorage.setItem('dc_deathy_state', JSON.stringify(ds));
+    } catch(e) {}
   }
   showToast('Purchased! Check your inventory.');
   renderHubStats();
