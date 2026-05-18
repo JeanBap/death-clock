@@ -254,10 +254,10 @@ function getDeathyParams() {
 
 // Save/load deathy state
 function getDeathyState() {
-  try { return JSON.parse(localStorage.getItem('dc_deathy_state')) || {}; } catch(e) { return {}; }
+  try { return JSON.parse(dcSync.syncGet('dc_deathy_state')) || {}; } catch(e) { return {}; }
 }
 function saveDeathyState(ds) {
-  localStorage.setItem('dc_deathy_state', JSON.stringify(ds));
+  dcSync.syncSet('dc_deathy_state', JSON.stringify(ds));
 }
 
 function getDeathyXP() {
@@ -448,7 +448,7 @@ function getGhostAccessories() {
 
   // BUG-020 FIX: Apply purchased shop cosmetics from dc_deathy_state
   try {
-    const ds = JSON.parse(localStorage.getItem('dc_deathy_state') || '{}');
+    const ds = JSON.parse(dcSync.syncGet('dc_deathy_state') || '{}');
     const shopItems = ds.accessories || [];
     if (shopItems.includes('ghost_hat')) {
       accessories += '<rect x="32" y="4" width="36" height="10" rx="2" fill="#1a1a2e"/><rect x="38" y="0" width="24" height="6" rx="1" fill="#1a1a2e"/>';
@@ -495,9 +495,9 @@ function getPersonalisedProducts() {
 
 function trackProductClick(productId) {
   // Track in localStorage for now, Supabase later
-  const clicks = JSON.parse(localStorage.getItem('dc_product_clicks') || '[]');
+  const clicks = JSON.parse(dcSync.syncGet('dc_product_clicks') || '[]');
   clicks.push({ id: productId, ts: Date.now() });
-  localStorage.setItem('dc_product_clicks', JSON.stringify(clicks));
+  dcSync.syncSet('dc_product_clicks', JSON.stringify(clicks));
   // Analytics event
   if (typeof gtag === 'function') gtag('event', 'product_click', { product_id: productId });
 }
