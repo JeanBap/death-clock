@@ -471,7 +471,7 @@ async function renderGroupsList() {
   }
 }
 
-function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+// escHtml() defined in core.js - removed duplicate (BUG-021 FIX)
 
 async function enterMansion(groupId) {
   const { data: group } = await socialClient.from('dc_haunting_groups')
