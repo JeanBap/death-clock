@@ -113,13 +113,33 @@ function switchHubTab(tab) {
     report: renderReportTab,
     shop: renderShopTab
   };
-  if (renderers[tab]) renderers[tab](c);
+  if (renderers[tab]) { if (!_catalogLoaded) loadTaskCatalog().catch(()=>{}); renderers[tab](c); }
 }
 
 
 // ============================================
-// 2. DAILY TASK ENGINE (Feature #4)
+// 2. DAILY TASK ENGINE (Feature #4) - CATALOG-POWERED
 // ============================================
+let _taskCatalog = null;
+let _catalogLoaded = false;
+
+async function loadTaskCatalog() {
+  if (_catalogLoaded && _taskCatalog) return _taskCatalog;
+  const sb = window._supabase;
+  if (sb) {
+    try {
+      const { data, error } = await sb.from('dc_task_catalog').select('*').eq('is_active', true).order('category');
+      if (!error && data && data.length > 0) {
+        _taskCatalog = data;
+        _catalogLoaded = true;
+        return data;
+      }
+    } catch(e) { console.warn('[tasks] catalog fetch failed:', e); }
+  }
+  // Fallback: use hardcoded defaults if Supabase unavailable
+  return null;
+}
+
 function getDailyTasks() {
   const saved = dcSync.syncGet('dc_daily_tasks');
   const today = new Date().toDateString();
@@ -138,96 +158,366 @@ function getDailyTasks() {
 function generateDailyTasks() {
   const factors = state.result ? state.result.factors || [] : [];
   const negFactors = factors.filter(f => f.impact < 0);
-  const allTasks = [];
 
-  // Map negative factors to actionable daily tasks
-  const taskMap = {
-    smoking: [
-      { name: 'Delay your first cigarette by 30 minutes', days: 0.3, cat: 'substances' },
-      { name: 'Replace one smoke break with a 5-min walk', days: 0.4, cat: 'substances' },
-      { name: 'Download a quit-smoking app', days: 0.2, cat: 'substances' }
-    ],
-    exercise: [
-      { name: 'Walk for 30 minutes', days: 0.5, cat: 'fitness' },
-      { name: 'Do 20 bodyweight squats', days: 0.3, cat: 'fitness' },
-      { name: 'Stretch for 10 minutes', days: 0.2, cat: 'fitness' },
-      { name: 'Take the stairs instead of the lift', days: 0.2, cat: 'fitness' }
-    ],
-    diet: [
-      { name: 'Eat 3 servings of vegetables', days: 0.4, cat: 'diet' },
-      { name: 'Drink 8 glasses of water', days: 0.3, cat: 'diet' },
-      { name: 'Skip processed food today', days: 0.5, cat: 'diet' },
-      { name: 'Eat a handful of nuts', days: 0.2, cat: 'diet' }
-    ],
-    sleep: [
-      { name: 'Go to bed before 11pm', days: 0.4, cat: 'sleep' },
-      { name: 'No screens 30 min before bed', days: 0.3, cat: 'sleep' },
-      { name: 'Get 7-8 hours of sleep', days: 0.5, cat: 'sleep' }
-    ],
-    alcohol: [
-      { name: 'Have an alcohol-free day', days: 0.5, cat: 'substances' },
-      { name: 'Replace one drink with sparkling water', days: 0.3, cat: 'substances' }
-    ],
-    stress: [
-      { name: '5 minutes of deep breathing', days: 0.3, cat: 'mind' },
-      { name: 'Write down 3 things you are grateful for', days: 0.2, cat: 'mind' },
-      { name: '10-minute meditation', days: 0.4, cat: 'mind' }
-    ],
-    social: [
-      { name: 'Call or message a friend', days: 0.3, cat: 'social' },
-      { name: 'Spend 30 min with someone you care about', days: 0.4, cat: 'social' }
-    ],
-    bmi: [
-      { name: 'Track your calories today', days: 0.3, cat: 'diet' },
-      { name: 'Walk 10,000 steps', days: 0.5, cat: 'fitness' }
-    ]
+  // If catalog is loaded, use it
+  if (_taskCatalog && _taskCatalog.length > 0) {
+    return generateFromCatalog(negFactors);
+  }
+
+  // Fallback: hardcoded tasks (original system)
+  return generateHardcodedTasks(negFactors);
+}
+
+function generateFromCatalog(negFactors) {
+  const catalog = _taskCatalog;
+  const allTasks = [];
+  const usedSlugs = new Set();
+
+  // Map risk factor keys to task categories
+  const factorCategoryMap = {
+    smoking: ['diet'], exercise: ['exercise'], diet: ['diet'],
+    sleep: ['sleep'], alcohol: ['diet'], stress: ['mental'],
+    social: ['social'], bmi: ['exercise', 'diet']
   };
 
-  // General tasks everyone gets
-  const generalTasks = [
-    { name: 'Drink a glass of water right now', days: 0.1, cat: 'diet' },
-    { name: 'Stand up and stretch', days: 0.1, cat: 'fitness' },
-    { name: 'Take a 5-minute mindfulness break', days: 0.2, cat: 'mind' }
-  ];
-
-  // Add tasks based on negative factors
-  const usedCats = new Set();
+  // Pick 2-3 tasks from risk-relevant categories
   for (const f of negFactors) {
+    if (allTasks.length >= 4) break;
     const key = f.key ? f.key.split('_')[0] : '';
-    if (taskMap[key]) {
-      const catTasks = taskMap[key];
-      // Pick 1-2 random from this category
-      const shuffled = catTasks.sort(() => Math.random() - 0.5);
-      for (let i = 0; i < Math.min(2, shuffled.length); i++) {
-        if (allTasks.length < 6) {
-          allTasks.push({ ...shuffled[i], id: 'task_' + allTasks.length, done: false });
-          usedCats.add(shuffled[i].cat);
-        }
+    const cats = factorCategoryMap[key] || [];
+    for (const cat of cats) {
+      const matching = catalog.filter(t => t.category === cat && !usedSlugs.has(t.slug) && t.frequency === 'daily');
+      if (matching.length > 0) {
+        const pick = matching[Math.floor(Math.random() * matching.length)];
+        usedSlugs.add(pick.slug);
+        allTasks.push(catalogToTask(pick, allTasks.length));
+        if (allTasks.length >= 4) break;
       }
     }
   }
 
-  // Fill with general tasks up to 5-7 total
-  for (const t of generalTasks) {
+  // Fill to 5-7 with default daily tasks from varied categories
+  const defaults = catalog.filter(t => t.is_default && t.frequency === 'daily' && !usedSlugs.has(t.slug));
+  const shuffled = defaults.sort(() => Math.random() - 0.5);
+  const usedCats = new Set(allTasks.map(t => t.cat));
+  for (const t of shuffled) {
     if (allTasks.length >= 7) break;
-    if (!usedCats.has(t.cat) || allTasks.length < 5) {
-      allTasks.push({ ...t, id: 'task_' + allTasks.length, done: false });
+    if (allTasks.length < 5 || !usedCats.has(t.category)) {
+      usedSlugs.add(t.slug);
+      usedCats.add(t.category);
+      allTasks.push(catalogToTask(t, allTasks.length));
     }
   }
 
-  // If still under 5, add more general ones
-  const extraTasks = [
-    { name: 'Eat a piece of fruit', days: 0.2, cat: 'diet' },
-    { name: 'Laugh at something today', days: 0.1, cat: 'mind' },
-    { name: 'Go outside for 15 minutes', days: 0.3, cat: 'fitness' }
-  ];
-  for (const t of extraTasks) {
-    if (allTasks.length >= 5) break;
-    allTasks.push({ ...t, id: 'task_' + allTasks.length, done: false });
+  // If still under 5, grab any daily task
+  if (allTasks.length < 5) {
+    const remaining = catalog.filter(t => t.frequency === 'daily' && !usedSlugs.has(t.slug));
+    for (const t of remaining.sort(() => Math.random() - 0.5)) {
+      if (allTasks.length >= 5) break;
+      allTasks.push(catalogToTask(t, allTasks.length));
+    }
   }
 
   return allTasks.slice(0, 7);
 }
+
+function catalogToTask(catalogItem, index) {
+  return {
+    id: 'task_' + index,
+    catalog_id: catalogItem.id,
+    slug: catalogItem.slug,
+    name: catalogItem.title,
+    description: catalogItem.description || '',
+    days: catalogItem.longevity_impact_days || 0.2,
+    cat: catalogItem.category,
+    icon: catalogItem.icon || '🎯',
+    points: catalogItem.points || 10,
+    coins: catalogItem.coin_reward || 10,
+    xp: catalogItem.xp_reward || 5,
+    difficulty: catalogItem.difficulty || 'easy',
+    evidence: catalogItem.evidence_grade || 'B',
+    done: false,
+    source: 'catalog'
+  };
+}
+
+function generateHardcodedTasks(negFactors) {
+  // Original fallback system (kept for offline/anonymous users)
+  const taskMap = {
+    smoking: [
+      { name: 'Delay your first cigarette by 30 minutes', days: 0.3, cat: 'substances', points: 15 },
+      { name: 'Replace one smoke break with a 5-min walk', days: 0.4, cat: 'substances', points: 15 }
+    ],
+    exercise: [
+      { name: 'Walk for 30 minutes', days: 0.5, cat: 'fitness', points: 15 },
+      { name: 'Do 20 bodyweight squats', days: 0.3, cat: 'fitness', points: 10 },
+      { name: 'Stretch for 10 minutes', days: 0.2, cat: 'fitness', points: 10 },
+      { name: 'Take the stairs instead of the lift', days: 0.2, cat: 'fitness', points: 5 }
+    ],
+    diet: [
+      { name: 'Eat 3 servings of vegetables', days: 0.4, cat: 'diet', points: 15 },
+      { name: 'Drink 8 glasses of water', days: 0.3, cat: 'diet', points: 10 },
+      { name: 'Skip processed food today', days: 0.5, cat: 'diet', points: 25 },
+      { name: 'Eat a handful of nuts', days: 0.2, cat: 'diet', points: 10 }
+    ],
+    sleep: [
+      { name: 'Go to bed before 11pm', days: 0.4, cat: 'sleep', points: 15 },
+      { name: 'No screens 30 min before bed', days: 0.3, cat: 'sleep', points: 15 },
+      { name: 'Get 7-8 hours of sleep', days: 0.5, cat: 'sleep', points: 20 }
+    ],
+    alcohol: [
+      { name: 'Have an alcohol-free day', days: 0.5, cat: 'substances', points: 15 },
+      { name: 'Replace one drink with sparkling water', days: 0.3, cat: 'substances', points: 10 }
+    ],
+    stress: [
+      { name: '5 minutes of deep breathing', days: 0.3, cat: 'mind', points: 10 },
+      { name: 'Write down 3 things you are grateful for', days: 0.2, cat: 'mind', points: 10 },
+      { name: '10-minute meditation', days: 0.4, cat: 'mind', points: 15 }
+    ],
+    social: [
+      { name: 'Call or message a friend', days: 0.3, cat: 'social', points: 15 },
+      { name: 'Spend 30 min with someone you care about', days: 0.4, cat: 'social', points: 20 }
+    ],
+    bmi: [
+      { name: 'Track your calories today', days: 0.3, cat: 'diet', points: 10 },
+      { name: 'Walk 10,000 steps', days: 0.5, cat: 'fitness', points: 20 }
+    ]
+  };
+
+  const generalTasks = [
+    { name: 'Drink a glass of water right now', days: 0.1, cat: 'diet', points: 5 },
+    { name: 'Stand up and stretch', days: 0.1, cat: 'fitness', points: 5 },
+    { name: 'Take a 5-minute mindfulness break', days: 0.2, cat: 'mind', points: 10 }
+  ];
+
+  const allTasks = [];
+  const usedCats = new Set();
+  for (const f of negFactors) {
+    const key = f.key ? f.key.split('_')[0] : '';
+    if (taskMap[key]) {
+      const catTasks = taskMap[key].sort(() => Math.random() - 0.5);
+      for (let i = 0; i < Math.min(2, catTasks.length); i++) {
+        if (allTasks.length < 6) {
+          allTasks.push({ ...catTasks[i], id: 'task_' + allTasks.length, done: false, icon: '🎯', coins: catTasks[i].points, xp: 5, source: 'system' });
+          usedCats.add(catTasks[i].cat);
+        }
+      }
+    }
+  }
+  for (const t of generalTasks) {
+    if (allTasks.length >= 7) break;
+    if (!usedCats.has(t.cat) || allTasks.length < 5) {
+      allTasks.push({ ...t, id: 'task_' + allTasks.length, done: false, icon: '🎯', coins: t.points, xp: 5, source: 'system' });
+    }
+  }
+  const extraTasks = [
+    { name: 'Eat a piece of fruit', days: 0.2, cat: 'diet', points: 10 },
+    { name: 'Laugh at something today', days: 0.1, cat: 'mind', points: 5 },
+    { name: 'Go outside for 15 minutes', days: 0.3, cat: 'fitness', points: 15 }
+  ];
+  for (const t of extraTasks) {
+    if (allTasks.length >= 5) break;
+    allTasks.push({ ...t, id: 'task_' + allTasks.length, done: false, icon: '🎯', coins: t.points, xp: 5, source: 'system' });
+  }
+  return allTasks.slice(0, 7);
+}
+
+// ─── USER & AI CUSTOM TASK CREATION ───
+
+function showAddTaskModal() {
+  const cats = ['exercise','diet','sleep','mental','social','medical','environment','purpose'];
+  const catOptions = cats.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('');
+
+  showModal('Add Custom Task', `
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <input id="customTaskTitle" type="text" placeholder="Task name (e.g. Walk to work)" maxlength="80" style="padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text1);font-size:0.95rem;">
+      <textarea id="customTaskDesc" placeholder="Description (optional)" maxlength="200" rows="2" style="padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text1);font-size:0.85rem;resize:none;"></textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);margin-bottom:4px;display:block;">Category</label>
+          <select id="customTaskCat" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text1);">${catOptions}</select>
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text3);margin-bottom:4px;display:block;">Difficulty</label>
+          <select id="customTaskDiff" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text1);">
+            <option value="easy">Easy (10 pts)</option>
+            <option value="medium">Medium (20 pts)</option>
+            <option value="hard">Hard (30 pts)</option>
+            <option value="epic">Epic (50 pts)</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:0.75rem;color:var(--text3);margin-bottom:4px;display:block;">Repeat</label>
+        <select id="customTaskFreq" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text1);">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="one_time">One-time</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="submitCustomTask()" style="margin-top:4px;">Add to Today's Tasks</button>
+    </div>
+  `);
+}
+
+function submitCustomTask() {
+  const title = document.getElementById('customTaskTitle')?.value?.trim();
+  if (!title) { showToast('Please enter a task name', 'error'); return; }
+
+  const cat = document.getElementById('customTaskCat')?.value || 'purpose';
+  const diff = document.getElementById('customTaskDiff')?.value || 'easy';
+  const freq = document.getElementById('customTaskFreq')?.value || 'daily';
+  const desc = document.getElementById('customTaskDesc')?.value?.trim() || '';
+
+  const pointsMap = { easy: 10, medium: 20, hard: 30, epic: 50 };
+  const pts = pointsMap[diff] || 10;
+  const daysMap = { easy: 0.2, medium: 0.5, hard: 1.0, epic: 2.0 };
+  const days = daysMap[diff] || 0.2;
+  const iconMap = { exercise: '💪', diet: '🥗', sleep: '😴', mental: '🧘', social: '👥', medical: '🩺', environment: '🌿', purpose: '🎯' };
+
+  // Add to today's tasks
+  const tasks = getDailyTasks();
+  const newTask = {
+    id: 'task_' + tasks.length + '_custom_' + Date.now(),
+    name: title,
+    description: desc,
+    days: days,
+    cat: cat,
+    icon: iconMap[cat] || '🎯',
+    points: pts,
+    coins: pts,
+    xp: Math.round(pts / 2),
+    difficulty: diff,
+    done: false,
+    source: 'user'
+  };
+  tasks.push(newTask);
+  dcSync.syncSet('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
+
+  // Also save to Supabase catalog if logged in
+  if (dcSync.isLoggedIn() && window._supabase) {
+    const slug = 'user_' + title.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 40) + '_' + Date.now();
+    window._supabase.from('dc_task_catalog').insert({
+      slug: slug,
+      title: title,
+      description: desc,
+      category: cat,
+      points: pts,
+      coin_reward: pts,
+      xp_reward: Math.round(pts / 2),
+      difficulty: diff,
+      frequency: freq,
+      longevity_impact_days: days,
+      icon: iconMap[cat] || '🎯',
+      is_default: false,
+      source: 'user',
+      created_by: dcSync.getCurrentUser()?.id || null
+    }).then(() => {}).catch(() => {});
+  }
+
+  closeModal();
+  showToast(`"${title}" added! (${pts} pts)`, 'success');
+  switchHubTab('today');
+}
+
+// AI Coach task assignment
+function aiCoachAssignTask(title, category, difficulty, description) {
+  const pointsMap = { easy: 10, medium: 20, hard: 30, epic: 50 };
+  const daysMap = { easy: 0.3, medium: 0.6, hard: 1.2, epic: 2.5 };
+  const iconMap = { exercise: '💪', diet: '🥗', sleep: '😴', mental: '🧘', social: '👥', medical: '🩺', environment: '🌿', purpose: '🎯' };
+  const pts = pointsMap[difficulty] || 15;
+
+  const tasks = getDailyTasks();
+  const newTask = {
+    id: 'task_' + tasks.length + '_ai_' + Date.now(),
+    name: title,
+    description: description || '',
+    days: daysMap[difficulty] || 0.3,
+    cat: category || 'purpose',
+    icon: iconMap[category] || '🤖',
+    points: pts,
+    coins: pts,
+    xp: Math.round(pts / 2),
+    difficulty: difficulty || 'easy',
+    done: false,
+    source: 'ai_coach'
+  };
+  tasks.push(newTask);
+  dcSync.syncSet('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
+  return newTask;
+}
+
+// Browse full task catalog
+function showTaskBrowser() {
+  if (!_taskCatalog || _taskCatalog.length === 0) {
+    showToast('Loading task catalog...', 'info');
+    loadTaskCatalog().then(() => showTaskBrowser());
+    return;
+  }
+
+  const cats = [...new Set(_taskCatalog.map(t => t.category))].sort();
+  let filterCat = 'all';
+
+  function renderBrowser(cat) {
+    const filtered = cat === 'all' ? _taskCatalog : _taskCatalog.filter(t => t.category === cat);
+    const tasks = getDailyTasks();
+    const activeSlugs = new Set(tasks.filter(t => !t.done).map(t => t.slug));
+
+    const catButtons = ['all', ...cats].map(c =>
+      `<button class="btn-sm ${c === cat ? 'btn-primary' : 'btn-secondary'}" onclick="renderTaskBrowserFiltered('${c}')" style="font-size:0.7rem;padding:6px 10px;text-transform:capitalize;">${c}</button>`
+    ).join('');
+
+    const diffColors = { easy: '#4ecc7a', medium: '#f0c040', hard: '#e94560', epic: '#9b59b6' };
+    const rows = filtered.map(t => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:var(--surface);margin-bottom:6px;border:1px solid var(--border);">
+        <div style="font-size:1.3rem;min-width:28px;text-align:center;">${t.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:0.85rem;color:var(--text1);">${escHtml(t.title)}</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin-top:2px;">${escHtml(t.description || '')}</div>
+          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+            <span style="font-size:0.65rem;padding:2px 6px;border-radius:4px;background:${diffColors[t.difficulty] || '#888'}22;color:${diffColors[t.difficulty] || '#888'};font-weight:600;">${t.difficulty}</span>
+            <span style="font-size:0.65rem;color:var(--text3);">${t.frequency}</span>
+            <span style="font-size:0.65rem;color:var(--green);">+${t.longevity_impact_days} days</span>
+          </div>
+        </div>
+        <div style="text-align:right;min-width:50px;">
+          <div style="font-weight:800;font-size:1rem;color:var(--accent);">${t.points}</div>
+          <div style="font-size:0.6rem;color:var(--text3);">pts</div>
+        </div>
+        ${activeSlugs.has(t.slug) ? '<div style="font-size:0.7rem;color:var(--green);font-weight:600;">Active</div>' :
+          `<button class="btn-sm btn-secondary" onclick="addCatalogTask('${t.id}')" style="font-size:0.65rem;padding:4px 8px;">+ Add</button>`}
+      </div>
+    `).join('');
+
+    document.getElementById('taskBrowserContent').innerHTML = `
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;">${catButtons}</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:8px;">${filtered.length} tasks</div>
+      ${rows}
+    `;
+  }
+
+  showModal('Task Catalog <span style="font-size:0.7rem;color:var(--text3);">' + _taskCatalog.length + ' tasks</span>', `
+    <div id="taskBrowserContent"></div>
+  `);
+  renderBrowser('all');
+
+  // Expose filter function globally for onclick
+  window.renderTaskBrowserFiltered = (cat) => renderBrowser(cat);
+}
+
+function addCatalogTask(catalogId) {
+  const item = _taskCatalog.find(t => t.id === catalogId);
+  if (!item) return;
+
+  const tasks = getDailyTasks();
+  tasks.push(catalogToTask(item, tasks.length));
+  dcSync.syncSet('dc_daily_tasks', JSON.stringify({ date: new Date().toDateString(), tasks }));
+
+  closeModal();
+  showToast(`"${item.title}" added! (${item.points} pts)`, 'success');
+  switchHubTab('today');
+}
+
 
 function completeTask(taskId) {
   const tasks = getDailyTasks();
@@ -240,7 +530,7 @@ function completeTask(taskId) {
   // BUG-019 FIX: Apply spin wheel multiplier if available
   let spinMult = parseFloat(dcSync.syncGet('dc_next_task_multiplier') || '1');
   if (spinMult > 1) dcSync.syncRemove('dc_next_task_multiplier');
-  const coinReward = Math.round(10 * mult * spinMult);
+  const coinReward = Math.round((task.coins || task.points || 10) * mult * spinMult);
   const daysReward = task.days;
 
   // First-ever task bonus (early win strategy)
@@ -376,6 +666,10 @@ function renderTodayTab(c) {
     <div class="hub-panel" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <h3>Today's Tasks <span style="font-size:0.8rem;color:var(--text3);font-weight:400;">${done}/${total} done</span></h3>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-sm btn-secondary" onclick="showAddTaskModal()" style="font-size:0.7rem;padding:4px 10px;">+ Add Task</button>
+          <button class="btn-sm btn-secondary" onclick="showTaskBrowser()" style="font-size:0.7rem;padding:4px 10px;">Browse (${_taskCatalog ? _taskCatalog.length : '...'})</button>
+        </div>
         ${comboActive ? '<span class="combo-badge mult-2x" style="font-size:0.8rem;">COMBO ACTIVE</span>' : ''}
       </div>
       <div class="progress-bar-sm" style="margin-bottom:16px;">
@@ -385,10 +679,18 @@ function renderTodayTab(c) {
         <div class="task-item ${t.done ? 'done' : ''}" data-task="${t.id}" tabindex="0" role="button" aria-label="${t.done ? 'Completed: ' : 'Complete: '}${escHtml(t.name)}" onclick="${t.done ? '' : 'completeTask(\'' + t.id + '\')'}" onkeydown="if(event.key==='Enter'&&!this.classList.contains('done'))completeTask('${t.id}')">
           <div class="task-check">${t.done ? '&#10003;' : ''}</div>
           <div style="flex:1;min-width:0;">
-            <div class="task-name" style="font-size:0.85rem;">${escHtml(t.name)}</div>
-            <span class="task-cat cat-${t.cat}">${t.cat}</span>
+            <div class="task-name" style="font-size:0.85rem;">${t.icon || '🎯'} ${escHtml(t.name)}</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:3px;">
+              <span class="task-cat cat-${t.cat}">${t.cat}</span>
+              ${t.source === 'user' ? '<span style="font-size:0.6rem;padding:1px 5px;border-radius:3px;background:rgba(155,89,182,0.15);color:#9b59b6;">Custom</span>' : ''}
+              ${t.source === 'ai_coach' ? '<span style="font-size:0.6rem;padding:1px 5px;border-radius:3px;background:rgba(52,152,219,0.15);color:#3498db;">AI Coach</span>' : ''}
+            </div>
           </div>
-          <div class="task-days">+${t.days.toFixed(1)} days</div>
+          <div style="text-align:right;">
+            <div style="font-weight:800;font-size:0.95rem;color:var(--accent);">${t.points || 10}</div>
+            <div style="font-size:0.6rem;color:var(--text3);">pts</div>
+            <div class="task-days" style="font-size:0.7rem;margin-top:2px;">+${t.days.toFixed(1)}d</div>
+          </div>
         </div>
       `).join('')}
       ${done === total && total > 0 ? `<div id="celebrationBox" style="text-align:center;margin-top:16px;padding:24px;background:linear-gradient(135deg,rgba(78,204,163,0.1),rgba(240,192,64,0.1));border-radius:12px;border:1px solid var(--green);">
